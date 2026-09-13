@@ -30,56 +30,22 @@ const artalkConfig = isCommentViewCountEnabled ? commentConfig.artalk : null;
     ];
     if (pageKeys.length === 0) return;
 
-    const elements = pageKeys.map((pageKey) => {
-      const element = document.createElement("span");
-      element.className = "artalk-list-pv-count";
-      element.dataset.pageKey = pageKey;
-      loader.append(element);
-      return element;
-    });
-
-    let published = false;
-    const publishCounts = (requireAll: boolean) => {
-      if (published) return;
-
-      const counts: ViewCounts = {};
-      elements.forEach((element) => {
-        const pageKey = element.dataset.pageKey;
-        const text = element.textContent?.trim() ?? "";
-        const count = Number(text);
-        if (pageKey && text && Number.isFinite(count)) counts[pageKey] = count;
-      });
-
-      if (requireAll && Object.keys(counts).length !== pageKeys.length) return;
-      if (Object.keys(counts).length === 0) return;
-
-      published = true;
-      document.dispatchEvent(new CustomEvent("post-view-counts", { detail: { counts } }));
-    };
-
-    const observer = new MutationObserver(() => {
-      publishCounts(true);
-      if (published) observer.disconnect();
-    });
-    observer.observe(loader, { childList: true, characterData: true, subtree: true });
-
-    window.setTimeout(() => {
-      publishCounts(false);
-      observer.disconnect();
-    }, 10000);
-
     try {
-      const { default: Artalk } = await import("artalk");
-      Artalk.loadCountWidget({
-        server,
-        site,
-        countEl: "[data-artalk-comment-count-disabled]",
-        pvEl: ".artalk-list-pv-count",
-        statPageKeyAttr: "data-page-key",
-        pvAdd: false,
-      });
+      const url = new URL(`${server.replace(/\/+$/, "")}/api/v2/stats/page_pv`, window.location.origin);
+      url.search = new URLSearchParams({ page_keys: pageKeys.join(","), site_name: site }).toString();
+
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`Artalk stats request failed: ${response.status}`);
+
+      const { data } = await response.json();
+      const counts: ViewCounts = {};
+      for (const pageKey of pageKeys) {
+        const count = data?.[pageKey] ?? 0;
+        if (typeof count === "number" && Number.isFinite(count)) counts[pageKey] = count;
+      }
+
+      document.dispatchEvent(new CustomEvent("post-view-counts", { detail: { counts } }));
     } catch (error) {
-      observer.disconnect();
       console.error("Failed to load Artalk view counts", error);
     }
   };

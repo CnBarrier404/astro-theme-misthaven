@@ -1,8 +1,5 @@
-import { copyFile, mkdir, readdir, readFile, writeFile } from "node:fs/promises";
-import { basename, dirname, extname, join, relative, sep } from "node:path";
-import { pathToFileURL } from "node:url";
-
-import matter from "gray-matter";
+import { copyFile, mkdir, readdir, writeFile } from "node:fs/promises";
+import { dirname, join, relative, resolve, sep } from "node:path";
 
 const PATH_MAP_NAME = "markdown-paths.map";
 const TOKEN_MAP_NAME = "markdown-tokens.map";
@@ -12,30 +9,27 @@ const GENERATOR_SOURCE = "src/integrations/markdownForAgents/generate.mjs";
  * Generates Markdown versions of every page plus the nginx/Caddy negotiation
  * maps (markdown-paths.map and markdown-tokens.map) inside the built dist dir.
  *
- * @param {object} [options]
+ * @param {object} options
  * @param {string} [options.root] Project root (defaults to process.cwd()).
  * @param {string} [options.distDir] Output directory (defaults to root/dist).
- * @param {string} [options.contentDir] Content directory (defaults to root/src/content).
+ * @param {Array<import("./content").MarkdownEntry>} options.posts Visible, sorted collection posts.
+ * @param {Array<import("./content").MarkdownEntry>} options.pages Collection entries with HTML routes.
  * @param {object} [options.siteConfig] Site config used for home/listing pages.
  */
-export async function generateMarkdownForAgents(options = {}) {
+export async function generateMarkdownForAgents(options) {
   const root = options.root ?? process.cwd();
   const distDir = options.distDir ?? join(root, "dist");
-  const contentDir = options.contentDir ?? join(root, "src/content");
   const siteConfig = options.siteConfig ?? {};
 
-  const posts = (await loadEntries(join(contentDir, "posts"), true)).sort(comparePosts);
-  const pages = await loadEntries(join(contentDir, "pages"), false);
+  const { posts, pages } = options;
   const entries = [];
 
   for (const page of pages) {
-    const route = `/${page.slug}`;
-    entries.push(await writeEntry(distDir, page, route, `${page.slug}/index.md`, renderPage(page)));
+    entries.push(await writeEntry(distDir, page, page.href, `${page.href.slice(1)}/index.md`, renderPage(page), root));
   }
 
   for (const post of posts) {
-    const route = `/posts/${post.slug}`;
-    entries.push(await writeEntry(distDir, post, route, `posts/${post.slug}/index.md`, renderPost(post)));
+    entries.push(await writeEntry(distDir, post, post.href, `${post.href.slice(1)}/index.md`, renderPost(post), root));
   }
 
   entries.push(await writeEntry(distDir, null, "/posts", "posts/index.md", renderPostsIndex(posts, siteConfig)));
@@ -48,30 +42,7 @@ export async function generateMarkdownForAgents(options = {}) {
   return { files: entries.map((entry) => entry.routes[0]) };
 }
 
-async function loadEntries(dir, isPosts) {
-  const files = await findFiles(dir, ".md");
-  const entries = [];
-
-  for (const file of files) {
-    if (basename(file).startsWith("_")) continue;
-
-    const parsed = matter(await readFile(file, "utf8"));
-    if (isPosts && parsed.data.draft === true) continue;
-
-    const slug = isPosts ? String(parsed.data.slug ?? basename(file, extname(file))) : basename(file, extname(file));
-
-    entries.push({
-      slug,
-      data: parsed.data,
-      body: parsed.content.trim(),
-      sourceDir: dirname(file),
-    });
-  }
-
-  return entries;
-}
-
-async function findFiles(dir, extension) {
+async function findFiles(dir) {
   let entries;
   try {
     entries = await readdir(dir, { withFileTypes: true });
@@ -83,23 +54,23 @@ async function findFiles(dir, extension) {
   for (const entry of entries) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) {
-      files.push(...(await findFiles(path, extension)));
-    } else if (entry.isFile() && (extension === null || entry.name.endsWith(extension))) {
+      files.push(...(await findFiles(path)));
+    } else if (entry.isFile()) {
       files.push(path);
     }
   }
   return files;
 }
 
-async function writeEntry(distDir, sourceEntry, route, markdownRelPath, content) {
+async function writeEntry(distDir, sourceEntry, route, markdownRelPath, content, root) {
   const markdownUri = `/${toPosix(markdownRelPath)}`;
-  const target = join(distDir, ...markdownRelPath.split("/"));
+  const target = join(distDir, ...markdownRelPath.split("/").map(decodeURIComponent));
 
   await mkdir(dirname(target), { recursive: true });
   await writeFile(target, content);
 
-  if (sourceEntry) {
-    await copyAssets(sourceEntry, dirname(target));
+  if (sourceEntry?.filePath) {
+    await copyAssets(dirname(resolve(root, sourceEntry.filePath)), dirname(target));
   }
 
   return {
@@ -109,22 +80,16 @@ async function writeEntry(distDir, sourceEntry, route, markdownRelPath, content)
   };
 }
 
-async function copyAssets(sourceEntry, targetDir) {
-  const files = await findFiles(sourceEntry.sourceDir, null);
+async function copyAssets(sourceDir, targetDir) {
+  const files = await findFiles(sourceDir);
 
   for (const file of files) {
     if (file.toLowerCase().endsWith(".md")) continue;
-    const relPath = relative(sourceEntry.sourceDir, file);
+    const relPath = relative(sourceDir, file);
     const target = join(targetDir, relPath);
     await mkdir(dirname(target), { recursive: true });
     await copyFile(file, target);
   }
-}
-
-function comparePosts(left, right) {
-  const leftTime = new Date(left.data.publishedAt).getTime();
-  const rightTime = new Date(right.data.publishedAt).getTime();
-  return rightTime - leftTime || left.slug.localeCompare(right.slug);
 }
 
 function renderPost(post) {
@@ -159,10 +124,7 @@ function renderHome(posts, siteConfig) {
     lines.push(
       ...posts
         .slice(0, 5)
-        .map(
-          (post) =>
-            `- [${escapeLinkText(post.data.title)}](/posts/${post.slug}) — ${formatDate(post.data.publishedAt)}`,
-        ),
+        .map((post) => `- [${escapeLinkText(post.data.title)}](${post.href}) — ${formatDate(post.data.publishedAt)}`),
     );
   }
 
@@ -175,7 +137,7 @@ function renderPostsIndex(posts, siteConfig) {
   const items = posts.map((post) => {
     const meta = formatDate(post.data.publishedAt);
     const summary = post.data.description ? `\n  ${post.data.description}` : "";
-    return `- [${escapeLinkText(post.data.title)}](/posts/${post.slug}) — ${meta}${summary}`;
+    return `- [${escapeLinkText(post.data.title)}](${post.href}) — ${meta}${summary}`;
   });
 
   return `${renderFrontmatter({
@@ -266,9 +228,4 @@ function escapeNginxRegex(value) {
 
 function toPosix(value) {
   return value.split(sep).join("/");
-}
-
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const { files } = await generateMarkdownForAgents();
-  console.log(`Generated ${files.length} markdown page(s) for agents.`);
 }

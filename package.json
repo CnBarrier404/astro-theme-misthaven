@@ -35,7 +35,6 @@
     "@iconify-json/fa7-solid": "^1.2.5",
     "@tailwindcss/vite": "^4.3.3",
     "astro-icon": "^1.2.0",
-    "gray-matter": "^4.0.3",
     "prettier": "^3.9.6",
     "prettier-plugin-astro": "^1.0.0",
     "prettier-plugin-tailwindcss": "^0.8.1",

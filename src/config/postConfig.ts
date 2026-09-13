@@ -10,6 +10,4 @@ export const postConfig = {
 
   // 文章页末尾显示的许可协议；留空时不显示
   license: "CC BY-NC-SA 4.0",
-
-  // TODO: 浏览量统计功能实现后，在此配置数据收集源。
 } as const;

@@ -32,7 +32,9 @@ const t = getTranslator();
   data-visitor-count={String(config.visitorCount)}
 >
   <header class="mb-6 border-b border-border pb-4">
-    <h2 class="m-0 text-xl font-bold" id="comments-title">{t(I18nKey.commentsTitle)}</h2>
+    <h2 class="m-0 text-xl font-bold" id="comments-title">
+      {t(I18nKey.commentsTitle)}
+    </h2>
     <p class="mt-2 mb-0 text-sm leading-6 text-warning" data-comment-read-only-notice hidden>
       {t(I18nKey.commentsReadOnly)}
     </p>

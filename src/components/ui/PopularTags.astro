@@ -12,6 +12,8 @@ const { tags, title, tagsLabel } = Astro.props;
 ---
 
 <Card as="section" class="px-6 py-5 tablet:p-8" aria-labelledby="tags-title">
-  <h2 class="m-0 text-sm font-bold tablet:text-base" id="tags-title">{title}</h2>
+  <h2 class="m-0 text-sm font-bold tablet:text-base" id="tags-title">
+    {title}
+  </h2>
   <TagList class="mt-4" tags={tags} variant="popular" ariaLabel={tagsLabel} />
 </Card>

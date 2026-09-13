@@ -15,26 +15,28 @@ const t = getTranslator();
 
 <div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted">
   <span class="inline-flex items-center gap-2">
-    <span class="grid size-7 place-items-center rounded-md bg-border/50"><Icon name="menu" size={16} /></span>
+    <span class="grid size-7 place-items-center rounded-md bg-border/50">
+      <Icon name="menu" size={16} />
+    </span>
     {wordCount}
   </span>
   <span class="inline-flex items-center gap-2">
-    <span class="grid size-7 place-items-center rounded-md bg-border/50"><Icon name="clock" size={16} /></span>
+    <span class="grid size-7 place-items-center rounded-md bg-border/50">
+      <Icon name="clock" size={16} />
+    </span>
     {readingTime}
   </span>
-  {
-    isCommentViewCountEnabled && (
-      <span class="inline-flex items-center gap-2" data-page-key={pageKey} data-post-view data-view-placeholder="-">
-        <span class="grid size-7 place-items-center rounded-md bg-border/50">
-          <Icon name="chart" size={16} />
-        </span>
-        <span>
-          {t(I18nKey.postViews)}{" "}
-          <span aria-live="polite" data-post-view-value>
-            -
-          </span>
+  {isCommentViewCountEnabled && (
+    <span class="inline-flex items-center gap-2" data-page-key={pageKey} data-post-view data-view-placeholder="-">
+      <span class="grid size-7 place-items-center rounded-md bg-border/50">
+        <Icon name="chart" size={16} />
+      </span>
+      <span>
+        {t(I18nKey.postViews)}{" "}
+        <span aria-live="polite" data-post-view-value>
+          -
         </span>
       </span>
-    )
-  }
+    </span>
+  )}
 </div>

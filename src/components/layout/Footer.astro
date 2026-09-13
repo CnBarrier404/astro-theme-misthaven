@@ -7,22 +7,18 @@ const currentYear = new Date().getFullYear();
 const t = getTranslator();
 ---
 
-<footer
-  class="mx-auto mt-4 w-layout-width max-w-page py-6 text-center text-xs leading-7 text-muted-light tablet:w-layout-width-tablet tablet:py-8 tablet:text-sm wide:w-layout-width-wide"
->
+<footer class="mx-auto mt-4 w-layout-width max-w-page py-6 text-center text-xs leading-7 text-muted-light tablet:w-layout-width-tablet tablet:py-8 tablet:text-sm wide:w-layout-width-wide">
   <nav class="mb-1 flex flex-wrap justify-center gap-x-2" aria-label={t(I18nKey.footerNavigation)}>
-    {
-      footerConfig.links.map((item, index) => {
-        return (
-          <>
-            <a class="transition-colors hover:text-accent-strong" href={item.href}>
-              {t(item.labelKey)}
-            </a>
-            {index < footerConfig.links.length - 1 && <span aria-hidden="true">|</span>}
-          </>
-        );
-      })
-    }
+    {footerConfig.links.map((item, index) => {
+      return (
+        <>
+          <a class="transition-colors hover:text-accent-strong" href={item.href}>
+            {t(item.labelKey)}
+          </a>
+          {index < footerConfig.links.length - 1 && <span aria-hidden="true">|</span>}
+        </>
+      );
+    })}
   </nav>
   <p class="m-0">{t(I18nKey.footerCopyright, { year: currentYear, owner: siteConfig.owner })}</p>
   <p class="mt-1 mb-0">
@@ -31,13 +27,18 @@ const t = getTranslator();
       class="font-semibold text-text-soft transition-colors hover:text-accent-strong"
       href="https://astro.build"
       target="_blank"
-      rel="noreferrer">Astro</a
-    > &amp;{" "}
+      rel="noreferrer"
+    >
+      Astro
+    </a>{" "}
+    &amp;{" "}
     <a
       class="font-semibold text-text-soft transition-colors hover:text-accent-strong"
       href="https://github.com/CnBarrier404/astro-theme-misthaven"
       target="_blank"
-      rel="noreferrer">Misthaven</a
+      rel="noreferrer"
     >
+      Misthaven
+    </a>
   </p>
 </footer>

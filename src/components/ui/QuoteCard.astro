@@ -14,7 +14,9 @@ const { quote, author } = Astro.props;
   as="figure"
   class="relative m-0 min-h-28 px-6 py-5 tablet:min-h-32 tablet:p-8 tablet:pb-5 tablet:max-wide:col-span-2"
 >
-  <span class="text-accent/40"><Icon class="size-5 tablet:size-6" name="quote" size={20} /></span>
+  <span class="text-accent/40">
+    <Icon class="size-5 tablet:size-6" name="quote" size={20} />
+  </span>
   <blockquote class="mt-1 mr-0 mb-0 ml-4 text-sm leading-7 text-text-soft tablet:ml-5 tablet:text-base">
     {quote}
   </blockquote>

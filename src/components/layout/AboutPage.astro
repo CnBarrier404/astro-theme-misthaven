@@ -19,12 +19,8 @@ const { title = aboutConfig.pageTitle, description = aboutConfig.pageDescription
   <div class="w-full">
     <Card as="header" class="grid min-h-80 grid-cols-4 items-center gap-12 px-12 py-10">
       <div class="col-span-1 flex justify-center">
-        <div
-          class="relative grid size-46 place-items-center bg-avatar-stage before:absolute before:inset-0 before:rounded-full before:border before:border-accent/20 before:content-[''] after:absolute after:inset-3 after:rounded-full after:border after:border-dashed after:border-accent/20 after:content-['']"
-        >
-          <div
-            class="relative z-10 -rotate-2 rounded-avatar border border-border-strong bg-surface p-2 shadow-sm shadow-shadow"
-          >
+        <div class="relative grid size-46 place-items-center bg-avatar-stage before:absolute before:inset-0 before:rounded-full before:border before:border-accent/20 before:content-[''] after:absolute after:inset-3 after:rounded-full after:border after:border-dashed after:border-accent/20 after:content-['']">
+          <div class="relative z-10 -rotate-2 rounded-avatar border border-border-strong bg-surface p-2 shadow-sm shadow-shadow">
             <Image
               class="size-38 rounded-avatar-image object-cover"
               src={siteConfig.gravatarUrl}
@@ -36,7 +32,8 @@ const { title = aboutConfig.pageTitle, description = aboutConfig.pageDescription
           </div>
           <span
             class="absolute right-2 bottom-3 z-20 size-6 rounded-full border-6 border-surface bg-success-light"
-            aria-hidden="true"></span>
+            aria-hidden="true"
+          ></span>
         </div>
       </div>
 
@@ -44,20 +41,16 @@ const { title = aboutConfig.pageTitle, description = aboutConfig.pageDescription
         <p class="m-0 text-xs font-bold text-accent-strong">{aboutConfig.hero.eyebrow}</p>
         <h1 class="mt-4 mb-0 text-profile-title font-extrabold text-text">{aboutConfig.hero.title}</h1>
         <div class="mt-5 max-w-3xl text-base leading-8 text-text-soft">
-          {
-            aboutConfig.hero.description.map((paragraph, index) => (
-              <p class:list={["m-0", index > 0 && "mt-1"]}>{paragraph}</p>
-            ))
-          }
+          {aboutConfig.hero.description.map((paragraph, index) => (
+            <p class:list={["m-0", index > 0 && "mt-1"]}>{paragraph}</p>
+          ))}
         </div>
         <ul class="mt-6 mb-0 flex list-none flex-wrap items-center gap-3 p-0" aria-label="联系方式">
-          {
-            aboutConfig.links.map((link) => (
-              <li>
-                <ContactLink {...link} />
-              </li>
-            ))
-          }
+          {aboutConfig.links.map((link) => (
+            <li>
+              <ContactLink {...link} />
+            </li>
+          ))}
         </ul>
       </div>
     </Card>
@@ -71,11 +64,15 @@ const { title = aboutConfig.pageTitle, description = aboutConfig.pageDescription
 
       <section class="pl-10" aria-labelledby="tech-stack-title">
         <header>
-          <h2 class="m-0 text-2xl font-bold text-text" id="tech-stack-title">{aboutConfig.techStack.title}</h2>
+          <h2 class="m-0 text-2xl font-bold text-text" id="tech-stack-title">
+            {aboutConfig.techStack.title}
+          </h2>
           <p class="mt-2 mb-0 text-sm leading-6 text-muted">{aboutConfig.techStack.description}</p>
         </header>
         <div class="mt-6 grid grid-cols-2 gap-4">
-          {aboutConfig.techStack.items.map((technology) => <TechStackCard {...technology} />)}
+          {aboutConfig.techStack.items.map((technology) => (
+            <TechStackCard {...technology} />
+          ))}
         </div>
       </section>
     </div>

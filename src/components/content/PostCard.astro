@@ -15,14 +15,14 @@ const { title, description, publishedAt, category, tags, draft } = post.data;
 const href = getPostHref(post);
 ---
 
-<article
-  class="grid min-h-44 grid-cols-[minmax(0,1fr)_2.75rem] gap-3 py-5 pr-3 pl-4 tablet:min-h-49 tablet:grid-cols-[minmax(0,1fr)_3.25rem] tablet:gap-6 tablet:pr-4 tablet:pl-5"
->
+<article class="grid min-h-44 grid-cols-[minmax(0,1fr)_2.75rem] gap-3 py-5 pr-3 pl-4 tablet:min-h-49 tablet:grid-cols-[minmax(0,1fr)_3.25rem] tablet:gap-6 tablet:pr-4 tablet:pl-5">
   <div class="min-w-0">
     <div class="flex items-start gap-2 tablet:gap-3">
       <span class="mt-1 h-4 w-1 flex-none rounded-sm bg-accent tablet:h-5" aria-hidden="true"></span>
       <h2 class="m-0 text-lg leading-7 font-bold tablet:text-post-card-title">
-        <a class="transition-colors hover:text-accent-strong" href={href}>{title}</a>
+        <a class="transition-colors hover:text-accent-strong" href={href}>
+          {title}
+        </a>
       </h2>
     </div>
 
@@ -34,41 +34,37 @@ const href = getPostHref(post);
         class="inline-flex w-36 flex-none items-center gap-2 text-sm text-muted"
         datetime={publishedAt.toISOString()}
       >
-        <span class="grid size-7 place-items-center rounded-md bg-accent-soft text-accent-strong"
-          ><Icon name="calendar" size={16} /></span
-        >
+        <span class="grid size-7 place-items-center rounded-md bg-accent-soft text-accent-strong">
+          <Icon name="calendar" size={16} />
+        </span>
         {formatPostDate(publishedAt)}
       </time>
       <span class="inline-flex w-36 flex-none items-center gap-2 text-sm text-muted">
-        <span class="grid size-7 place-items-center rounded-md bg-accent-soft text-accent-strong"
-          ><Icon name="article" size={16} /></span
-        >
+        <span class="grid size-7 place-items-center rounded-md bg-accent-soft text-accent-strong">
+          <Icon name="article" size={16} />
+        </span>
         {category}
       </span>
-      {
-        isCommentViewCountEnabled && (
-          <span class="inline-flex w-36 flex-none items-center gap-2 text-sm text-muted">
-            <span class="grid size-7 place-items-center rounded-md bg-accent-soft text-accent-strong">
-              <Icon name="chart" size={16} />
-            </span>
-            <span>
-              {t(I18nKey.postViews)}{" "}
-              <span aria-live="polite" data-post-card-view-value>
-                -
-              </span>
+      {isCommentViewCountEnabled && (
+        <span class="inline-flex w-36 flex-none items-center gap-2 text-sm text-muted">
+          <span class="grid size-7 place-items-center rounded-md bg-accent-soft text-accent-strong">
+            <Icon name="chart" size={16} />
+          </span>
+          <span>
+            {t(I18nKey.postViews)}{" "}
+            <span aria-live="polite" data-post-card-view-value>
+              -
             </span>
           </span>
-        )
-      }
+        </span>
+      )}
       {draft && <span class="rounded-panel bg-draft-soft px-2 py-1 text-xs text-draft">{t(I18nKey.postDraft)}</span>}
     </div>
 
     <p class="mt-3 mb-0 ml-3 line-clamp-2 text-sm leading-6 text-text-soft tablet:ml-4">{description}</p>
-    {
-      tags.length > 0 && (
-        <TagList class="mt-3 ml-3 tablet:ml-4" tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} />
-      )
-    }
+    {tags.length > 0 && (
+      <TagList class="mt-3 ml-3 tablet:ml-4" tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} />
+    )}
   </div>
 
   <a

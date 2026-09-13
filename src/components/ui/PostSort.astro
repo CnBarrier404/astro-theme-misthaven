@@ -43,26 +43,24 @@ const menuId = `${targetId}-sort-menu`;
       </span>
       <span>{t(I18nKey.sortLatest)}</span>
     </button>
-    {
-      isCommentViewCountEnabled && (
-        <button
-          class="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong aria-pressed:text-accent-strong"
-          type="button"
-          aria-pressed="false"
-          data-post-sort-label={t(I18nKey.sortMostRead)}
-          data-post-sort-option="views"
+    {isCommentViewCountEnabled && (
+      <button
+        class="flex w-full cursor-pointer items-center gap-2 rounded-md px-3 py-2 text-left text-sm whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong aria-pressed:text-accent-strong"
+        type="button"
+        aria-pressed="false"
+        data-post-sort-label={t(I18nKey.sortMostRead)}
+        data-post-sort-option="views"
+      >
+        <span
+          class="grid size-4 shrink-0 place-items-center text-accent-strong opacity-0 transition-opacity duration-150"
+          aria-hidden="true"
+          data-post-sort-check
         >
-          <span
-            class="grid size-4 shrink-0 place-items-center text-accent-strong opacity-0 transition-opacity duration-150"
-            aria-hidden="true"
-            data-post-sort-check
-          >
-            <Icon class="size-3.5" name="check" size={14} />
-          </span>
-          <span>{t(I18nKey.sortMostRead)}</span>
-        </button>
-      )
-    }
+          <Icon class="size-3.5" name="check" size={14} />
+        </span>
+        <span>{t(I18nKey.sortMostRead)}</span>
+      </button>
+    )}
   </div>
 </div>
 

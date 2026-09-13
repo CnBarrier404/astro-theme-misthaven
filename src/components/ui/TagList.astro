@@ -15,29 +15,27 @@ const chipClass =
 ---
 
 <div class:list={["flex flex-wrap gap-2", className]} aria-label={ariaLabel}>
-  {
-    tags.map((tag) =>
-      linked ? (
-        <a
-          class:list={[
-            "inline-flex min-h-6 items-center rounded-panel px-2 py-0.5 text-xs transition-colors tablet:min-h-7 tablet:px-3 tablet:py-1 tablet:text-sm",
-            chipClass,
-            "hover:bg-accent-soft hover:text-accent-strong",
-          ]}
-          href={`${normalizedBasePath}/${encodeURIComponent(tag)}`}
-        >
-          {tag}
-        </a>
-      ) : (
-        <span
-          class:list={[
-            "inline-flex min-h-6 items-center rounded-panel px-2 py-0.5 text-xs tablet:min-h-7 tablet:px-3 tablet:py-1 tablet:text-sm",
-            chipClass,
-          ]}
-        >
-          {tag}
-        </span>
-      ),
-    )
-  }
+  {tags.map((tag) =>
+    linked ? (
+      <a
+        class:list={[
+          "inline-flex min-h-6 items-center rounded-panel px-2 py-0.5 text-xs transition-colors tablet:min-h-7 tablet:px-3 tablet:py-1 tablet:text-sm",
+          chipClass,
+          "hover:bg-accent-soft hover:text-accent-strong",
+        ]}
+        href={`${normalizedBasePath}/${encodeURIComponent(tag)}`}
+      >
+        {tag}
+      </a>
+    ) : (
+      <span
+        class:list={[
+          "inline-flex min-h-6 items-center rounded-panel px-2 py-0.5 text-xs tablet:min-h-7 tablet:px-3 tablet:py-1 tablet:text-sm",
+          chipClass,
+        ]}
+      >
+        {tag}
+      </span>
+    ),
+  )}
 </div>

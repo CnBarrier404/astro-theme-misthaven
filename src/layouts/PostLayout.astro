@@ -48,9 +48,10 @@ const pageKey = getPostHref(post);
     <div class="hidden w-72 shrink-0 wide:block" aria-hidden="true"></div>
 
     <div class="w-full max-w-reading min-w-0">
-      <a class="mb-4 ml-1 inline-flex items-center gap-2 text-sm font-bold text-accent-strong" href="/posts"
-        ><Icon class="rotate-180" name="arrow" size={16} />{t(I18nKey.backToPosts)}</a
-      >
+      <a class="mb-4 ml-1 inline-flex items-center gap-2 text-sm font-bold text-accent-strong" href="/posts">
+        <Icon class="rotate-180" name="arrow" size={16} />
+        {t(I18nKey.backToPosts)}
+      </a>
 
       <Card as="article" class="w-full overflow-hidden" data-reading-content>
         <header class="border-b border-border px-5 py-8 tablet:px-12 tablet:py-10">
@@ -71,49 +72,41 @@ const pageKey = getPostHref(post);
               </span>
               {publishedLabel}
             </time>
-            {
-              updatedAt && (
-                <time class="inline-flex items-center gap-2" datetime={updatedAt.toISOString()}>
-                  <span class="grid size-8 place-items-center rounded-md bg-accent-soft text-accent-strong">
-                    <Icon name="clock" size={16} />
-                  </span>
-                  {t(I18nKey.postUpdatedAt, { date: formatPostDate(updatedAt) })}
-                </time>
-              )
-            }
+            {updatedAt && (
+              <time class="inline-flex items-center gap-2" datetime={updatedAt.toISOString()}>
+                <span class="grid size-8 place-items-center rounded-md bg-accent-soft text-accent-strong">
+                  <Icon name="clock" size={16} />
+                </span>
+                {t(I18nKey.postUpdatedAt, { date: formatPostDate(updatedAt) })}
+              </time>
+            )}
             <span class="inline-flex items-center gap-2">
               <span class="grid size-8 place-items-center rounded-md bg-accent-soft text-accent-strong">
                 <Icon name="article" size={16} />
               </span>
               {category}
             </span>
-            {
-              tags.length > 0 && (
-                <span class="inline-flex min-w-0 items-center gap-2">
-                  <span class="grid size-8 flex-none place-items-center rounded-md bg-accent-soft font-bold text-accent-strong">
-                    #
-                  </span>
-                  <span class="text-text-soft">{tags.join(" / ")}</span>
+            {tags.length > 0 && (
+              <span class="inline-flex min-w-0 items-center gap-2">
+                <span class="grid size-8 flex-none place-items-center rounded-md bg-accent-soft font-bold text-accent-strong">
+                  #
                 </span>
-              )
-            }
-            {
-              draft && (
-                <span class="rounded-panel bg-draft-soft px-2 py-1 text-xs text-draft">
-                  {t(I18nKey.postDraftPreview)}
-                </span>
-              )
-            }
+                <span class="text-text-soft">{tags.join(" / ")}</span>
+              </span>
+            )}
+            {draft && (
+              <span class="rounded-panel bg-draft-soft px-2 py-1 text-xs text-draft">
+                {t(I18nKey.postDraftPreview)}
+              </span>
+            )}
           </div>
 
-          {
-            postConfig.outdatedWarning.enabled && (
-              <PostOutdatedWarning
-                lastUpdatedAt={updatedAt ?? publishedAt}
-                thresholdDays={postConfig.outdatedWarning.days}
-              />
-            )
-          }
+          {postConfig.outdatedWarning.enabled && (
+            <PostOutdatedWarning
+              lastUpdatedAt={updatedAt ?? publishedAt}
+              thresholdDays={postConfig.outdatedWarning.days}
+            />
+          )}
         </header>
 
         <div class="prose-content px-5 py-8 tablet:px-12 tablet:py-10 tablet:pb-14">

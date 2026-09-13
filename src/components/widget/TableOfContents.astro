@@ -18,50 +18,48 @@ const items = headings
   }));
 ---
 
-{
-  items.length > 0 && (
-    <aside class="sticky top-4 mt-9 hidden w-72 shrink-0 wide:block" aria-label={t(I18nKey.tableOfContents)}>
-      <Card as="nav" class="p-4">
-        <h2 class="m-0 px-1 text-sm font-bold tablet:text-base">{t(I18nKey.tableOfContents)}</h2>
+{items.length > 0 && (
+  <aside class="sticky top-4 mt-9 hidden w-72 shrink-0 wide:block" aria-label={t(I18nKey.tableOfContents)}>
+    <Card as="nav" class="p-4">
+      <h2 class="m-0 px-1 text-sm font-bold tablet:text-base">{t(I18nKey.tableOfContents)}</h2>
 
-        <ol class="relative mt-4 flex flex-col gap-1">
-          <li
-            class="pointer-events-none absolute inset-x-0 top-0 rounded-panel bg-accent-soft opacity-0 transition-[top,height,opacity] duration-200 ease-out"
-            data-toc-indicator
-            aria-hidden="true"
-          />
-          {items.map(({ depth, slug, text, sectionIndex }) => (
-            <li>
-              <a
-                class:list={[
-                  "relative z-10 flex min-w-0 items-center rounded-panel py-2 text-sm leading-5 text-text-soft transition-colors hover:text-accent-strong",
-                  depth === 2 && "gap-3 px-2",
-                  depth === 3 && "gap-4 pr-2 pl-6",
-                  depth === 4 && "gap-4 pr-2 pl-8",
-                ]}
-                href={`#${slug}`}
-                data-toc-link
-              >
-                {depth === 2 ? (
-                  <span class="flex size-5 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-xs font-bold text-accent-strong">
-                    {sectionIndex}
-                  </span>
-                ) : (
-                  <span
-                    class="size-2 shrink-0 rounded-full bg-accent/35 transition-colors"
-                    data-toc-marker
-                    aria-hidden="true"
-                  />
-                )}
-                <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
-              </a>
-            </li>
-          ))}
-        </ol>
-      </Card>
-    </aside>
-  )
-}
+      <ol class="relative mt-4 flex flex-col gap-1">
+        <li
+          class="pointer-events-none absolute inset-x-0 top-0 rounded-panel bg-accent-soft opacity-0 transition-[top,height,opacity] duration-200 ease-out"
+          data-toc-indicator
+          aria-hidden="true"
+        />
+        {items.map(({ depth, slug, text, sectionIndex }) => (
+          <li>
+            <a
+              class:list={[
+                "relative z-10 flex min-w-0 items-center rounded-panel py-2 text-sm leading-5 text-text-soft transition-colors hover:text-accent-strong",
+                depth === 2 && "gap-3 px-2",
+                depth === 3 && "gap-4 pr-2 pl-6",
+                depth === 4 && "gap-4 pr-2 pl-8",
+              ]}
+              href={`#${slug}`}
+              data-toc-link
+            >
+              {depth === 2 ? (
+                <span class="flex size-5 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-xs font-bold text-accent-strong">
+                  {sectionIndex}
+                </span>
+              ) : (
+                <span
+                  class="size-2 shrink-0 rounded-full bg-accent/35 transition-colors"
+                  data-toc-marker
+                  aria-hidden="true"
+                />
+              )}
+              <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
+            </a>
+          </li>
+        ))}
+      </ol>
+    </Card>
+  </aside>
+)}
 
 <script>
   let cleanupTableOfContents = () => {};

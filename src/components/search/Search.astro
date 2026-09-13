@@ -24,7 +24,9 @@ const t = getTranslator();
     class="flex h-10 w-72 items-center gap-2 rounded-panel border border-border bg-surface/90 px-3 text-text-soft transition focus-within:border-focus-ring/40 focus-within:ring-3 focus-within:ring-focus-ring/10"
     id="search"
   >
-    <label class="sr-only" for="site-search-input">{t(I18nKey.searchLabel)}</label>
+    <label class="sr-only" for="site-search-input">
+      {t(I18nKey.searchLabel)}
+    </label>
     <Icon name="search" size={16} />
     <input
       class="w-full min-w-0 border-0 bg-transparent p-0 text-sm outline-none placeholder:text-muted"

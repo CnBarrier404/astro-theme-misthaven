@@ -10,8 +10,6 @@ interface Props {
 const { pageKey, pageTitle } = Astro.props;
 ---
 
-{
-  commentConfig.enabled && commentConfig.type === "artalk" && (
-    <ArtalkComments config={commentConfig.artalk} pageKey={pageKey} pageTitle={pageTitle} />
-  )
-}
+{commentConfig.enabled && commentConfig.type === "artalk" && (
+  <ArtalkComments config={commentConfig.artalk} pageKey={pageKey} pageTitle={pageTitle} />
+)}

@@ -20,45 +20,43 @@ const normalizedCurrentPath = normalizeSitePath(currentPath);
 ---
 
 <header class="mx-auto flex h-18 w-full max-w-chrome items-center gap-2 px-4 tablet:gap-5 tablet:px-6 wide:px-18">
-  <a class="shrink-0 text-lg font-bold whitespace-nowrap text-accent-strong tablet:text-xl" href={homeHref}
-    >{siteConfig.title}</a
-  >
+  <a class="shrink-0 text-lg font-bold whitespace-nowrap text-accent-strong tablet:text-xl" href={homeHref}>
+    {siteConfig.title}
+  </a>
   <nav
     class="ml-6 hidden items-center gap-1 tablet:flex"
     data-navigation-content
     aria-label={t(I18nKey.primaryNavigation)}
   >
-    {
-      navigationConfig.map((item) => {
-        const href = item.href;
-        const normalizedHref = href.replace(/\/$/, "") || "/";
-        const isActive =
-          item.href === "/"
-            ? normalizedCurrentPath === normalizedHref
-            : normalizedCurrentPath === normalizedHref || normalizedCurrentPath.startsWith(`${normalizedHref}/`);
+    {navigationConfig.map((item) => {
+      const href = item.href;
+      const normalizedHref = href.replace(/\/$/, "") || "/";
+      const isActive =
+        item.href === "/"
+          ? normalizedCurrentPath === normalizedHref
+          : normalizedCurrentPath === normalizedHref || normalizedCurrentPath.startsWith(`${normalizedHref}/`);
 
-        return (
-          <a
-            class:list={[
-              "relative isolate inline-flex h-10 items-center gap-2 rounded-panel px-3 text-sm font-semibold whitespace-nowrap text-text-soft transition-colors",
-              !isActive && "hover:bg-accent-soft/50 hover:text-accent-strong",
-            ]}
-            href={href}
-            aria-current={isActive ? "page" : undefined}
-          >
-            {isActive && (
-              <span
-                class="absolute inset-0 -z-10 rounded-panel bg-accent-soft"
-                data-navigation-indicator
-                aria-hidden="true"
-              />
-            )}
-            <Icon name={item.icon} size={16} />
-            <span>{t(item.labelKey)}</span>
-          </a>
-        );
-      })
-    }
+      return (
+        <a
+          class:list={[
+            "relative isolate inline-flex h-10 items-center gap-2 rounded-panel px-3 text-sm font-semibold whitespace-nowrap text-text-soft transition-colors",
+            !isActive && "hover:bg-accent-soft/50 hover:text-accent-strong",
+          ]}
+          href={href}
+          aria-current={isActive ? "page" : undefined}
+        >
+          {isActive && (
+            <span
+              class="absolute inset-0 -z-10 rounded-panel bg-accent-soft"
+              data-navigation-indicator
+              aria-hidden="true"
+            />
+          )}
+          <Icon name={item.icon} size={16} />
+          <span>{t(item.labelKey)}</span>
+        </a>
+      );
+    })}
   </nav>
   <div class="flex-1"></div>
   <Search />

@@ -55,27 +55,25 @@ const heroImageDark = resolveSiteAsset(siteConfig.heroImageDark);
     id="latest"
   >
     <div class="grid content-start gap-4 tablet:gap-6">
-      {
-        posts.length > 0 ? (
-          <section aria-labelledby="recent-title">
-            <div class="mb-4 flex items-center justify-between gap-4">
-              <h2 class="m-0 text-lg font-bold" id="recent-title">
-                {t(I18nKey.postsList)}
-              </h2>
-              <PostSort targetId="home-post-list" />
-            </div>
-            <PostList id="home-post-list" posts={posts} limit={5} ariaLabel={t(I18nKey.postsList)} />
-            <a class="mt-5 ml-auto flex w-fit items-center gap-2 text-sm font-bold text-accent-strong" href={postsHref}>
-              {t(I18nKey.viewAllPosts)}
-              <Icon class="size-5" name="arrow" size={20} />
-            </a>
-          </section>
-        ) : (
-          <Card as="section" class="px-6 py-10 text-center text-muted">
-            <p class="m-0">{t(I18nKey.noPublishedPosts)}</p>
-          </Card>
-        )
-      }
+      {posts.length > 0 ? (
+        <section aria-labelledby="recent-title">
+          <div class="mb-4 flex items-center justify-between gap-4">
+            <h2 class="m-0 text-lg font-bold" id="recent-title">
+              {t(I18nKey.postsList)}
+            </h2>
+            <PostSort targetId="home-post-list" />
+          </div>
+          <PostList id="home-post-list" posts={posts} limit={5} ariaLabel={t(I18nKey.postsList)} />
+          <a class="mt-5 ml-auto flex w-fit items-center gap-2 text-sm font-bold text-accent-strong" href={postsHref}>
+            {t(I18nKey.viewAllPosts)}
+            <Icon class="size-5" name="arrow" size={20} />
+          </a>
+        </section>
+      ) : (
+        <Card as="section" class="px-6 py-10 text-center text-muted">
+          <p class="m-0">{t(I18nKey.noPublishedPosts)}</p>
+        </Card>
+      )}
     </div>
 
     <aside
@@ -83,11 +81,9 @@ const heroImageDark = resolveSiteAsset(siteConfig.heroImageDark);
       aria-label={t(I18nKey.siteInformation)}
     >
       <SiteStats stats={stats} title={t(I18nKey.siteOverview)} />
-      {
-        popularTags.length > 0 && (
-          <PopularTags tags={popularTags} title={t(I18nKey.popularTags)} tagsLabel={t(I18nKey.navigationTags)} />
-        )
-      }
+      {popularTags.length > 0 && (
+        <PopularTags tags={popularTags} title={t(I18nKey.popularTags)} tagsLabel={t(I18nKey.navigationTags)} />
+      )}
       <QuoteCard quote={siteConfig.quote} author={siteConfig.owner} />
     </aside>
   </div>

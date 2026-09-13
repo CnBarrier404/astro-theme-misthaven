@@ -33,15 +33,13 @@ const pageDescription = t(I18nKey.postsPageDescription, { owner: siteConfig.owne
       </div>
     </Card>
 
-    {
-      posts.length > 0 ? (
-        <PostList class="mt-4 tablet:mt-5" id="posts-page-list" posts={posts} ariaLabel={t(I18nKey.postsList)} />
-      ) : (
-        <Card class="mt-4 grid justify-items-center gap-3 px-6 py-12 text-center text-muted tablet:mt-5">
-          <Icon name="article" size={28} />
-          <p class="m-0">{t(I18nKey.noPublishedPosts)}</p>
-        </Card>
-      )
-    }
+    {posts.length > 0 ? (
+      <PostList class="mt-4 tablet:mt-5" id="posts-page-list" posts={posts} ariaLabel={t(I18nKey.postsList)} />
+    ) : (
+      <Card class="mt-4 grid justify-items-center gap-3 px-6 py-12 text-center text-muted tablet:mt-5">
+        <Icon name="article" size={28} />
+        <p class="m-0">{t(I18nKey.noPublishedPosts)}</p>
+      </Card>
+    )}
   </div>
 </BaseLayout>

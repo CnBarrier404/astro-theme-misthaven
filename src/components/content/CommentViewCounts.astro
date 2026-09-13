@@ -5,11 +5,9 @@ import { siteConfig } from "@/config/siteConfig";
 const artalkConfig = isCommentViewCountEnabled ? commentConfig.artalk : null;
 ---
 
-{
-  artalkConfig?.visitorCount && (
-    <div data-comment-view-counts data-server={artalkConfig.server} data-site={siteConfig.title} hidden />
-  )
-}
+{artalkConfig?.visitorCount && (
+  <div data-comment-view-counts data-server={artalkConfig.server} data-site={siteConfig.title} hidden />
+)}
 
 <script>
   type ViewCounts = Record<string, number>;

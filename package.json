@@ -22,7 +22,7 @@
     "@expressive-code/plugin-line-numbers": "^0.44.2",
     "@resvg/resvg-js": "^2.6.2",
     "artalk": "^2.10.0",
-    "astro": "^7.3.1",
+    "astro": "^7.3.2",
     "astro-expressive-code": "^0.44.2",
     "ec-lang-logo": "^1.0.5",
     "expressive-code-collapsible": "^1.0.0",
@@ -30,18 +30,18 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "@iconify-json/devicon": "^1.2.62",
+    "@iconify-json/devicon": "^1.2.63",
     "@iconify-json/fa7-brands": "^1.2.4",
     "@iconify-json/fa7-solid": "^1.2.5",
     "@tailwindcss/vite": "^4.3.3",
     "astro-icon": "^1.2.0",
     "gray-matter": "^4.0.3",
     "prettier": "^3.9.6",
-    "prettier-plugin-astro": "^0.14.1",
+    "prettier-plugin-astro": "^1.0.0",
     "prettier-plugin-tailwindcss": "^0.8.1",
     "tailwindcss": "^4.3.3",
     "typescript": "^6.0.3",
-    "wrangler": "^4.129.0"
+    "wrangler": "^4.131.1"
   },
   "overrides": {
     "@expressive-code/core": "^0.44.2",

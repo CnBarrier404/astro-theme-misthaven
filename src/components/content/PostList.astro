@@ -22,17 +22,15 @@ const { posts, ariaLabel, class: className, id, limit = posts.length } = Astro.p
   data-post-list
   id={id}
 >
-  {
-    posts.map((post, index) => (
-      <li
-        data-post-list-item
-        data-post-path={getPostHref(post)}
-        data-published-at={post.data.publishedAt.getTime()}
-        data-view-count="0"
-        hidden={index >= limit}
-      >
-        <PostCard post={post} />
-      </li>
-    ))
-  }
+  {posts.map((post, index) => (
+    <li
+      data-post-list-item
+      data-post-path={getPostHref(post)}
+      data-published-at={post.data.publishedAt.getTime()}
+      data-view-count="0"
+      hidden={index >= limit}
+    >
+      <PostCard post={post} />
+    </li>
+  ))}
 </Card>

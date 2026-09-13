@@ -26,13 +26,9 @@ const updatedAt = page.data.updatedAt;
       <header class="border-b border-border px-5 py-8 tablet:px-12 tablet:py-10">
         <p class="m-0 text-xs font-bold text-accent-strong">PRIVACY</p>
         <h1 class="mt-2 mb-0 text-page-title font-bold">{title}</h1>
-        {
-          updatedAt && (
-            <p class="mt-3 mb-0 text-sm text-muted">
-              {t(I18nKey.pageLastUpdated, { date: formatPostDate(updatedAt) })}
-            </p>
-          )
-        }
+        {updatedAt && (
+          <p class="mt-3 mb-0 text-sm text-muted">{t(I18nKey.pageLastUpdated, { date: formatPostDate(updatedAt) })}</p>
+        )}
       </header>
       <div class="prose-content px-5 py-8 tablet:px-12 tablet:py-10 tablet:pb-14">
         <Content />

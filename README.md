@@ -19,7 +19,7 @@ Misthaven 是一个简洁、安静的 Astro 博客主题。
 
 ## 开始使用
 
-需要 Node.js `22.12.0` 或更高版本。
+需要 Node.js `22.23.4+`（22.x）、`24.22.1+`（24.x），或 `26.12.1` 及更高版本。
 
 ```bash
 git clone https://github.com/CnBarrier404/astro-theme-misthaven.git

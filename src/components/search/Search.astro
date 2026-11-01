@@ -21,7 +21,7 @@ const dialogId = "mobile-search-dialog";
 </button>
 
 <dialog
-  class="m-0 w-full max-w-none border-0 bg-transparent p-0 text-text backdrop:bg-overlay"
+  class="m-0 w-full max-w-none -translate-y-2 border-0 bg-transparent p-0 text-text opacity-0 transition transition-discrete duration-200 ease-soft backdrop:bg-overlay backdrop:opacity-0 backdrop:transition backdrop:transition-discrete backdrop:duration-200 open:translate-y-0 open:opacity-100 open:backdrop:opacity-100 starting:open:-translate-y-2 starting:open:opacity-0 starting:open:backdrop:opacity-0"
   id={dialogId}
   aria-label={t(I18nKey.searchLabel)}
   data-search-dialog

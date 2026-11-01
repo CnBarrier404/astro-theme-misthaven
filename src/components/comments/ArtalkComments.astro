@@ -45,6 +45,8 @@ const t = getTranslator();
 </Card>
 
 <script>
+  import { fadeInUpdatedText } from "@/utils/motion";
+
   const setupArtalkComments = async () => {
     const sections = document.querySelectorAll<HTMLElement>("[data-artalk-comments]");
 
@@ -115,6 +117,7 @@ const t = getTranslator();
 
             viewCountObserver.disconnect();
             if (currentCount <= 0) count.textContent = placeholder;
+            else fadeInUpdatedText(count);
           });
           viewCountObserver.observe(count, { childList: true, characterData: true, subtree: true });
 

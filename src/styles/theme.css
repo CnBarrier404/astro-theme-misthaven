@@ -68,6 +68,9 @@
   --radius-panel: var(--panel-radius);
   --radius-full: 9999px;
 
+  /* A soft ease-out shared by every movement: quick to respond, slow to settle. */
+  --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
+
   --container-page: 100rem;
   --container-chrome: 109rem;
   --container-reading: 65rem;

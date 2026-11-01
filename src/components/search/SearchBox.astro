@@ -1,6 +1,7 @@
 ---
 import Icon from "@/components/ui/Icon.astro";
 import { getTranslator, I18nKey } from "@/i18n";
+import { dropdownMotionClass } from "@/utils/motion";
 
 interface Props {
   /** Prefix for the input and result IDs; must be unique on the page. */
@@ -63,15 +64,20 @@ const isSheet = variant === "sheet";
   <div
     class:list={[
       "overflow-hidden rounded-panel border border-border bg-surface",
+      dropdownMotionClass,
       isSheet ? "w-full" : "absolute top-full left-1/2 z-50 mt-2 w-112 -translate-x-1/2",
     ]}
     data-search-panel
-    hidden
   >
     <p class="m-0 px-4 py-3 text-sm text-muted" data-search-status aria-live="polite">
       {t(I18nKey.searchPrompt)}
     </p>
-    <ul class="max-h-96 overflow-y-auto border-t border-border p-2" id={resultsId} role="listbox" hidden></ul>
+    <ul
+      class="max-h-96 overflow-y-auto border-t border-border p-2 transition-opacity duration-200 ease-soft starting:opacity-0"
+      id={resultsId}
+      role="listbox"
+      hidden
+    ></ul>
   </div>
 </site-search>
 
@@ -95,6 +101,7 @@ const isSheet = variant === "sheet";
 
   // Every search box on the page shares one request for the index.
   let searchIndexPromise: Promise<SearchEntry[]> | null = null;
+  let isSearchIndexLoaded = false;
 
   const getSearchIndex = () => {
     searchIndexPromise ??= fetch("/search-index.json").then(async (response) => {
@@ -102,6 +109,7 @@ const isSheet = variant === "sheet";
 
       const index: unknown = await response.json();
       if (!Array.isArray(index)) throw new TypeError("Search index is not an array");
+      isSearchIndexLoaded = true;
       return index as SearchEntry[];
     });
 
@@ -225,13 +233,13 @@ const isSheet = variant === "sheet";
 
     private openPanel() {
       if (!this.panel || !this.input) return;
-      this.panel.hidden = false;
+      this.panel.toggleAttribute("data-open", true);
       this.input.setAttribute("aria-expanded", "true");
     }
 
     private closePanel() {
       if (!this.panel || !this.input) return;
-      this.panel.hidden = true;
+      this.panel.removeAttribute("data-open");
       this.input.setAttribute("aria-expanded", "false");
       this.setActiveResult(-1);
     }
@@ -260,7 +268,9 @@ const isSheet = variant === "sheet";
         return;
       }
 
-      this.showStatus(this.dataset.searchLoading ?? "");
+      // Matching against a loaded index is instant; only the first fetch is worth a loading message.
+      // Skipping it otherwise keeps the current results on screen while the next query is typed.
+      if (!isSearchIndexLoaded) this.showStatus(this.dataset.searchLoading ?? "");
 
       try {
         const index = await getSearchIndex();

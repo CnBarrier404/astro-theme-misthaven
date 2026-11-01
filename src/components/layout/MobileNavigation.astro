@@ -29,7 +29,7 @@ const menuId = "mobile-navigation";
 </button>
 
 <nav
-  class="absolute inset-auto top-16 right-4 m-0 w-44 rounded-panel border border-border bg-panel p-1 text-text"
+  class="absolute inset-auto top-16 right-4 m-0 w-44 -translate-y-1 rounded-panel border border-border bg-panel p-1 text-text opacity-0 transition transition-discrete duration-150 ease-soft open:translate-y-0 open:opacity-100 starting:open:-translate-y-1 starting:open:opacity-0"
   id={menuId}
   aria-label={t(I18nKey.primaryNavigation)}
   popover

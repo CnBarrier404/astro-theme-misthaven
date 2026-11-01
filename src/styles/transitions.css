@@ -19,6 +19,11 @@
   view-transition-name: navigation-content;
 }
 
+/* A theme change reveals the whole page at once, so nothing may leave the root snapshot. */
+:root.theme-transition :is([data-page-content], [data-navigation-indicator], [data-navigation-content]) {
+  view-transition-name: none;
+}
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
@@ -30,13 +35,13 @@
 
 :root.theme-transition::view-transition-new(root) {
   z-index: 2;
-  animation: theme-reveal 360ms ease-out both;
+  animation: theme-reveal 420ms var(--ease-soft) both;
 }
 
 ::view-transition-group(navigation-indicator) {
   z-index: 1;
-  animation-duration: 200ms;
-  animation-timing-function: ease-out;
+  animation-duration: 260ms;
+  animation-timing-function: var(--ease-soft);
 }
 
 ::view-transition-group(navigation-content) {
@@ -60,11 +65,12 @@
 }
 
 ::view-transition-old(page-content) {
-  animation: page-fade-out 160ms ease-out both;
+  animation: page-fade-out 140ms ease-out both;
 }
 
+/* The new page settles in from slightly below once the old one has mostly faded. */
 ::view-transition-new(page-content) {
-  animation: page-fade-in 200ms ease-out both;
+  animation: page-fade-in 280ms var(--ease-soft) 60ms both;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -85,6 +91,7 @@
 @keyframes page-fade-in {
   from {
     opacity: 0;
+    translate: 0 6px;
   }
 }
 

@@ -15,6 +15,7 @@ import { postConfig } from "@/config/postConfig";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { nudgeBackClass } from "@/utils/motion";
 import { formatPostDate, getPostHref, getPostMetrics, getPostOgImageHref } from "@/utils/posts";
 import type { MarkdownHeading } from "astro";
 import type { CollectionEntry } from "astro:content";
@@ -52,7 +53,7 @@ const pageKey = getPostHref(post);
 
     <div class="w-full max-w-reading min-w-0">
       <TextLink class="mb-4 ml-1" href="/posts">
-        <Icon class="rotate-180" name="arrow" size={16} />
+        <Icon class:list={["rotate-180", nudgeBackClass]} name="arrow" size={16} />
         {t(I18nKey.backToPosts)}
       </TextLink>
 

@@ -13,6 +13,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getTranslator, I18nKey } from "@/i18n";
 import type { CategoryCount, SiteStat } from "@/types/home";
 import { resolveSiteAsset } from "@/utils/assets";
+import { nudgeForwardClass } from "@/utils/motion";
 import { getVisiblePosts } from "@/utils/posts";
 
 const t = getTranslator();
@@ -76,7 +77,7 @@ const heroImageDark = resolveSiteAsset(siteConfig.heroImageDark);
           <div class="mt-5 flex justify-end">
             <TextLink href={postsHref}>
               {t(I18nKey.viewAllPosts)}
-              <Icon class="size-5" name="arrow" size={20} />
+              <Icon class:list={["size-5", nudgeForwardClass]} name="arrow" size={20} />
             </TextLink>
           </div>
         </section>

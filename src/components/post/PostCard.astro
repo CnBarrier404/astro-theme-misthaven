@@ -5,6 +5,7 @@ import IconBadge from "@/components/ui/IconBadge.astro";
 import TagList from "@/components/ui/TagList.astro";
 import { isCommentViewCountEnabled } from "@/config/commentConfig";
 import { getTranslator, I18nKey } from "@/i18n";
+import { nudgeForwardClass } from "@/utils/motion";
 import { formatPostDate, getPostHref, type PostEntry } from "@/utils/posts";
 
 interface Props {
@@ -64,10 +65,10 @@ const href = getPostHref(post);
   </div>
 
   <a
-    class="flex min-h-full items-center justify-center rounded-lg bg-accent-soft text-accent-strong transition-colors hover:bg-accent hover:text-surface"
+    class="group flex min-h-full items-center justify-center rounded-lg bg-accent-soft text-accent-strong transition-colors hover:bg-accent hover:text-surface"
     href={href}
     aria-label={t(I18nKey.readPost, { title })}
   >
-    <Icon name="chevron" size={22} />
+    <Icon class={nudgeForwardClass} name="chevron" size={22} />
   </a>
 </article>

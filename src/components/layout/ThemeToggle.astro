@@ -1,6 +1,7 @@
 ---
 import Icon from "@/components/ui/Icon.astro";
 import { getTranslator, I18nKey } from "@/i18n";
+import { dropdownMotionClass } from "@/utils/motion";
 
 const t = getTranslator();
 const menuId = "theme-preference-menu";
@@ -43,19 +44,27 @@ const themeOptions = [
     data-theme-trigger
   >
     {themeOptions.map(({ value, icon, triggerIconSize, visibleClass }) => (
-      <span class:list={["hidden items-center justify-center", visibleClass]} data-theme-trigger-icon={value}>
+      <span
+        class:list={[
+          "hidden items-center justify-center transition duration-300 ease-soft starting:in-[.theme-transition]:-rotate-90 starting:in-[.theme-transition]:opacity-0",
+          visibleClass,
+        ]}
+        data-theme-trigger-icon={value}
+      >
         <Icon name={icon} size={triggerIconSize} />
       </span>
     ))}
   </button>
 
   <div
-    class="absolute top-full right-0 z-50 mt-2 w-40 rounded-panel border border-border bg-panel p-1"
+    class:list={[
+      "absolute top-full right-0 z-50 mt-2 w-40 rounded-panel border border-border bg-panel p-1",
+      dropdownMotionClass,
+    ]}
     id={menuId}
     role="group"
     aria-label={t(I18nKey.themeLabel)}
     data-theme-menu
-    hidden
   >
     {themeOptions.map(({ value, icon, label }) => (
       <button
@@ -181,7 +190,7 @@ const themeOptions = [
     if (!trigger || !menu) return;
 
     trigger.setAttribute("aria-expanded", "false");
-    menu.hidden = true;
+    menu.removeAttribute("data-open");
   };
 
   const setupThemeToggles = () => {
@@ -198,10 +207,10 @@ const themeOptions = [
 
       toggle.dataset.themeReady = "true";
       trigger.addEventListener("click", () => {
-        const shouldOpen = menu.hidden;
+        const shouldOpen = !menu.hasAttribute("data-open");
         document.querySelectorAll<HTMLElement>("theme-toggle").forEach(closeThemeToggle);
         trigger.setAttribute("aria-expanded", String(shouldOpen));
-        menu.hidden = !shouldOpen;
+        menu.toggleAttribute("data-open", shouldOpen);
       });
 
       options.forEach((option) => {
@@ -216,7 +225,7 @@ const themeOptions = [
       });
 
       toggle.addEventListener("keydown", (event) => {
-        if (event.key !== "Escape" || menu.hidden) return;
+        if (event.key !== "Escape" || !menu.hasAttribute("data-open")) return;
         closeThemeToggle(toggle);
         trigger.focus();
       });

@@ -29,7 +29,7 @@ const items = headings
 
       <ol class="relative mt-4 flex flex-col gap-1">
         <li
-          class="pointer-events-none absolute inset-x-0 top-0 rounded-panel bg-accent-soft opacity-0 transition-[top,height,opacity] duration-200 ease-out"
+          class="pointer-events-none absolute inset-x-0 top-0 rounded-panel bg-accent-soft opacity-0 transition-[top,height,opacity] duration-250 ease-soft"
           data-toc-indicator
           aria-hidden="true"
         />
@@ -42,10 +42,14 @@ const items = headings
 )}
 
 {items.length > 0 && variant === "inline" && (
-  <details class="group border-b border-border wide:hidden">
+  <details class="group border-b border-border [interpolate-size:allow-keywords] details-content:h-0 details-content:overflow-clip details-content:transition-[height,content-visibility] details-content:transition-discrete details-content:duration-250 details-content:ease-soft open:details-content:h-auto wide:hidden">
     <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-bold text-text transition-colors hover:text-accent-strong focus-visible:-outline-offset-2 tablet:px-12 [&::-webkit-details-marker]:hidden">
       {t(I18nKey.tableOfContents)}
-      <Icon class="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron" size={16} />
+      <Icon
+        class="text-muted transition-transform duration-250 ease-soft group-open:rotate-90"
+        name="chevron"
+        size={16}
+      />
     </summary>
     <nav aria-label={t(I18nKey.tableOfContents)}>
       <ol class="flex flex-col gap-1 px-3 pb-4 tablet:px-10">

@@ -15,9 +15,7 @@ Misthaven is a clean and minimalist Astro blog theme with calm colors, spacious 
 | `npm run format`          | Format code                                      |
 | `npm run check`           | Check types                                      |
 
-Manage the background server with `npm run astro dev stop`, `npm run astro dev status`, and `npm run astro dev logs`.
-
-After completing work, run `npm run format` and `npm run check`. After source changes, also run `npm run build` and `git diff --check`.
+After completing work, run `npm run format` and `npm run check`.
 
 ## Repository Structure
 
@@ -62,36 +60,10 @@ After completing work, run `npm run format` and `npm run check`. After source ch
 | `ui/`      | Reusable UI primitives and small composed display components   |
 | `widget/`  | Standalone page widgets, such as the table of contents         |
 
-## Workflows
+## Rules
 
-### 1. Implementing a Feature
-
-1. Read the user's requirements and inspect the relevant existing code, configuration, content, and documentation.
-2. Before editing implementation files, present a concrete plan that describes the intended behavior, affected areas, and validation steps.
-3. Do not modify source code or other implementation files, and do not run commands that rewrite or generate files, until the user explicitly approves the plan and authorizes implementation. Read-only inspection is allowed.
-4. After approval, implement only the approved scope. If a materially different approach or broader scope becomes necessary, explain the change and request approval again before proceeding.
-5. Validate the implementation with the commands required by this document and report the result.
-
-### 2. Fixing a Bug
-
-1. Start from the user's problem description. Inspect the relevant code and, when practical, reproduce the issue using read-only or non-mutating diagnostics.
-2. Identify the root cause and support the diagnosis with concrete evidence from the code or reproduction. Do not present an unverified guess as the cause.
-3. Explain the root cause, affected behavior, proposed fix, and validation plan to the user. Wait for explicit approval before modifying source code or other implementation files.
-4. After approval, implement the fix within the agreed scope, add or update regression coverage when appropriate, and run the required validation commands.
-
-## UI and Styling
-
-- Use Tailwind utilities for component layout and visual styling. Keep global CSS for base styles, design tokens, prose,
-  third-party integrations, and selectors that cannot be expressed clearly as utilities.
-- Use only semantic theme colors defined in `src/styles/global.css`. Do not use Tailwind's default color palette or raw
-  color literals in components.
-- Prefer integer spacing utilities so layout, spacing, padding, and gaps remain multiples of `4px`.
-- Use only the `tablet` and `wide` responsive variants. Do not add one-off breakpoints in component markup.
-- Do not use arbitrary values when a theme token or standard utility exists. Add a reusable token when the same custom
-  value is needed more than once.
-- Keep letter spacing at `0`. Use font size, weight, and color for hierarchy.
-- Reuse repeated visual structures as Astro components. Do not hide copied utility lists behind `@apply` or new CSS
-  classes.
+- When replacing an implementation, remove the old implementation. Do not retain backward-compatibility code or legacy entry points unless the user explicitly requests them.
+- Do not add tests unless the user explicitly requests them.scripts unless requested.
 
 ## URL Conventions
 

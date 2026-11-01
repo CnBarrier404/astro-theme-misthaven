@@ -16,7 +16,10 @@ const { posts, ariaLabel, class: className, id, limit = posts.length } = Astro.p
 
 <Card
   as="ol"
-  class:list={["m-0 list-none divide-y divide-border overflow-hidden p-0", className]}
+  class:list={[
+    "m-0 list-none divide-y divide-border overflow-hidden p-0 tablet:grid tablet:grid-cols-[max-content_fit-content(10rem)_max-content_minmax(0,1fr)] tablet:gap-x-5",
+    className,
+  ]}
   aria-label={ariaLabel}
   data-limit={limit}
   data-post-list
@@ -24,6 +27,7 @@ const { posts, ariaLabel, class: className, id, limit = posts.length } = Astro.p
 >
   {posts.map((post, index) => (
     <li
+      class="tablet:col-span-full tablet:grid tablet:grid-cols-subgrid"
       data-post-list-item
       data-post-path={getPostHref(post)}
       data-published-at={post.data.publishedAt.getTime()}

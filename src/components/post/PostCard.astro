@@ -16,8 +16,8 @@ const { title, description, publishedAt, category, tags, draft } = post.data;
 const href = getPostHref(post);
 ---
 
-<article class="group relative flex flex-col gap-3 px-5 py-6 tablet:px-8 tablet:py-7">
-  <h2 class="m-0 text-lg leading-7 font-semibold tablet:text-post-card-title">
+<article class="group relative flex flex-col gap-3 px-5 py-6 tablet:col-span-full tablet:grid tablet:grid-cols-subgrid tablet:gap-x-5 tablet:px-8 tablet:py-7">
+  <h2 class="m-0 text-lg leading-7 font-semibold tablet:col-span-full tablet:text-post-card-title">
     <!-- The title link stretches over the whole card so the card is one click target. -->
     <a
       class="transition-colors group-hover:text-accent-strong after:absolute after:inset-0 after:rounded-panel focus-visible:outline-hidden focus-visible:after:outline-2 focus-visible:after:-outline-offset-2 focus-visible:after:outline-focus-ring"
@@ -27,13 +27,19 @@ const href = getPostHref(post);
     </a>
   </h2>
 
-  <div class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted" aria-label={t(I18nKey.postInformation)}>
+  <!-- Shared list columns keep metadata aligned across cards with different category names. -->
+  <div
+    class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted tablet:col-span-full tablet:grid tablet:grid-cols-subgrid"
+    aria-label={t(I18nKey.postInformation)}
+  >
     <IconText icon="calendar">
       <time class="tabular-nums" datetime={publishedAt.toISOString()}>
         {formatPostDate(publishedAt)}
       </time>
     </IconText>
-    <IconText icon="folder">{category}</IconText>
+    <IconText icon="folder" class="min-w-0">
+      <span class="wrap-anywhere">{category}</span>
+    </IconText>
     {isCommentViewCountEnabled && (
       <IconText icon="chart">
         <span>
@@ -44,9 +50,11 @@ const href = getPostHref(post);
         </span>
       </IconText>
     )}
-    {draft && <DraftBadge>{t(I18nKey.postDraft)}</DraftBadge>}
+    {draft && <DraftBadge class="justify-self-start">{t(I18nKey.postDraft)}</DraftBadge>}
   </div>
 
-  <p class="m-0 line-clamp-2 text-sm leading-6 text-text-soft">{description}</p>
-  {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} linked />}
+  <p class="m-0 line-clamp-2 text-sm leading-6 text-text-soft tablet:col-span-full">{description}</p>
+  {tags.length > 0 && (
+    <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} linked class="tablet:col-span-full" />
+  )}
 </article>

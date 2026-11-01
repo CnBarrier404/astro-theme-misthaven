@@ -158,3 +158,35 @@ const faviconLinks = siteConfig.favicon.filter(({ src }) => src.trim());
     <CommentViewCounts />
   </body>
 </html>
+
+<script>
+  import { normalizeSitePath } from "@/utils/paths";
+
+  // ClientRouter re-fetches and swaps the page even when a link points at the page already on screen.
+  // Treat such clicks as "back to top" instead. This capture listener runs before the router's own
+  // click handler, which skips events that are already default-prevented.
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if ((link.target && link.target !== "_self") || link.hasAttribute("download")) return;
+
+      const url = new URL(link.href);
+      const isCurrentPage =
+        url.origin === location.origin &&
+        !url.hash &&
+        url.search === location.search &&
+        normalizeSitePath(url.pathname) === normalizeSitePath(location.pathname);
+      if (!isCurrentPage) return;
+
+      event.preventDefault();
+      link.closest<HTMLElement>("[popover]")?.hidePopover();
+      window.scrollTo({ top: 0 });
+    },
+    { capture: true },
+  );
+</script>

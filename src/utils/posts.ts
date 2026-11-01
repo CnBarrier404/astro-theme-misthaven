@@ -74,16 +74,33 @@ export function groupPostsByYear(posts: readonly PostEntry[]) {
   return groups;
 }
 
+/** Counts each Han character and each Latin word as one unit, matching how readers estimate length. */
+export function countPostWords(post: PostEntry) {
+  const body = post.body ?? "";
+  const hanCharacterCount = body.match(/\p{Script=Han}/gu)?.length ?? 0;
+  const latinWordCount = body.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g)?.length ?? 0;
+  return hanCharacterCount + latinWordCount;
+}
+
+/**
+ * The most recent publish or update date that is not in the future. Sample posts pin themselves
+ * to the top with far-future dates, which would otherwise read as the latest update.
+ */
+export function getLatestUpdate(posts: readonly PostEntry[], now = new Date()) {
+  const dates = posts
+    .flatMap(({ data }) => [data.publishedAt, data.updatedAt])
+    .filter((date): date is Date => date !== undefined && date.getTime() <= now.getTime());
+
+  return dates.length > 0 ? new Date(Math.max(...dates.map((date) => date.getTime()))) : undefined;
+}
+
 /** "3 posts" / "1 post" in the site language. */
 export function formatPostCount(count: number) {
   return i18n(count === 1 ? I18nKey.postCountOne : I18nKey.postCount, { count });
 }
 
 export function getPostMetrics(post: PostEntry) {
-  const body = post.body ?? "";
-  const hanCharacterCount = body.match(/\p{Script=Han}/gu)?.length ?? 0;
-  const latinWordCount = body.match(/[A-Za-z0-9]+(?:['’-][A-Za-z0-9]+)*/g)?.length ?? 0;
-  const wordCount = hanCharacterCount + latinWordCount;
+  const wordCount = countPostWords(post);
   const minutes = Math.max(1, Math.ceil(wordCount / postConfig.readingUnitsPerMinute));
 
   return {

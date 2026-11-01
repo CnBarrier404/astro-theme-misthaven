@@ -1,7 +1,7 @@
 export interface SiteStat {
   value: string;
   label: string;
-  icon: "article" | "folder" | "tag";
+  icon: "article" | "pen" | "history";
 }
 
 export interface CategoryCount {

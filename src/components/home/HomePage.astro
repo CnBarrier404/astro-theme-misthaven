@@ -12,7 +12,7 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getTranslator, I18nKey } from "@/i18n";
 import type { CategoryCount, SiteStat } from "@/types/home";
 import { resolveSiteAsset } from "@/utils/assets";
-import { getTagCounts, getVisiblePosts } from "@/utils/posts";
+import { countPostWords, formatPostDate, getLatestUpdate, getTagCounts, getVisiblePosts } from "@/utils/posts";
 
 const t = getTranslator();
 const posts = await getVisiblePosts();
@@ -22,23 +22,26 @@ for (const post of posts) {
   categoryCounts.set(post.data.category, (categoryCounts.get(post.data.category) ?? 0) + 1);
 }
 
-function sortByCount(counts: Map<string, number>) {
-  return [...counts.entries()].sort(([leftName, leftCount], [rightName, rightCount]) => {
-    return rightCount - leftCount || leftName.localeCompare(rightName, siteConfig.lang);
-  });
-}
-
 const popularTags = getTagCounts(posts)
   .slice(0, 6)
   .map(({ name }) => name);
-const categories = sortByCount(categoryCounts)
+const categories = [...categoryCounts.entries()]
+  .sort(([leftName, leftCount], [rightName, rightCount]) => {
+    return rightCount - leftCount || leftName.localeCompare(rightName, siteConfig.lang);
+  })
   .slice(0, 6)
   .map(([name, count]) => ({ name, count })) satisfies CategoryCount[];
-const stats = [
-  { value: String(posts.length), icon: "article", label: t(I18nKey.statsPosts) },
-  { value: String(categoryCounts.size), icon: "folder", label: t(I18nKey.statsCategories) },
-  { value: String(getTagCounts(posts).length), icon: "tag", label: t(I18nKey.statsTags) },
-] satisfies readonly SiteStat[];
+const numberFormat = new Intl.NumberFormat(siteConfig.lang);
+const totalWords = posts.reduce((total, post) => total + countPostWords(post), 0);
+const latestUpdate = getLatestUpdate(posts);
+const stats: SiteStat[] = [
+  { value: numberFormat.format(posts.length), icon: "article", label: t(I18nKey.statsPosts) },
+  { value: numberFormat.format(totalWords), icon: "pen", label: t(I18nKey.statsWords) },
+];
+
+if (latestUpdate) {
+  stats.push({ value: formatPostDate(latestUpdate), icon: "history", label: t(I18nKey.statsLastUpdated) });
+}
 const postsHref = "/posts";
 const heroImageLight = resolveSiteAsset(siteConfig.heroImageLight);
 const heroImageDark = resolveSiteAsset(siteConfig.heroImageDark);

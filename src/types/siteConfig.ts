@@ -19,6 +19,5 @@ export interface SiteConfig {
   readonly subTitle: string;
   readonly heroImageLight: string;
   readonly heroImageDark: string;
-  readonly quote: string;
   readonly enableMarkdownNegotiation: boolean;
 }

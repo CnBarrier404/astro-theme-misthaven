@@ -62,9 +62,6 @@ export const siteConfig = {
   heroImageLight: "images/hero_light.png",
   heroImageDark: "images/hero_dark.png",
 
-  // 首页引言
-  quote: "在安静的角落，记录想法、生活与沿途的微光。",
-
   // Markdown Negotiation（Accept: text/markdown）
   // 开启后，构建会自动生成每页的 Markdown 版本，
   // 以及 nginx/Caddy 内容协商所需的 markdown-paths.map / markdown-tokens.map。

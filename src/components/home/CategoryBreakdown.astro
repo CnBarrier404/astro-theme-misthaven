@@ -1,0 +1,37 @@
+---
+import Card from "@/components/ui/Card.astro";
+import { getTranslator, I18nKey } from "@/i18n";
+import type { CategoryCount } from "@/types/home";
+
+interface Props {
+  categories: readonly CategoryCount[];
+  title: string;
+}
+
+const { categories, title } = Astro.props;
+const t = getTranslator();
+const maxCount = Math.max(1, ...categories.map((category) => category.count));
+---
+
+<Card as="section" class="px-6 py-5 tablet:p-8" aria-labelledby="categories-title">
+  <h2 class="m-0 text-sm font-bold tablet:text-base" id="categories-title">
+    {title}
+  </h2>
+  <ul class="mt-4 mb-0 grid list-none gap-3 p-0">
+    {categories.map((category) => (
+      <li>
+        <div class="flex items-center justify-between gap-3 text-sm">
+          <span class="min-w-0 wrap-anywhere text-text-soft">{category.name}</span>
+          <span class="flex-none text-xs text-muted">
+            {t(category.count === 1 ? I18nKey.categoryPostCountOne : I18nKey.categoryPostCount, {
+              count: category.count,
+            })}
+          </span>
+        </div>
+        <div class="mt-1 h-1 overflow-hidden rounded-sm bg-accent-soft" aria-hidden="true">
+          <div class="h-full rounded-sm bg-accent" style={`inline-size: ${(category.count / maxCount) * 100}%`} />
+        </div>
+      </li>
+    ))}
+  </ul>
+</Card>

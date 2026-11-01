@@ -1,13 +1,17 @@
 ---
+import TableOfContentsItem from "@/components/post/TableOfContentsItem.astro";
 import Card from "@/components/ui/Card.astro";
+import Icon from "@/components/ui/Icon.astro";
 import { getTranslator, I18nKey } from "@/i18n";
 import type { MarkdownHeading } from "astro";
 
 interface Props {
   headings: MarkdownHeading[];
+  /** `sidebar` is the sticky panel on wide screens; `inline` collapses inside the article below `wide`. */
+  variant: "sidebar" | "inline";
 }
 
-const { headings } = Astro.props;
+const { headings, variant } = Astro.props;
 const t = getTranslator();
 let sectionIndex = 0;
 const items = headings
@@ -18,8 +22,8 @@ const items = headings
   }));
 ---
 
-{items.length > 0 && (
-  <aside class="sticky top-4 mt-9 hidden w-72 shrink-0 wide:block" aria-label={t(I18nKey.tableOfContents)}>
+{items.length > 0 && variant === "sidebar" && (
+  <aside class="sticky top-4 mt-9 hidden w-sidebar shrink-0 wide:block" aria-label={t(I18nKey.tableOfContents)}>
     <Card as="nav" class="p-4">
       <h2 class="m-0 px-1 text-sm font-bold tablet:text-base">{t(I18nKey.tableOfContents)}</h2>
 
@@ -29,36 +33,28 @@ const items = headings
           data-toc-indicator
           aria-hidden="true"
         />
-        {items.map(({ depth, slug, text, sectionIndex }) => (
-          <li>
-            <a
-              class:list={[
-                "relative z-10 flex min-w-0 items-center rounded-panel py-2 text-sm leading-5 text-text-soft transition-colors hover:text-accent-strong",
-                depth === 2 && "gap-3 px-2",
-                depth === 3 && "gap-4 pr-2 pl-6",
-                depth === 4 && "gap-4 pr-2 pl-8",
-              ]}
-              href={`#${slug}`}
-              data-toc-link
-            >
-              {depth === 2 ? (
-                <span class="flex size-5 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-xs font-bold text-accent-strong">
-                  {sectionIndex}
-                </span>
-              ) : (
-                <span
-                  class="size-2 shrink-0 rounded-full bg-accent/35 transition-colors"
-                  data-toc-marker
-                  aria-hidden="true"
-                />
-              )}
-              <span class="min-w-0 overflow-hidden text-ellipsis whitespace-nowrap">{text}</span>
-            </a>
-          </li>
+        {items.map((item) => (
+          <TableOfContentsItem {...item} tracked />
         ))}
       </ol>
     </Card>
   </aside>
+)}
+
+{items.length > 0 && variant === "inline" && (
+  <details class="group border-b border-border wide:hidden">
+    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-bold text-text transition-colors hover:text-accent-strong focus-visible:-outline-offset-2 tablet:px-12 [&::-webkit-details-marker]:hidden">
+      {t(I18nKey.tableOfContents)}
+      <Icon class="text-muted transition-transform duration-200 group-open:rotate-90" name="chevron" size={16} />
+    </summary>
+    <nav aria-label={t(I18nKey.tableOfContents)}>
+      <ol class="flex flex-col gap-1 px-3 pb-4 tablet:px-10">
+        {items.map((item) => (
+          <TableOfContentsItem {...item} />
+        ))}
+      </ol>
+    </nav>
+  </details>
 )}
 
 <script>

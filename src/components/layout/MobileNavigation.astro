@@ -1,0 +1,47 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+import { getTranslator, I18nKey } from "@/i18n";
+import type { ComponentProps } from "astro/types";
+
+interface NavigationItem {
+  href: string;
+  label: string;
+  icon: ComponentProps<typeof Icon>["name"];
+  isActive: boolean;
+}
+
+interface Props {
+  items: readonly NavigationItem[];
+}
+
+const { items } = Astro.props;
+const t = getTranslator();
+const menuId = "mobile-navigation";
+---
+
+<button
+  class="grid size-10 flex-none cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong tablet:hidden"
+  type="button"
+  aria-label={t(I18nKey.navigationMenu)}
+  popovertarget={menuId}
+>
+  <Icon name="menu" size={18} />
+</button>
+
+<nav
+  class="absolute inset-auto top-16 right-4 m-0 w-44 rounded-panel border border-border bg-panel p-1 text-text"
+  id={menuId}
+  aria-label={t(I18nKey.primaryNavigation)}
+  popover
+>
+  {items.map(({ href, label, icon, isActive }) => (
+    <a
+      class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong focus-visible:bg-accent-soft focus-visible:text-accent-strong focus-visible:outline-hidden aria-[current=page]:bg-accent-soft aria-[current=page]:text-accent-strong"
+      href={href}
+      aria-current={isActive ? "page" : undefined}
+    >
+      <Icon name={icon} size={16} />
+      <span>{label}</span>
+    </a>
+  ))}
+</nav>

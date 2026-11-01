@@ -12,15 +12,15 @@ const t = getTranslator();
 >
   <div class="mx-auto w-layout-width max-w-page tablet:w-layout-width-tablet wide:w-layout-width-wide">
     <div class="mx-auto flex w-full max-w-reading wide:max-w-chrome wide:justify-center wide:gap-8">
-      <div class="hidden w-72 shrink-0 wide:block" aria-hidden="true"></div>
+      <div class="hidden w-sidebar shrink-0 wide:block" aria-hidden="true"></div>
       <div class="hidden w-full max-w-reading min-w-0 wide:block" aria-hidden="true"></div>
       <div
-        class="pointer-events-auto hidden w-72 shrink-0 flex-col gap-2 wide:flex"
+        class="pointer-events-auto ml-auto flex shrink-0 flex-col gap-2 wide:ml-0 wide:w-sidebar"
         role="group"
         aria-label={t(I18nKey.postQuickActions)}
       >
         <button
-          class="grid h-11 w-12 cursor-pointer place-items-center rounded-panel border border-border bg-panel text-accent-strong transition-colors hover:bg-accent hover:text-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus-ring"
+          class="grid h-11 w-12 cursor-pointer place-items-center rounded-panel border border-border bg-panel text-accent-strong transition-colors hover:bg-accent hover:text-surface"
           type="button"
           aria-label={t(I18nKey.backToTop)}
           data-back-to-top

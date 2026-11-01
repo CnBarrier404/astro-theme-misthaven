@@ -1,13 +1,16 @@
 ---
-import Icon from "@/components/ui/Icon.astro";
-import CommentSection from "@/components/content/CommentSection.astro";
-import PostEndMatter from "@/components/content/PostEndMatter.astro";
-import PostOutdatedWarning from "@/components/content/PostOutdatedWarning.astro";
-import Spoiler from "@/components/content/Spoiler.astro";
+import CommentSection from "@/components/comments/CommentSection.astro";
+import PostEndMatter from "@/components/post/PostEndMatter.astro";
+import PostFloatingActions from "@/components/post/PostFloatingActions.astro";
+import PostMeta from "@/components/post/PostMeta.astro";
+import PostOutdatedWarning from "@/components/post/PostOutdatedWarning.astro";
+import Spoiler from "@/components/post/Spoiler.astro";
+import TableOfContents from "@/components/post/TableOfContents.astro";
 import Card from "@/components/ui/Card.astro";
-import PostMeta from "@/components/ui/PostMeta.astro";
-import PostFloatingActions from "@/components/widget/PostFloatingActions.astro";
-import TableOfContents from "@/components/widget/TableOfContents.astro";
+import DraftBadge from "@/components/ui/DraftBadge.astro";
+import Icon from "@/components/ui/Icon.astro";
+import IconBadge from "@/components/ui/IconBadge.astro";
+import TextLink from "@/components/ui/TextLink.astro";
 import { postConfig } from "@/config/postConfig";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
@@ -45,13 +48,13 @@ const pageKey = getPostHref(post);
   <Spoiler />
 
   <div class="mx-auto w-full max-w-reading wide:flex wide:max-w-chrome wide:items-start wide:justify-center wide:gap-8">
-    <div class="hidden w-72 shrink-0 wide:block" aria-hidden="true"></div>
+    <div class="hidden w-sidebar shrink-0 wide:block" aria-hidden="true"></div>
 
     <div class="w-full max-w-reading min-w-0">
-      <a class="mb-4 ml-1 inline-flex items-center gap-2 text-sm font-bold text-accent-strong" href="/posts">
+      <TextLink class="mb-4 ml-1" href="/posts">
         <Icon class="rotate-180" name="arrow" size={16} />
         {t(I18nKey.backToPosts)}
-      </a>
+      </TextLink>
 
       <Card as="article" class="w-full overflow-hidden" data-reading-content>
         <header class="border-b border-border px-5 py-8 tablet:px-12 tablet:py-10">
@@ -59,7 +62,7 @@ const pageKey = getPostHref(post);
 
           <div class="mt-4 flex items-start gap-3 tablet:mt-5 tablet:gap-4">
             <span class="h-4 w-1 flex-none self-center rounded-sm bg-accent tablet:h-5" aria-hidden="true"></span>
-            <h1 class="m-0 text-4xl font-bold">{title}</h1>
+            <h1 class="m-0 text-3xl font-bold tablet:text-4xl">{title}</h1>
           </div>
 
           <div
@@ -67,38 +70,26 @@ const pageKey = getPostHref(post);
             aria-label={t(I18nKey.postInformation)}
           >
             <time class="inline-flex items-center gap-2" datetime={publishedAt.toISOString()}>
-              <span class="grid size-8 place-items-center rounded-md bg-accent-soft text-accent-strong">
-                <Icon name="calendar" size={16} />
-              </span>
+              <IconBadge icon="calendar" />
               {publishedLabel}
             </time>
             {updatedAt && (
               <time class="inline-flex items-center gap-2" datetime={updatedAt.toISOString()}>
-                <span class="grid size-8 place-items-center rounded-md bg-accent-soft text-accent-strong">
-                  <Icon name="clock" size={16} />
-                </span>
+                <IconBadge icon="clock" />
                 {t(I18nKey.postUpdatedAt, { date: formatPostDate(updatedAt) })}
               </time>
             )}
             <span class="inline-flex items-center gap-2">
-              <span class="grid size-8 place-items-center rounded-md bg-accent-soft text-accent-strong">
-                <Icon name="article" size={16} />
-              </span>
+              <IconBadge icon="article" />
               {category}
             </span>
             {tags.length > 0 && (
               <span class="inline-flex min-w-0 items-center gap-2">
-                <span class="grid size-8 flex-none place-items-center rounded-md bg-accent-soft font-bold text-accent-strong">
-                  #
-                </span>
+                <IconBadge class="font-bold">#</IconBadge>
                 <span class="text-text-soft">{tags.join(" / ")}</span>
               </span>
             )}
-            {draft && (
-              <span class="rounded-panel bg-draft-soft px-2 py-1 text-xs text-draft">
-                {t(I18nKey.postDraftPreview)}
-              </span>
-            )}
+            {draft && <DraftBadge>{t(I18nKey.postDraftPreview)}</DraftBadge>}
           </div>
 
           {postConfig.outdatedWarning.enabled && (
@@ -108,6 +99,8 @@ const pageKey = getPostHref(post);
             />
           )}
         </header>
+
+        <TableOfContents headings={headings} variant="inline" />
 
         <div class="prose-content px-5 py-8 tablet:px-12 tablet:py-10 tablet:pb-14">
           <slot />
@@ -119,6 +112,6 @@ const pageKey = getPostHref(post);
       <CommentSection pageKey={pageKey} pageTitle={title} />
     </div>
 
-    <TableOfContents headings={headings} />
+    <TableOfContents headings={headings} variant="sidebar" />
   </div>
 </BaseLayout>

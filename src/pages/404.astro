@@ -1,6 +1,7 @@
 ---
 import Card from "@/components/ui/Card.astro";
 import Icon from "@/components/ui/Icon.astro";
+import TextLink from "@/components/ui/TextLink.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getTranslator, I18nKey } from "@/i18n";
 
@@ -20,9 +21,9 @@ const t = getTranslator();
       {t(I18nKey.notFoundTitle)}
     </h1>
     <p class="mt-2 mb-0 text-muted">{t(I18nKey.notFoundDescription)}</p>
-    <a class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-accent-strong" href="/">
+    <TextLink class="mt-6" href="/">
       <Icon class="size-5" name="home" size={20} />
       {t(I18nKey.notFoundBackHome)}
-    </a>
+    </TextLink>
   </Card>
 </BaseLayout>

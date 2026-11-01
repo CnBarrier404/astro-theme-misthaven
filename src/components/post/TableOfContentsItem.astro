@@ -1,0 +1,38 @@
+---
+interface Props {
+  depth: number;
+  slug: string;
+  text: string;
+  sectionIndex?: number;
+  /** Tracked links drive the active-section indicator of the sidebar table of contents. */
+  tracked?: boolean;
+}
+
+const { depth, slug, text, sectionIndex, tracked = false } = Astro.props;
+---
+
+<li>
+  <a
+    class:list={[
+      "relative z-10 flex min-w-0 items-center rounded-panel py-2 text-sm leading-5 text-text-soft transition-colors hover:text-accent-strong",
+      depth === 2 && "gap-3 px-2",
+      depth === 3 && "gap-4 pr-2 pl-6",
+      depth === 4 && "gap-4 pr-2 pl-8",
+    ]}
+    href={`#${slug}`}
+    data-toc-link={tracked ? "" : undefined}
+  >
+    {depth === 2 ? (
+      <span class="flex size-5 shrink-0 items-center justify-center rounded-lg bg-accent/15 text-xs font-bold text-accent-strong">
+        {sectionIndex}
+      </span>
+    ) : (
+      <span
+        class="size-2 shrink-0 rounded-full bg-accent/35 transition-colors"
+        data-toc-marker={tracked ? "" : undefined}
+        aria-hidden="true"
+      />
+    )}
+    <span class="min-w-0 truncate">{text}</span>
+  </a>
+</li>

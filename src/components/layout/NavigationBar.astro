@@ -1,8 +1,9 @@
 ---
 import { Image } from "astro:assets";
+import MobileNavigation from "@/components/layout/MobileNavigation.astro";
+import ThemeToggle from "@/components/layout/ThemeToggle.astro";
 import Search from "@/components/search/Search.astro";
 import Icon from "@/components/ui/Icon.astro";
-import ThemeToggle from "@/components/ui/ThemeToggle.astro";
 import { navigationConfig } from "@/config/navigationConfig";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
@@ -17,10 +18,19 @@ const t = getTranslator();
 const homeHref = "/";
 const aboutHref = "/about";
 const normalizedCurrentPath = normalizeSitePath(currentPath);
+const navigationItems = navigationConfig.map((item) => {
+  const normalizedHref = normalizeSitePath(item.href);
+  const isActive =
+    normalizedHref === "/"
+      ? normalizedCurrentPath === normalizedHref
+      : normalizedCurrentPath === normalizedHref || normalizedCurrentPath.startsWith(`${normalizedHref}/`);
+
+  return { href: item.href, icon: item.icon, label: t(item.labelKey), isActive };
+});
 ---
 
 <header class="mx-auto flex h-18 w-full max-w-chrome items-center gap-2 px-4 tablet:gap-5 tablet:px-6 wide:px-18">
-  <a class="shrink-0 text-lg font-bold whitespace-nowrap text-accent-strong tablet:text-xl" href={homeHref}>
+  <a class="min-w-0 truncate text-lg font-bold text-accent-strong tablet:shrink-0 tablet:text-xl" href={homeHref}>
     {siteConfig.title}
   </a>
   <nav
@@ -28,42 +38,33 @@ const normalizedCurrentPath = normalizeSitePath(currentPath);
     data-navigation-content
     aria-label={t(I18nKey.primaryNavigation)}
   >
-    {navigationConfig.map((item) => {
-      const href = item.href;
-      const normalizedHref = href.replace(/\/$/, "") || "/";
-      const isActive =
-        item.href === "/"
-          ? normalizedCurrentPath === normalizedHref
-          : normalizedCurrentPath === normalizedHref || normalizedCurrentPath.startsWith(`${normalizedHref}/`);
-
-      return (
-        <a
-          class:list={[
-            "relative isolate inline-flex h-10 items-center gap-2 rounded-panel px-3 text-sm font-semibold whitespace-nowrap text-text-soft transition-colors",
-            !isActive && "hover:bg-accent-soft/50 hover:text-accent-strong",
-          ]}
-          href={href}
-          aria-current={isActive ? "page" : undefined}
-        >
-          {isActive && (
-            <span
-              class="absolute inset-0 -z-10 rounded-panel bg-accent-soft"
-              data-navigation-indicator
-              aria-hidden="true"
-            />
-          )}
-          <Icon name={item.icon} size={16} />
-          <span>{t(item.labelKey)}</span>
-        </a>
-      );
-    })}
+    {navigationItems.map(({ href, icon, label, isActive }) => (
+      <a
+        class:list={[
+          "relative isolate inline-flex h-10 items-center gap-2 rounded-panel px-3 text-sm font-semibold whitespace-nowrap text-text-soft transition-colors",
+          !isActive && "hover:bg-accent-soft/50 hover:text-accent-strong",
+        ]}
+        href={href}
+        aria-current={isActive ? "page" : undefined}
+      >
+        {isActive && (
+          <span
+            class="absolute inset-0 -z-10 rounded-panel bg-accent-soft"
+            data-navigation-indicator
+            aria-hidden="true"
+          />
+        )}
+        <Icon name={icon} size={16} />
+        <span>{label}</span>
+      </a>
+    ))}
   </nav>
   <div class="flex-1"></div>
   <Search />
   <ThemeToggle />
 
   <a
-    class="flex-none overflow-hidden rounded-full border border-border bg-surface"
+    class="hidden flex-none overflow-hidden rounded-full border border-border bg-surface tablet:block"
     href={aboutHref}
     aria-label={`${t(I18nKey.navigationAbout)} ${siteConfig.owner}`}
   >
@@ -76,4 +77,6 @@ const normalizedCurrentPath = normalizeSitePath(currentPath);
       priority
     />
   </a>
+
+  <MobileNavigation items={navigationItems} />
 </header>

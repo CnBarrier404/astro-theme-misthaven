@@ -1,0 +1,99 @@
+/*
+ * View Transitions for page navigation, the navigation indicator, and the theme reveal.
+ * These rules stay unlayered, so their reduced-motion overrides must stay unlayered as well.
+ */
+
+@view-transition {
+  navigation: auto;
+}
+
+[data-page-content] {
+  view-transition-name: page-content;
+}
+
+[data-navigation-indicator] {
+  view-transition-name: navigation-indicator;
+}
+
+[data-navigation-content] {
+  view-transition-name: navigation-content;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+}
+
+:root.theme-transition::view-transition-old(root) {
+  z-index: 1;
+}
+
+:root.theme-transition::view-transition-new(root) {
+  z-index: 2;
+  animation: theme-reveal 360ms ease-out both;
+}
+
+::view-transition-group(navigation-indicator) {
+  z-index: 1;
+  animation-duration: 200ms;
+  animation-timing-function: ease-out;
+}
+
+::view-transition-group(navigation-content) {
+  z-index: 2;
+  animation: none;
+}
+
+::view-transition-old(navigation-indicator),
+::view-transition-new(navigation-indicator),
+::view-transition-new(navigation-content) {
+  animation: none;
+}
+
+::view-transition-old(navigation-content) {
+  opacity: 0;
+  animation: none;
+}
+
+::view-transition-group(page-content) {
+  animation: none;
+}
+
+::view-transition-old(page-content) {
+  animation: page-fade-out 160ms ease-out both;
+}
+
+::view-transition-new(page-content) {
+  animation: page-fade-in 200ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(page-content),
+  ::view-transition-new(page-content),
+  ::view-transition-group(navigation-indicator),
+  :root.theme-transition::view-transition-new(root) {
+    animation: none;
+  }
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes theme-reveal {
+  from {
+    clip-path: circle(0 at var(--theme-transition-x) var(--theme-transition-y));
+  }
+
+  to {
+    clip-path: circle(var(--theme-transition-radius) at var(--theme-transition-x) var(--theme-transition-y));
+  }
+}

@@ -11,11 +11,18 @@ import { defineConfig } from "astro/config";
 import { expressiveCodeConfig } from "./src/config/expressiveCodeConfig.ts";
 import { siteConfig } from "./src/config/siteConfig.ts";
 import { getTranslation, I18nKey } from "./src/i18n/index.ts";
-import { calloutPlugin } from "./src/integrations/markdownCallout/index.ts";
+import { createCalloutPlugin } from "./src/integrations/markdownCallout/index.ts";
 import { markdownForAgents } from "./src/integrations/markdownForAgents/index.ts";
 
 const expressiveCodePlugins = [];
 const siteTranslation = getTranslation(siteConfig.lang);
+const calloutPlugin = createCalloutPlugin({
+  note: siteTranslation[I18nKey.calloutNote],
+  tip: siteTranslation[I18nKey.calloutTip],
+  important: siteTranslation[I18nKey.calloutImportant],
+  warning: siteTranslation[I18nKey.calloutWarning],
+  caution: siteTranslation[I18nKey.calloutCaution],
+});
 
 /** @type {import("satteri").MdastPluginDefinition} */
 const spoilerPlugin = {

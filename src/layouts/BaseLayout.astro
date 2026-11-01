@@ -1,7 +1,7 @@
 ---
 import Footer from "@/components/layout/Footer.astro";
 import NavigationBar from "@/components/layout/NavigationBar.astro";
-import CommentViewCounts from "@/components/content/CommentViewCounts.astro";
+import CommentViewCounts from "@/components/comments/CommentViewCounts.astro";
 import { fontConfig } from "@/config/fontConfig";
 import { siteConfig } from "@/config/siteConfig";
 import "@/styles/global.css";
@@ -144,18 +144,16 @@ const faviconLinks = siteConfig.favicon.filter(({ src }) => src.trim());
     <ClientRouter fallback="animate" />
   </head>
   <body>
-    <div class="min-h-screen">
-      <div class="flex min-h-screen flex-col">
-        <NavigationBar currentPath={Astro.url.pathname} />
+    <div class="flex min-h-screen flex-col">
+      <NavigationBar currentPath={Astro.url.pathname} />
 
-        <main
-          class="mx-auto mt-1 w-layout-width max-w-page flex-1 pb-12 tablet:mt-2 tablet:w-layout-width-tablet tablet:pb-16 wide:w-layout-width-wide"
-          data-page-content
-        >
-          <slot />
-        </main>
-        <Footer />
-      </div>
+      <main
+        class="mx-auto mt-1 w-layout-width max-w-page flex-1 pb-12 tablet:mt-2 tablet:w-layout-width-tablet tablet:pb-16 wide:w-layout-width-wide"
+        data-page-content
+      >
+        <slot />
+      </main>
+      <Footer />
     </div>
     <CommentViewCounts />
   </body>

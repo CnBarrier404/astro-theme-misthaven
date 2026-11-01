@@ -1,0 +1,354 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+import { getTranslator, I18nKey } from "@/i18n";
+
+interface Props {
+  /** Prefix for the input and result IDs; must be unique on the page. */
+  id: string;
+  /** `popover` floats results below a compact field; `sheet` stacks them full width for the mobile dialog. */
+  variant: "popover" | "sheet";
+  class?: string;
+}
+
+const { id, variant, class: className } = Astro.props;
+const t = getTranslator();
+const inputId = `${id}-input`;
+const resultsId = `${id}-results`;
+const isSheet = variant === "sheet";
+---
+
+<site-search
+  class:list={[isSheet ? "flex flex-wrap items-center gap-2" : "relative", className]}
+  data-search-prompt={t(I18nKey.searchPrompt)}
+  data-search-loading={t(I18nKey.searchLoading)}
+  data-search-count={t(I18nKey.searchCount, { count: "{count}" })}
+  data-search-empty={t(I18nKey.searchEmpty)}
+  data-search-error={t(I18nKey.searchError)}
+>
+  <div
+    class:list={[
+      "flex items-center gap-2 rounded-panel border border-border bg-surface/90 px-3 text-text-soft transition focus-within:border-focus-ring/40 focus-within:ring-3 focus-within:ring-focus-ring/10",
+      isSheet ? "h-11 min-w-0 flex-1" : "h-10 w-72 max-w-full",
+    ]}
+  >
+    <label class="sr-only" for={inputId}>
+      {t(I18nKey.searchLabel)}
+    </label>
+    <Icon name="search" size={16} />
+    <input
+      class="w-full min-w-0 border-0 bg-transparent p-0 text-sm placeholder:text-muted focus-visible:outline-hidden"
+      id={inputId}
+      type="text"
+      placeholder={t(I18nKey.searchPlaceholder)}
+      autocomplete="off"
+      enterkeyhint="search"
+      role="combobox"
+      aria-autocomplete="list"
+      aria-controls={resultsId}
+      aria-expanded="false"
+    />
+    <button
+      class="grid size-7 shrink-0 cursor-pointer place-items-center rounded-md text-accent-strong transition-colors hover:bg-accent-soft focus-visible:bg-accent-soft focus-visible:outline-hidden"
+      type="button"
+      aria-label={t(I18nKey.searchClear)}
+      data-search-clear
+      hidden
+    >
+      <Icon name="close" size={16} strokeWidth={2.4} />
+    </button>
+  </div>
+
+  <slot />
+
+  <div
+    class:list={[
+      "overflow-hidden rounded-panel border border-border bg-surface",
+      isSheet ? "w-full" : "absolute top-full left-1/2 z-50 mt-2 w-112 -translate-x-1/2",
+    ]}
+    data-search-panel
+    hidden
+  >
+    <p class="m-0 px-4 py-3 text-sm text-muted" data-search-status aria-live="polite">
+      {t(I18nKey.searchPrompt)}
+    </p>
+    <ul class="max-h-96 overflow-y-auto border-t border-border p-2" id={resultsId} role="listbox" hidden></ul>
+  </div>
+</site-search>
+
+<script>
+  interface SearchEntry {
+    title: string;
+    description: string;
+    category: string;
+    tags: string[];
+    publishedAt: string;
+    publishedLabel: string;
+    href: string;
+  }
+
+  interface SearchMatch {
+    entry: SearchEntry;
+    score: number;
+  }
+
+  const normalizeSearchText = (value: string) => value.normalize("NFKC").toLocaleLowerCase();
+
+  // Every search box on the page shares one request for the index.
+  let searchIndexPromise: Promise<SearchEntry[]> | null = null;
+
+  const getSearchIndex = () => {
+    searchIndexPromise ??= fetch("/search-index.json").then(async (response) => {
+      if (!response.ok) throw new Error(`Search index request failed with ${response.status}`);
+
+      const index: unknown = await response.json();
+      if (!Array.isArray(index)) throw new TypeError("Search index is not an array");
+      return index as SearchEntry[];
+    });
+
+    return searchIndexPromise;
+  };
+
+  const scoreEntry = (entry: SearchEntry, tokens: string[]): number | undefined => {
+    const fields = [
+      { values: [entry.title], weight: 12 },
+      { values: entry.tags, weight: 8 },
+      { values: [entry.category], weight: 6 },
+      { values: [entry.description], weight: 3 },
+    ];
+    let score = 0;
+
+    for (const token of tokens) {
+      let tokenScore = 0;
+
+      for (const field of fields) {
+        for (const value of field.values) {
+          const normalizedValue = normalizeSearchText(value);
+          if (!normalizedValue.includes(token)) continue;
+
+          const matchScore =
+            field.weight +
+            (normalizedValue === token ? field.weight : 0) +
+            (normalizedValue.startsWith(token) ? field.weight / 2 : 0);
+          tokenScore = Math.max(tokenScore, matchScore);
+        }
+      }
+
+      if (tokenScore === 0) return undefined;
+      score += tokenScore;
+    }
+
+    return score;
+  };
+
+  class SiteSearch extends HTMLElement {
+    private input: HTMLInputElement | null = null;
+    private panel: HTMLElement | null = null;
+    private status: HTMLElement | null = null;
+    private results: HTMLUListElement | null = null;
+    private clearButton: HTMLButtonElement | null = null;
+    private resultLinks: HTMLAnchorElement[] = [];
+    private activeResult = -1;
+    private queryVersion = 0;
+
+    private readonly handleDocumentPointerDown = (event: PointerEvent) => {
+      if (event.target instanceof Node && !this.contains(event.target)) this.closePanel();
+    };
+
+    connectedCallback() {
+      this.input = this.querySelector("input");
+      this.panel = this.querySelector("[data-search-panel]");
+      this.status = this.querySelector("[data-search-status]");
+      this.results = this.querySelector("[role='listbox']");
+      this.clearButton = this.querySelector("[data-search-clear]");
+
+      if (!this.input || !this.panel || !this.status || !this.results || !this.clearButton) return;
+
+      this.input.addEventListener("focus", this.handleFocus);
+      this.input.addEventListener("input", this.handleInput);
+      this.input.addEventListener("keydown", this.handleKeyDown);
+      this.clearButton.addEventListener("click", this.handleClear);
+      document.addEventListener("pointerdown", this.handleDocumentPointerDown);
+    }
+
+    disconnectedCallback() {
+      this.input?.removeEventListener("focus", this.handleFocus);
+      this.input?.removeEventListener("input", this.handleInput);
+      this.input?.removeEventListener("keydown", this.handleKeyDown);
+      this.clearButton?.removeEventListener("click", this.handleClear);
+      document.removeEventListener("pointerdown", this.handleDocumentPointerDown);
+    }
+
+    private readonly handleFocus = () => {
+      this.openPanel();
+      if (!this.input?.value.trim()) this.showStatus(this.dataset.searchPrompt ?? "");
+    };
+
+    private readonly handleInput = () => {
+      this.updateClearButton();
+      void this.updateResults();
+    };
+
+    private readonly handleClear = () => {
+      if (!this.input) return;
+      this.input.value = "";
+      this.queryVersion += 1;
+      this.updateClearButton();
+      this.openPanel();
+      this.showStatus(this.dataset.searchPrompt ?? "");
+      this.input.focus();
+    };
+
+    private readonly handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        this.closePanel();
+        this.input?.blur();
+        return;
+      }
+
+      if (this.resultLinks.length === 0) return;
+
+      if (event.key === "ArrowDown") {
+        event.preventDefault();
+        this.setActiveResult((this.activeResult + 1) % this.resultLinks.length);
+      } else if (event.key === "ArrowUp") {
+        event.preventDefault();
+        this.setActiveResult((this.activeResult - 1 + this.resultLinks.length) % this.resultLinks.length);
+      } else if (event.key === "Enter") {
+        event.preventDefault();
+        this.resultLinks[Math.max(this.activeResult, 0)].click();
+      }
+    };
+
+    private getResultId(index: number) {
+      return `${this.results?.id ?? "search-results"}-${index}`;
+    }
+
+    private openPanel() {
+      if (!this.panel || !this.input) return;
+      this.panel.hidden = false;
+      this.input.setAttribute("aria-expanded", "true");
+    }
+
+    private closePanel() {
+      if (!this.panel || !this.input) return;
+      this.panel.hidden = true;
+      this.input.setAttribute("aria-expanded", "false");
+      this.setActiveResult(-1);
+    }
+
+    private showStatus(message: string) {
+      if (!this.status || !this.results) return;
+      this.status.textContent = message;
+      this.status.hidden = false;
+      this.results.hidden = true;
+      this.results.replaceChildren();
+      this.resultLinks = [];
+      this.setActiveResult(-1);
+    }
+
+    private updateClearButton() {
+      if (this.clearButton) this.clearButton.hidden = !this.input?.value;
+    }
+
+    private async updateResults() {
+      const query = this.input?.value.trim() ?? "";
+      const version = ++this.queryVersion;
+      this.openPanel();
+
+      if (!query) {
+        this.showStatus(this.dataset.searchPrompt ?? "");
+        return;
+      }
+
+      this.showStatus(this.dataset.searchLoading ?? "");
+
+      try {
+        const index = await getSearchIndex();
+        if (version !== this.queryVersion) return;
+
+        const tokens = normalizeSearchText(query).split(/\s+/u).filter(Boolean);
+        const matches = index
+          .map((entry): SearchMatch | undefined => {
+            const score = scoreEntry(entry, tokens);
+            return score === undefined ? undefined : { entry, score };
+          })
+          .filter((match) => match !== undefined)
+          .sort(
+            (left, right) =>
+              right.score - left.score ||
+              Date.parse(right.entry.publishedAt) - Date.parse(left.entry.publishedAt) ||
+              left.entry.title.localeCompare(right.entry.title),
+          )
+          .slice(0, 8);
+
+        this.renderMatches(matches);
+      } catch (error) {
+        console.error(error);
+        if (version === this.queryVersion) this.showStatus(this.dataset.searchError ?? "");
+      }
+    }
+
+    private renderMatches(matches: SearchMatch[]) {
+      if (!this.status || !this.results) return;
+
+      if (matches.length === 0) {
+        this.showStatus(this.dataset.searchEmpty ?? "");
+        return;
+      }
+
+      this.status.textContent = (this.dataset.searchCount ?? "{count}").replace("{count}", String(matches.length));
+      this.status.hidden = false;
+      this.results.replaceChildren(...matches.map(({ entry }, index) => this.createResult(entry, index)));
+      this.results.hidden = false;
+      this.resultLinks = Array.from(this.results.querySelectorAll("a"));
+      this.setActiveResult(-1);
+    }
+
+    private createResult(entry: SearchEntry, index: number) {
+      const item = document.createElement("li");
+      item.id = this.getResultId(index);
+      item.setAttribute("role", "option");
+
+      const link = document.createElement("a");
+      link.className =
+        "block rounded-panel px-3 py-3 transition-colors hover:bg-accent-soft focus:bg-accent-soft focus:outline-hidden";
+      link.href = entry.href;
+
+      const title = document.createElement("span");
+      title.className = "block text-sm font-bold text-text";
+      title.textContent = entry.title;
+
+      const description = document.createElement("span");
+      description.className = "mt-1 line-clamp-2 block text-sm leading-6 text-text-soft";
+      description.textContent = entry.description;
+
+      const metadata = document.createElement("span");
+      metadata.className = "mt-2 flex items-center gap-2 text-xs text-muted";
+
+      const category = document.createElement("span");
+      category.className = "rounded-panel bg-accent-soft px-2 py-1 text-accent-strong";
+      category.textContent = entry.category;
+
+      const date = document.createElement("span");
+      date.textContent = entry.publishedLabel;
+
+      metadata.append(category, date);
+      link.append(title, description, metadata);
+      item.append(link);
+      return item;
+    }
+
+    private setActiveResult(index: number) {
+      this.activeResult = index;
+      this.resultLinks.forEach((link, resultIndex) => {
+        const isActive = resultIndex === index;
+        link.classList.toggle("bg-accent-soft", isActive);
+        link.parentElement?.setAttribute("aria-selected", String(isActive));
+      });
+      this.input?.setAttribute("aria-activedescendant", index >= 0 ? this.getResultId(index) : "");
+      if (index >= 0) this.resultLinks[index].scrollIntoView({ block: "nearest" });
+    }
+  }
+
+  if (!customElements.get("site-search")) customElements.define("site-search", SiteSearch);
+</script>

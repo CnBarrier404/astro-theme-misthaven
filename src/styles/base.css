@@ -1,0 +1,70 @@
+@layer base {
+  :root {
+    font-family: var(--font-family);
+    color: var(--color-text);
+    background: var(--color-page);
+    color-scheme: light;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    color: var(--color-selection-text);
+    background: var(--color-selection-bg);
+  }
+
+  html {
+    scroll-behavior: smooth;
+    scrollbar-gutter: stable;
+  }
+
+  /* Keep the page still behind modal dialogs such as the mobile search sheet. */
+  :root:has(dialog:modal) {
+    overflow: hidden;
+  }
+
+  body {
+    min-width: 20rem;
+    min-height: 100vh;
+    background: var(--color-page);
+  }
+
+  body,
+  button,
+  input {
+    font: inherit;
+  }
+
+  button,
+  input {
+    color: inherit;
+  }
+
+  button,
+  a {
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /*
+   * Shared keyboard focus ring for every interactive element.
+   * Items inside menus and listboxes may replace it with a background state plus `outline-hidden`.
+   */
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      scroll-behavior: auto !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

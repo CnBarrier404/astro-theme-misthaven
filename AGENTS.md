@@ -52,18 +52,62 @@ After completing work, run `npm run format` and `npm run check`.
 
 `src/components/`:
 
-| Directory  | Purpose                                                        |
-| :--------- | :------------------------------------------------------------- |
-| `content/` | Content presentation components such as cards, lists, and tags |
-| `layout/`  | Page-wide structure and site shell components                  |
-| `search/`  | Search interfaces and interactions                             |
-| `ui/`      | Reusable UI primitives and small composed display components   |
-| `widget/`  | Standalone page widgets, such as the table of contents         |
+Components are grouped by feature. Shared building blocks live in `ui/`; everything else lives with the page or
+feature that owns it.
+
+| Directory   | Purpose                                                                           |
+| :---------- | :-------------------------------------------------------------------------------- |
+| `ui/`       | Reusable primitives shared across features, such as `Card`, `Icon`, and `TagList` |
+| `layout/`   | Site shell: navigation bar, mobile navigation, theme toggle, and footer           |
+| `search/`   | Site search field, results, and the mobile search dialog                          |
+| `home/`     | Home page view and its sections                                                   |
+| `post/`     | Post list, post page sections, table of contents, and reading widgets             |
+| `about/`    | About page view and its cards                                                     |
+| `comments/` | Comment integration and view counts                                               |
+
+### Style Source Layout
+
+`src/styles/`:
+
+| File              | Purpose                                                                           |
+| :---------------- | :-------------------------------------------------------------------------------- |
+| `global.css`      | Stylesheet entry point; imports Tailwind and the files below, holds no rules      |
+| `theme.css`       | Design tokens in `@theme`, dark theme overrides, and the `dark` custom variant    |
+| `base.css`        | Element defaults, the shared `:focus-visible` ring, and reduced-motion defaults   |
+| `transitions.css` | View Transitions for navigation and theme changes; unlayered on purpose           |
+| `prose.css`       | Typography for rendered Markdown (`.prose-content`) and Expressive Code overrides |
+| `integrations/`   | Third-party widget styles, imported by the component that loads the widget        |
 
 ## Rules
 
 - When replacing an implementation, remove the old implementation. Do not retain backward-compatibility code or legacy entry points unless the user explicitly requests them.
-- Do not add tests unless the user explicitly requests them.scripts unless requested.
+- Do not add tests unless the user explicitly requests them.
+
+## UI and Styling
+
+- Style components with Tailwind utilities in their markup. Keep global CSS to tokens, element defaults, prose, View
+  Transitions, and third-party integrations. Do not add component classes or `@apply`.
+- Use only the semantic tokens in `src/styles/theme.css`; Tailwind's default palette is disabled. Add a token with a
+  dark value instead of a raw color, and add a token instead of repeating the same arbitrary value.
+- Use the `dark:` variant for theme-specific styles. It follows `data-theme`, not the OS preference.
+- Build layouts mobile first with only the `tablet` and `wide` variants. Every multi-column layout needs a single-column
+  base layout, and every feature hidden at one size needs an equivalent at the other sizes, such as the mobile menu,
+  mobile search dialog, and inline table of contents.
+- Standalone controls are at least `size-10` so they stay comfortable to tap.
+- Build new overlays on platform primitives: `<dialog>` with `showModal()` for modal surfaces and the Popover API for
+  light-dismiss menus.
+- Keep spacing on the 4px grid with integer utilities, and keep letter spacing at `0`.
+- Every interactive element needs a hover state and a visible keyboard focus state. Rely on the shared `:focus-visible`
+  ring; only items inside menus or listboxes and controls with an equivalent visible state may replace it, using
+  `focus-visible:outline-hidden` (never `outline-none`). Inside `overflow-hidden` containers, inset the ring with
+  `focus-visible:-outline-offset-2`.
+- Respect `prefers-reduced-motion` for every transition and animation.
+- Reuse the primitives in `src/components/ui/` (`Card`, `Icon`, `IconBadge`, `DraftBadge`, `TextLink`, `TagList`)
+  before writing new markup. When the same utility list appears twice, extract a component or render it from a data
+  array.
+- Class names built in scripts or data arrays must be complete static strings so Tailwind can detect them.
+- User-facing text, including `aria-label` values, comes from `src/i18n`.
+- In CSS files, use native nesting and logical properties such as `padding-inline-start` and `text-align: start`.
 
 ## URL Conventions
 

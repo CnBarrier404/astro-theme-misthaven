@@ -1,6 +1,7 @@
 ---
-import Icon from "@/components/ui/Icon.astro";
 import Card from "@/components/ui/Card.astro";
+import Icon from "@/components/ui/Icon.astro";
+import IconBadge from "@/components/ui/IconBadge.astro";
 import { postConfig } from "@/config/postConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import { getPostHref, type PostEntry } from "@/utils/posts";
@@ -25,9 +26,7 @@ const hasNavigation = Boolean(previousPost || nextPost);
             {t(I18nKey.postInformation)}
           </h2>
           <div class="mt-4 flex items-center gap-3">
-            <span class="grid size-8 flex-none place-items-center rounded-md bg-accent-soft text-accent-strong">
-              <Icon name="cc" size={18} />
-            </span>
+            <IconBadge icon="cc" iconSize={18} />
             <span class="min-w-0">
               <span class="block text-xs text-muted">{t(I18nKey.postLicense)}</span>
               <span class="block text-sm leading-6 text-text-soft">{license}</span>
@@ -41,7 +40,7 @@ const hasNavigation = Boolean(previousPost || nextPost);
       <Card as="nav" class="grid grid-cols-2 overflow-hidden" aria-label={t(I18nKey.postNavigation)}>
         {previousPost ? (
           <a
-            class="group flex min-h-24 min-w-0 items-center gap-3 border-r border-border px-4 py-4 transition-colors hover:bg-accent-soft tablet:gap-4 tablet:px-6"
+            class="flex min-h-24 min-w-0 items-center gap-3 border-r border-border px-4 py-4 transition-colors hover:bg-accent-soft focus-visible:-outline-offset-2 tablet:gap-4 tablet:px-6"
             href={getPostHref(previousPost)}
             aria-label={t(I18nKey.postPreviousLink, { title: previousPost.data.title })}
           >
@@ -56,7 +55,7 @@ const hasNavigation = Boolean(previousPost || nextPost);
         )}
         {nextPost ? (
           <a
-            class="group flex min-h-24 min-w-0 items-center justify-end gap-3 px-4 py-4 text-right transition-colors hover:bg-accent-soft tablet:gap-4 tablet:px-6"
+            class="flex min-h-24 min-w-0 items-center justify-end gap-3 px-4 py-4 text-right transition-colors hover:bg-accent-soft focus-visible:-outline-offset-2 tablet:gap-4 tablet:px-6"
             href={getPostHref(nextPost)}
             aria-label={t(I18nKey.postNextLink, { title: nextPost.data.title })}
           >

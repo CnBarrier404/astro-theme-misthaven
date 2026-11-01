@@ -15,7 +15,7 @@ if (!page) {
 
 const { Content } = await render(page);
 
-const title = page.data.title ?? "隐私政策";
+const title = page.data.title ?? t(I18nKey.footerPrivacyPolicy);
 const description = page.data.description ?? siteConfig.description.join(" ");
 const updatedAt = page.data.updatedAt;
 ---

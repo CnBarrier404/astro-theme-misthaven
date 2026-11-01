@@ -4,11 +4,37 @@ import { getTranslator, I18nKey } from "@/i18n";
 
 const t = getTranslator();
 const menuId = "theme-preference-menu";
+
+// `visibleClass` must stay a complete static string so Tailwind can detect it.
+// The trigger icon follows the root attribute that BaseLayout sets before the first paint.
+const themeOptions = [
+  {
+    value: "system",
+    icon: "system",
+    triggerIconSize: 17,
+    visibleClass: "in-data-[theme-preference=system]:inline-flex",
+    label: t(I18nKey.themeSystem),
+  },
+  {
+    value: "light",
+    icon: "sun",
+    triggerIconSize: 18,
+    visibleClass: "in-data-[theme-preference=light]:inline-flex",
+    label: t(I18nKey.themeLight),
+  },
+  {
+    value: "dark",
+    icon: "moon",
+    triggerIconSize: 17,
+    visibleClass: "in-data-[theme-preference=dark]:inline-flex",
+    label: t(I18nKey.themeDark),
+  },
+] as const;
 ---
 
 <theme-toggle class="relative flex-none" data-theme-label={t(I18nKey.themeLabel)}>
   <button
-    class="grid size-10 cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong focus-visible:border-focus-ring focus-visible:text-accent-strong focus-visible:outline-none"
+    class="grid size-10 cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong focus-visible:border-focus-ring focus-visible:text-accent-strong focus-visible:outline-hidden"
     type="button"
     aria-label={`${t(I18nKey.themeLabel)}: ${t(I18nKey.themeSystem)}`}
     aria-controls={menuId}
@@ -16,15 +42,11 @@ const menuId = "theme-preference-menu";
     aria-haspopup="true"
     data-theme-trigger
   >
-    <span class="items-center justify-center" data-theme-trigger-icon="system">
-      <Icon name="system" size={17} />
-    </span>
-    <span class="items-center justify-center" data-theme-trigger-icon="light">
-      <Icon name="sun" size={18} />
-    </span>
-    <span class="items-center justify-center" data-theme-trigger-icon="dark">
-      <Icon name="moon" size={17} />
-    </span>
+    {themeOptions.map(({ value, icon, triggerIconSize, visibleClass }) => (
+      <span class:list={["hidden items-center justify-center", visibleClass]} data-theme-trigger-icon={value}>
+        <Icon name={icon} size={triggerIconSize} />
+      </span>
+    ))}
   </button>
 
   <div
@@ -35,36 +57,18 @@ const menuId = "theme-preference-menu";
     data-theme-menu
     hidden
   >
-    <button
-      class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong focus-visible:bg-accent-soft focus-visible:text-accent-strong focus-visible:outline-none aria-pressed:bg-accent-soft aria-pressed:text-accent-strong"
-      type="button"
-      aria-pressed="true"
-      data-theme-option="system"
-      data-theme-option-label={t(I18nKey.themeSystem)}
-    >
-      <Icon name="system" size={16} />
-      <span>{t(I18nKey.themeSystem)}</span>
-    </button>
-    <button
-      class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong focus-visible:bg-accent-soft focus-visible:text-accent-strong focus-visible:outline-none aria-pressed:bg-accent-soft aria-pressed:text-accent-strong"
-      type="button"
-      aria-pressed="false"
-      data-theme-option="light"
-      data-theme-option-label={t(I18nKey.themeLight)}
-    >
-      <Icon name="sun" size={16} />
-      <span>{t(I18nKey.themeLight)}</span>
-    </button>
-    <button
-      class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong focus-visible:bg-accent-soft focus-visible:text-accent-strong focus-visible:outline-none aria-pressed:bg-accent-soft aria-pressed:text-accent-strong"
-      type="button"
-      aria-pressed="false"
-      data-theme-option="dark"
-      data-theme-option-label={t(I18nKey.themeDark)}
-    >
-      <Icon name="moon" size={16} />
-      <span>{t(I18nKey.themeDark)}</span>
-    </button>
+    {themeOptions.map(({ value, icon, label }) => (
+      <button
+        class="flex w-full cursor-pointer items-center gap-3 rounded-lg px-3 py-2 text-left text-sm font-semibold whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong focus-visible:bg-accent-soft focus-visible:text-accent-strong focus-visible:outline-hidden aria-pressed:bg-accent-soft aria-pressed:text-accent-strong"
+        type="button"
+        aria-pressed={value === "system" ? "true" : "false"}
+        data-theme-option={value}
+        data-theme-option-label={label}
+      >
+        <Icon name={icon} size={16} />
+        <span>{label}</span>
+      </button>
+    ))}
   </div>
 </theme-toggle>
 

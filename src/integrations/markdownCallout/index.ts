@@ -5,17 +5,12 @@ interface HastVisitorContext {
   textContent(node: Readonly<Element>): string;
 }
 
-type CalloutType = "note" | "tip" | "important" | "warning" | "caution";
+export type CalloutType = "note" | "tip" | "important" | "warning" | "caution";
+
+/** Titles shown when a callout marker has no custom title, such as `> [!NOTE]`. */
+export type CalloutTitles = Record<CalloutType, string>;
 
 const calloutPattern = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:[ \t]+)?/i;
-
-const defaultTitles: Record<CalloutType, string> = {
-  note: "提示",
-  tip: "建议",
-  important: "重要",
-  warning: "警告",
-  caution: "注意",
-};
 
 const calloutIconPaths: Record<CalloutType, ElementContent[]> = {
   note: [
@@ -154,7 +149,7 @@ function splitParagraph(paragraph: Readonly<Element>, markerLength: number, cont
   };
 }
 
-function getCalloutData(node: Readonly<Element>, context: HastVisitorContext) {
+function getCalloutData(node: Readonly<Element>, context: HastVisitorContext, titles: CalloutTitles) {
   const firstParagraphData = getFirstParagraph(node);
   if (!firstParagraphData) return;
 
@@ -172,7 +167,7 @@ function getCalloutData(node: Readonly<Element>, context: HastVisitorContext) {
   return {
     index,
     type,
-    title: split.title || defaultTitles[type],
+    title: split.title || titles[type],
     titleChildren: split.titleChildren,
     bodyParagraph: split.bodyParagraph,
   };
@@ -188,12 +183,12 @@ function getClassNames(node: Readonly<Element>) {
   return typeof className === "string" ? [className] : [];
 }
 
-export const calloutPlugin = {
+export const createCalloutPlugin = (titles: CalloutTitles) => ({
   name: "callout-icons",
   element: {
     filter: ["blockquote"],
     visit(node: Readonly<Element>, context: HastVisitorContext) {
-      const callout = getCalloutData(node, context);
+      const callout = getCalloutData(node, context, titles);
       if (!callout) return;
 
       const classNames = getClassNames(node);
@@ -223,4 +218,4 @@ export const calloutPlugin = {
       context.setProperty(node, "data-callout", callout.type);
     },
   },
-};
+});

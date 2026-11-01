@@ -1,4 +1,5 @@
 import { postConfig } from "@/config/postConfig";
+import { siteConfig } from "@/config/siteConfig";
 import { i18n, I18nKey } from "@/i18n";
 import { getCollection, type CollectionEntry } from "astro:content";
 
@@ -16,6 +17,25 @@ export async function getVisiblePosts() {
 export function getPostHref(post: PostEntry) {
   const encodedId = post.id.split("/").map(encodeURIComponent).join("/");
   return `/posts/${encodedId}`;
+}
+
+export function getTagHref(tag: string) {
+  return `/tags/${encodeURIComponent(tag)}`;
+}
+
+/** Every tag with its post count, most used first and then alphabetically in the site language. */
+export function getTagCounts(posts: readonly PostEntry[]) {
+  const counts = new Map<string, number>();
+
+  for (const post of posts) {
+    for (const tag of new Set(post.data.tags)) {
+      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    }
+  }
+
+  return [...counts.entries()]
+    .map(([name, count]) => ({ name, count }))
+    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, siteConfig.lang));
 }
 
 export function getAdjacentPosts(posts: readonly PostEntry[], post: PostEntry) {
@@ -52,6 +72,11 @@ export function groupPostsByYear(posts: readonly PostEntry[]) {
   }
 
   return groups;
+}
+
+/** "3 posts" / "1 post" in the site language. */
+export function formatPostCount(count: number) {
+  return i18n(count === 1 ? I18nKey.postCountOne : I18nKey.postCount, { count });
 }
 
 export function getPostMetrics(post: PostEntry) {

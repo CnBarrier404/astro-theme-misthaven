@@ -12,19 +12,14 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getTranslator, I18nKey } from "@/i18n";
 import type { CategoryCount, SiteStat } from "@/types/home";
 import { resolveSiteAsset } from "@/utils/assets";
-import { getVisiblePosts } from "@/utils/posts";
+import { getTagCounts, getVisiblePosts } from "@/utils/posts";
 
 const t = getTranslator();
 const posts = await getVisiblePosts();
 const categoryCounts = new Map<string, number>();
-const tagCounts = new Map<string, number>();
 
 for (const post of posts) {
   categoryCounts.set(post.data.category, (categoryCounts.get(post.data.category) ?? 0) + 1);
-
-  for (const tag of new Set(post.data.tags)) {
-    tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
-  }
 }
 
 function sortByCount(counts: Map<string, number>) {
@@ -33,16 +28,16 @@ function sortByCount(counts: Map<string, number>) {
   });
 }
 
-const popularTags = sortByCount(tagCounts)
+const popularTags = getTagCounts(posts)
   .slice(0, 6)
-  .map(([tag]) => tag);
+  .map(({ name }) => name);
 const categories = sortByCount(categoryCounts)
   .slice(0, 6)
   .map(([name, count]) => ({ name, count })) satisfies CategoryCount[];
 const stats = [
   { value: String(posts.length), icon: "article", label: t(I18nKey.statsPosts) },
   { value: String(categoryCounts.size), icon: "folder", label: t(I18nKey.statsCategories) },
-  { value: String(tagCounts.size), icon: "tag", label: t(I18nKey.statsTags) },
+  { value: String(getTagCounts(posts).length), icon: "tag", label: t(I18nKey.statsTags) },
 ] satisfies readonly SiteStat[];
 const postsHref = "/posts";
 const heroImageLight = resolveSiteAsset(siteConfig.heroImageLight);

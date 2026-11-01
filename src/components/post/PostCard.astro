@@ -48,5 +48,5 @@ const href = getPostHref(post);
   </div>
 
   <p class="m-0 line-clamp-2 text-sm leading-6 text-text-soft">{description}</p>
-  {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} />}
+  {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} linked />}
 </article>

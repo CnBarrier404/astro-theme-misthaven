@@ -1,0 +1,20 @@
+---
+import TagPage from "@/components/tags/TagPage.astro";
+import { getTagCounts, getVisiblePosts } from "@/utils/posts";
+import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
+
+export const getStaticPaths = (async () => {
+  const posts = await getVisiblePosts();
+
+  return getTagCounts(posts).map(({ name }) => ({
+    params: { tag: name },
+    props: { tag: name, posts: posts.filter((post) => post.data.tags.includes(name)) },
+  }));
+}) satisfies GetStaticPaths;
+
+type Props = InferGetStaticPropsType<typeof getStaticPaths>;
+
+const { tag, posts } = Astro.props as Props;
+---
+
+<TagPage tag={tag} posts={posts} />

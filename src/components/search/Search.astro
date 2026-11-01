@@ -73,6 +73,30 @@ const dialogId = "mobile-search-dialog";
     { passive: true },
   );
 
+  // Elements marked with `data-search-query`, such as home page categories, run a search for their text: in the header
+  // field when it is visible, otherwise in the mobile search dialog.
+  document.addEventListener("click", (event) => {
+    const trigger = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-search-query]") : null;
+    const query = trigger?.dataset.searchQuery;
+    if (!query) return;
+
+    const headerInput = document.querySelector<HTMLInputElement>("#site-search-input");
+    const headerSearch = headerInput?.closest<HTMLElement>("site-search");
+    let input = headerSearch && !isHidden(headerSearch) ? headerInput : null;
+
+    if (!input) {
+      const dialog = document.querySelector<HTMLDialogElement>("[data-search-dialog]");
+      if (!dialog) return;
+      if (!dialog.open) dialog.showModal();
+      input = dialog.querySelector("input");
+    }
+
+    if (!input) return;
+    input.value = query;
+    input.focus();
+    input.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+
   setupSearchDialogs();
   document.addEventListener("astro:page-load", setupSearchDialogs);
 </script>

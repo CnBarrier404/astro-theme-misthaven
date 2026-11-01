@@ -69,7 +69,7 @@ const pageKey = getPostHref(post);
 
           {(tags.length > 0 || draft) && (
             <div class="mt-4 flex flex-wrap items-center gap-2">
-              {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} />}
+              {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} linked />}
               {draft && <DraftBadge>{t(I18nKey.postDraftPreview)}</DraftBadge>}
             </div>
           )}

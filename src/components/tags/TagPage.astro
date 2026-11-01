@@ -1,0 +1,31 @@
+---
+import PostList from "@/components/post/PostList.astro";
+import PageHeader from "@/components/ui/PageHeader.astro";
+import TextLink from "@/components/ui/TextLink.astro";
+import { siteConfig } from "@/config/siteConfig";
+import { getTranslator, I18nKey } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import type { PostEntry } from "@/utils/posts";
+
+interface Props {
+  tag: string;
+  posts: readonly PostEntry[];
+}
+
+const { tag, posts } = Astro.props;
+const t = getTranslator();
+const pageDescription = t(I18nKey.tagPageDescription, { owner: siteConfig.owner, tag });
+---
+
+<BaseLayout title={`${tag} · ${t(I18nKey.navigationTags)} · ${siteConfig.title}`} description={pageDescription}>
+  <div class="mx-auto w-full max-w-post">
+    <PageHeader title={tag} intro={t(I18nKey.tagPageIntro)}>
+      <div class="flex flex-none items-center gap-4">
+        <p class="m-0 text-sm text-muted">{t(I18nKey.postsCount, { count: posts.length })}</p>
+        <TextLink href="/tags">{t(I18nKey.viewAllTags)}</TextLink>
+      </div>
+    </PageHeader>
+
+    <PostList class="mt-4 tablet:mt-5" posts={posts} ariaLabel={t(I18nKey.postsList)} />
+  </div>
+</BaseLayout>

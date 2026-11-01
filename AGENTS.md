@@ -63,6 +63,7 @@ feature that owns it.
 | `home/`     | Home page view and its sections                                                   |
 | `post/`     | Post list, post page sections, table of contents, and reading widgets             |
 | `archive/`  | Archive page view with posts grouped by year                                      |
+| `tags/`     | Tag index and per-tag post list pages                                             |
 | `about/`    | About page view and its cards                                                     |
 | `comments/` | Comment integration and view counts                                               |
 

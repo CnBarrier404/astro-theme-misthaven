@@ -7,7 +7,7 @@ import PageHeader from "@/components/ui/PageHeader.astro";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { formatPostDate, getPostHref, getVisiblePosts, groupPostsByYear } from "@/utils/posts";
+import { formatPostCount, formatPostDate, getPostHref, getVisiblePosts, groupPostsByYear } from "@/utils/posts";
 
 const posts = await getVisiblePosts();
 const years = groupPostsByYear(posts);
@@ -31,11 +31,7 @@ const pageDescription = t(I18nKey.archivePageDescription, { owner: siteConfig.ow
               <h2 class="m-0 text-2xl font-semibold tabular-nums" id={`archive-year-${year}`}>
                 {year}
               </h2>
-              <span class="text-xs text-muted">
-                {t(yearPosts.length === 1 ? I18nKey.archiveYearPostCountOne : I18nKey.archiveYearPostCount, {
-                  count: yearPosts.length,
-                })}
-              </span>
+              <span class="text-xs text-muted">{formatPostCount(yearPosts.length)}</span>
             </div>
 
             <ol class="mt-4 mb-0 ms-1 list-none border-s border-border-strong p-0">

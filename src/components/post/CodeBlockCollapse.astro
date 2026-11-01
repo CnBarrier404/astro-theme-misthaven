@@ -1,0 +1,59 @@
+<div class="sr-only" data-code-collapse-announcer aria-live="polite" aria-atomic="true"></div>
+
+<script>
+  const toggleSelector = ".ec-collapse__toggle, .ec-collapse__header-toggle";
+  let announcementTimeout: ReturnType<typeof setTimeout>;
+
+  function measurePreviewHeights() {
+    document.querySelectorAll<HTMLElement>(".ec-collapse").forEach((frame) => {
+      const code = frame.querySelector("code");
+      const pre = frame.querySelector("pre");
+      const figure = frame.querySelector<HTMLElement>(".ec-collapse__content > :first-child");
+      if (!code || !pre || !figure) return;
+
+      const lineHeight = Number.parseFloat(getComputedStyle(code).lineHeight) || 21.6;
+      const preStyle = getComputedStyle(pre);
+      const padding = Number.parseFloat(preStyle.paddingTop) + Number.parseFloat(preStyle.paddingBottom);
+      const previewLines = Number.parseInt(frame.dataset.collapsePreviewLines || "8", 10);
+      const height = Math.min(previewLines * lineHeight + padding, figure.getBoundingClientRect().height);
+      frame.style.setProperty("--ec-collapse-preview-height", `${height}px`);
+    });
+  }
+
+  // The document survives ClientRouter body swaps, so new buttons work without rebinding.
+  document.addEventListener("click", (event) => {
+    const button = event.target instanceof Element ? event.target.closest(toggleSelector) : null;
+    if (!(button instanceof HTMLButtonElement)) return;
+    const frame = button.closest<HTMLElement>(".ec-collapse");
+    if (!frame) return;
+
+    event.preventDefault();
+    const expanded = frame.classList.contains("ec-collapse--collapsed");
+    frame.classList.add("ec-collapse--animated");
+    frame.classList.toggle("ec-collapse--collapsed", !expanded);
+    frame.classList.toggle("ec-collapse--expanded", expanded);
+    frame.querySelectorAll(toggleSelector).forEach((toggle) => {
+      toggle.setAttribute("aria-expanded", String(expanded));
+    });
+
+    if (!expanded && frame.getBoundingClientRect().top < 0) {
+      frame.scrollIntoView({
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+        block: "start",
+      });
+    }
+
+    const announcer = document.querySelector<HTMLElement>("[data-code-collapse-announcer]");
+    if (announcer) {
+      clearTimeout(announcementTimeout);
+      announcer.textContent =
+        (expanded ? frame.dataset.expandedAnnouncement : frame.dataset.collapsedAnnouncement) ?? "";
+      announcementTimeout = setTimeout(() => {
+        announcer.textContent = "";
+      }, 1000);
+    }
+  });
+
+  measurePreviewHeights();
+  document.addEventListener("astro:page-load", measurePreviewHeights);
+</script>

@@ -1,5 +1,6 @@
 ---
 import CommentSection from "@/components/comments/CommentSection.astro";
+import CodeBlockCollapse from "@/components/post/CodeBlockCollapse.astro";
 import PostEndMatter from "@/components/post/PostEndMatter.astro";
 import PostFloatingActions from "@/components/post/PostFloatingActions.astro";
 import PostMeta from "@/components/post/PostMeta.astro";
@@ -11,6 +12,7 @@ import DraftBadge from "@/components/ui/DraftBadge.astro";
 import TagList from "@/components/ui/TagList.astro";
 import TextLink from "@/components/ui/TextLink.astro";
 import { postConfig } from "@/config/postConfig";
+import { expressiveCodeConfig } from "@/config/expressiveCodeConfig";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
@@ -44,6 +46,7 @@ const pageKey = getPostHref(post);
 >
   <PostFloatingActions />
   <Spoiler />
+  {expressiveCodeConfig.pluginCollapsible.enable && <CodeBlockCollapse />}
 
   <div class="mx-auto w-full max-w-reading wide:flex wide:max-w-chrome wide:items-start wide:justify-center wide:gap-8">
     <div class="hidden w-sidebar shrink-0 wide:block" aria-hidden="true"></div>

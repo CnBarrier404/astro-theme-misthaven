@@ -98,15 +98,17 @@ const tableWrapPlugin = {
 
 if (expressiveCodeConfig.pluginCollapsible.enable) {
   const { enable: _enable, ...options } = expressiveCodeConfig.pluginCollapsible;
-  expressiveCodePlugins.push(
-    pluginCollapsible({
+  expressiveCodePlugins.push({
+    ...pluginCollapsible({
       ...options,
       expandButtonText: siteTranslation[I18nKey.codeBlockExpand],
       collapseButtonText: siteTranslation[I18nKey.codeBlockCollapse],
       expandedAnnouncement: siteTranslation[I18nKey.codeBlockExpanded],
       collapsedAnnouncement: siteTranslation[I18nKey.codeBlockCollapsed],
     }),
-  );
+    // CodeBlockCollapse.astro handles navigation; the upstream runtime observes a replaced body.
+    jsModules: [],
+  });
 }
 
 if (expressiveCodeConfig.pluginLineNumbers.enable) {

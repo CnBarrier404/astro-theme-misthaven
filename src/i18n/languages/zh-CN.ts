@@ -77,7 +77,6 @@ export const zhCN = {
   [I18nKey.footerPoweredBy]: "Powered by",
   [I18nKey.pageLastUpdated]: "最后更新日期：{date}",
   [I18nKey.aboutContactLinks]: "联系方式",
-  [I18nKey.aboutIntroduction]: "关于我",
   [I18nKey.notFoundTitle]: "页面不存在",
   [I18nKey.notFoundDescription]: "你访问的页面不存在或已被移动，请检查网址后重试。",
   [I18nKey.notFoundBackHome]: "返回首页",

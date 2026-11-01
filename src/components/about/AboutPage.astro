@@ -1,12 +1,13 @@
 ---
 import { Image } from "astro:assets";
 import ContactLink from "@/components/about/ContactLink.astro";
-import TechStackCard from "@/components/about/TechStackCard.astro";
 import Card from "@/components/ui/Card.astro";
+import ThemedImage from "@/components/ui/ThemedImage.astro";
 import { aboutConfig } from "@/config/aboutConfig";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
+import { resolveSiteAsset } from "@/utils/assets";
 
 interface Props {
   title?: string;
@@ -15,77 +16,54 @@ interface Props {
 
 const { title = aboutConfig.pageTitle, description = aboutConfig.pageDescription } = Astro.props;
 const t = getTranslator();
+const bannerLight = resolveSiteAsset(siteConfig.heroImageLight);
+const bannerDark = resolveSiteAsset(siteConfig.heroImageDark);
 ---
 
 <BaseLayout title={`${title} · ${siteConfig.title}`} description={description}>
-  <div class="w-full">
-    <Card
-      as="header"
-      class="grid min-h-80 grid-cols-1 items-center gap-8 px-5 py-8 tablet:px-12 tablet:py-10 wide:grid-cols-4 wide:gap-12"
-    >
-      <div class="flex justify-center">
-        <div class="relative grid size-46 place-items-center bg-avatar-stage before:absolute before:inset-0 before:rounded-full before:border before:border-accent/20 after:absolute after:inset-3 after:rounded-full after:border after:border-dashed after:border-accent/20">
-          <div class="relative z-10 -rotate-2 rounded-avatar border border-border-strong bg-surface p-2 shadow-sm shadow-shadow">
-            <Image
-              class="size-38 rounded-avatar-image object-cover"
-              src={siteConfig.gravatarUrl}
-              width={152}
-              height={152}
-              alt=""
-              priority
-            />
-          </div>
-          <span
-            class="absolute right-2 bottom-3 z-20 size-6 rounded-full border-6 border-surface bg-success-light"
-            aria-hidden="true"
-          ></span>
-        </div>
+  <div class="mx-auto grid w-full max-w-reading gap-4 tablet:gap-6">
+    <Card as="header" class="overflow-hidden">
+      <div class="relative h-32 bg-profile-hero tablet:h-48">
+        <ThemedImage
+          class="absolute inset-0 size-full object-cover object-[center_60%]"
+          light={bannerLight}
+          dark={bannerDark}
+          priority
+        />
       </div>
 
-      <div class="text-center wide:col-span-3 wide:text-start">
-        <p class="m-0 text-xs font-bold text-accent-strong">{aboutConfig.hero.eyebrow}</p>
-        <h1 class="mt-4 mb-0 text-profile-title font-extrabold text-text">{aboutConfig.hero.title}</h1>
-        <div class="mx-auto mt-5 max-w-3xl text-base leading-8 text-text-soft wide:mx-0">
-          {aboutConfig.hero.description.map((paragraph, index) => (
-            <p class:list={["m-0", index > 0 && "mt-1"]}>{paragraph}</p>
-          ))}
+      <div class="px-5 pb-8 tablet:px-12 tablet:pb-10">
+        <Image
+          class="relative -mt-12 size-24 rounded-full border-4 border-surface bg-surface object-cover shadow-sm shadow-shadow tablet:-mt-14 tablet:size-28"
+          src={siteConfig.gravatarUrl}
+          width={224}
+          height={224}
+          alt=""
+          priority
+        />
+        <div class="mt-4 flex flex-col gap-5 tablet:flex-row tablet:items-end tablet:justify-between tablet:gap-8">
+          <div class="min-w-0">
+            <p class="m-0 text-xs font-bold text-accent-strong">ABOUT</p>
+            <h1 class="mt-1 mb-0 text-page-title font-bold">{siteConfig.owner}</h1>
+            <p class="mt-2 mb-0 max-w-xl text-sm leading-7 text-text-soft tablet:text-base">{aboutConfig.tagline}</p>
+          </div>
+          {aboutConfig.links.length > 0 && (
+            <ul class="m-0 flex flex-none list-none flex-wrap gap-3 p-0" aria-label={t(I18nKey.aboutContactLinks)}>
+              {aboutConfig.links.map((link) => (
+                <li>
+                  <ContactLink {...link} />
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
-        <ul
-          class="mt-6 mb-0 flex list-none flex-wrap items-center justify-center gap-3 p-0 wide:justify-start"
-          aria-label={t(I18nKey.aboutContactLinks)}
-        >
-          {aboutConfig.links.map((link) => (
-            <li>
-              <ContactLink {...link} />
-            </li>
-          ))}
-        </ul>
       </div>
     </Card>
 
-    <div class="mt-8 grid grid-cols-1 gap-10 tablet:grid-cols-2 tablet:gap-0">
-      <section
-        class="border-b border-border pb-10 tablet:border-r tablet:border-b-0 tablet:pr-10 tablet:pb-0"
-        aria-label={t(I18nKey.aboutIntroduction)}
-      >
-        <div class="prose-content">
-          <slot />
-        </div>
-      </section>
-
-      <section class="tablet:pl-10" aria-labelledby="tech-stack-title">
-        <header>
-          <h2 class="m-0 text-2xl font-bold text-text" id="tech-stack-title">
-            {aboutConfig.techStack.title}
-          </h2>
-          <p class="mt-2 mb-0 text-sm leading-6 text-muted">{aboutConfig.techStack.description}</p>
-        </header>
-        <div class="mt-6 grid grid-cols-2 gap-4">
-          {aboutConfig.techStack.items.map((technology) => (
-            <TechStackCard {...technology} />
-          ))}
-        </div>
-      </section>
-    </div>
+    <Card as="article">
+      <div class="prose-content px-5 py-8 tablet:px-12 tablet:py-10 tablet:pb-14">
+        <slot />
+      </div>
+    </Card>
   </div>
 </BaseLayout>

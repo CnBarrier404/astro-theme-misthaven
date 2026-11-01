@@ -1,5 +1,5 @@
 ---
-import { Image } from "astro:assets";
+import ThemedImage from "@/components/ui/ThemedImage.astro";
 
 interface Props {
   title: string;
@@ -10,26 +10,18 @@ interface Props {
 }
 
 const { title, subTitle, description, imageLightSrc, imageDarkSrc } = Astro.props;
-const resolvedLightImage = imageLightSrc ?? imageDarkSrc;
-const resolvedDarkImage = imageDarkSrc ?? imageLightSrc;
-const hasThemeVariants = Boolean(
-  resolvedLightImage && resolvedDarkImage && resolvedLightImage.src !== resolvedDarkImage.src,
-);
-const imageClass = "absolute inset-0 size-full object-cover object-[66%_center] tablet:object-[center_48%]";
 ---
 
 <section
   class="relative flex min-h-[30.625rem] items-end overflow-hidden rounded-panel border border-border/75 bg-hero after:absolute after:inset-0 after:bg-hero-mobile tablet:min-h-112 tablet:items-center tablet:after:bg-hero-wide"
   aria-labelledby="hero-title"
 >
-  {resolvedLightImage && (
-    <>
-      <Image class:list={[imageClass, hasThemeVariants && "dark:hidden"]} src={resolvedLightImage} alt="" priority />
-      {hasThemeVariants && resolvedDarkImage && (
-        <Image class:list={[imageClass, "hidden dark:block"]} src={resolvedDarkImage} alt="" priority />
-      )}
-    </>
-  )}
+  <ThemedImage
+    class="absolute inset-0 size-full object-cover object-[66%_center] tablet:object-[center_48%]"
+    light={imageLightSrc}
+    dark={imageDarkSrc}
+    priority
+  />
   <div class="relative z-10 w-full px-6 py-8 tablet:w-3/5 tablet:px-[6.8%] tablet:py-15">
     <h1 class="m-0 font-extrabold text-hero text-text tablet:text-hero-wide" id="hero-title">
       <span class="relative inline bg-title-highlight bg-[length:100%_0.4375rem] bg-[position:0_93%] bg-no-repeat tablet:inline-block tablet:bg-none tablet:after:absolute tablet:after:bottom-2 tablet:after:left-0 tablet:after:-z-10 tablet:after:h-2 tablet:after:w-full tablet:after:rounded-panel tablet:after:bg-coral/60">

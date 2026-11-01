@@ -35,7 +35,7 @@ npm run dev
 大多数设置都集中在 `src/config/` 中：
 
 - `siteConfig.ts`：站点名称、描述、域名、作者与分享设置
-- `aboutConfig.ts`：关于页面与联系方式
+- `aboutConfig.ts`：关于页面的简介与联系方式（正文位于 `src/content/pages/about.md`）
 - `navigationConfig.ts`：顶部导航
 - `footerConfig.ts`：页脚链接
 - `commentConfig.ts`：评论功能

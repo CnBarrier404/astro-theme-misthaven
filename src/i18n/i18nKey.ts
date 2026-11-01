@@ -74,7 +74,6 @@ export const I18nKey = {
   footerPoweredBy: "footer.poweredBy",
   pageLastUpdated: "page.lastUpdated",
   aboutContactLinks: "about.contactLinks",
-  aboutIntroduction: "about.introduction",
   notFoundTitle: "error.notFoundTitle",
   notFoundDescription: "error.notFoundDescription",
   notFoundBackHome: "error.notFoundBackHome",

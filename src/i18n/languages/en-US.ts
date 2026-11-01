@@ -77,7 +77,6 @@ export const enUS = {
   [I18nKey.footerPoweredBy]: "Powered by",
   [I18nKey.pageLastUpdated]: "Last updated: {date}",
   [I18nKey.aboutContactLinks]: "Contact links",
-  [I18nKey.aboutIntroduction]: "About me",
   [I18nKey.notFoundTitle]: "Page not found",
   [I18nKey.notFoundDescription]:
     "The page you are looking for does not exist or has been moved. Please check the URL and try again.",

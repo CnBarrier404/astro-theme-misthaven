@@ -1,0 +1,24 @@
+---
+import { Image } from "astro:assets";
+
+interface Props {
+  /** Image for the light theme; falls back to `dark` when omitted. */
+  light: ImageMetadata | null;
+  /** Image for the dark theme; falls back to `light` when omitted. */
+  dark: ImageMetadata | null;
+  class?: string;
+  priority?: boolean;
+}
+
+const { light, dark, class: className, priority = false } = Astro.props;
+const lightImage = light ?? dark;
+const darkImage = dark ?? light;
+const hasThemeVariants = Boolean(lightImage && darkImage && lightImage.src !== darkImage.src);
+---
+
+{lightImage && (
+  <Image class:list={[className, hasThemeVariants && "dark:hidden"]} src={lightImage} alt="" priority={priority} />
+)}
+{hasThemeVariants && darkImage && (
+  <Image class:list={[className, "hidden dark:block"]} src={darkImage} alt="" priority={priority} />
+)}

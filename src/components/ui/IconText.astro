@@ -1,0 +1,17 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+import type { ComponentProps } from "astro/types";
+
+interface Props {
+  icon: ComponentProps<typeof Icon>["name"];
+  class?: string;
+}
+
+const { icon, class: className } = Astro.props;
+---
+
+<!-- A small line icon in the text color followed by its text, for metadata such as dates and counts. -->
+<span class:list={["inline-flex items-center gap-2", className]}>
+  <Icon name={icon} size={15} />
+  <slot />
+</span>

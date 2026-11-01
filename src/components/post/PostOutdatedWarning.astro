@@ -18,7 +18,7 @@ const summaryTemplate = t(I18nKey.postOutdatedSummary, { date: formattedDate, da
 ---
 
 <aside
-  class="mt-6 flex items-center gap-2 rounded-panel bg-warning-soft px-6 py-6"
+  class="mt-6 flex items-start gap-3 rounded-lg bg-warning-soft px-4 py-3 tablet:px-5"
   data-post-outdated-warning
   data-last-updated-at={lastUpdatedAt.toISOString()}
   data-summary-template={summaryTemplate}
@@ -26,14 +26,12 @@ const summaryTemplate = t(I18nKey.postOutdatedSummary, { date: formattedDate, da
   hidden={elapsedDays < normalizedThresholdDays}
   role="note"
 >
-  <span class="grid size-9 flex-none place-items-center rounded-md bg-panel text-warning" aria-hidden="true">
-    <Icon name="history" size={18} />
-  </span>
-  <span class="min-w-0">
-    <span class="block text-base leading-5" data-post-outdated-summary>
+  <Icon class="mt-1 text-warning" name="history" size={16} />
+  <span class="min-w-0 text-sm leading-6">
+    <span class="block text-text" data-post-outdated-summary>
       {t(I18nKey.postOutdatedSummary, { date: formattedDate, days: elapsedDays })}
     </span>
-    <span class="block text-sm leading-4">{t(I18nKey.postOutdatedDescription)}</span>
+    <span class="block text-warning">{t(I18nKey.postOutdatedDescription)}</span>
   </span>
 </aside>
 

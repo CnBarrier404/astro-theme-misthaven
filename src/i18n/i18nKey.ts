@@ -55,7 +55,6 @@ export const I18nKey = {
   postDraftPreview: "post.draftPreview",
   postUpdatedAt: "post.updatedAt",
   postTagsForTitle: "post.tagsForTitle",
-  readPost: "post.read",
   postWordCount: "post.wordCount",
   postReadingTime: "post.readingTime",
   codeBlockExpand: "codeBlock.expand",

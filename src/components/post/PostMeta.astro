@@ -1,36 +1,50 @@
 ---
-import IconBadge from "@/components/ui/IconBadge.astro";
+import IconText from "@/components/ui/IconText.astro";
 import { isCommentViewCountEnabled } from "@/config/commentConfig";
 import { getTranslator, I18nKey } from "@/i18n";
+import { formatPostDate } from "@/utils/posts";
 
 interface Props {
+  publishedAt: Date;
+  updatedAt?: Date;
+  category: string;
   wordCount: string;
   readingTime: string;
   pageKey: string;
+  class?: string;
 }
 
-const { wordCount, readingTime, pageKey } = Astro.props;
+const { publishedAt, updatedAt, category, wordCount, readingTime, pageKey, class: className } = Astro.props;
 const t = getTranslator();
 ---
 
-<div class="flex flex-wrap gap-x-4 gap-y-2 text-sm text-muted">
-  <span class="inline-flex items-center gap-2">
-    <IconBadge icon="menu" size="sm" tone="neutral" />
-    {wordCount}
-  </span>
-  <span class="inline-flex items-center gap-2">
-    <IconBadge icon="clock" size="sm" tone="neutral" />
-    {readingTime}
-  </span>
+<div
+  class:list={["flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted", className]}
+  aria-label={t(I18nKey.postInformation)}
+>
+  <IconText icon="calendar">
+    <time class="tabular-nums" datetime={publishedAt.toISOString()}>
+      {formatPostDate(publishedAt)}
+    </time>
+  </IconText>
+  {updatedAt && (
+    <IconText icon="history">
+      <time class="tabular-nums" datetime={updatedAt.toISOString()}>
+        {t(I18nKey.postUpdatedAt, { date: formatPostDate(updatedAt) })}
+      </time>
+    </IconText>
+  )}
+  <IconText icon="folder">{category}</IconText>
+  <IconText icon="menu">{wordCount}</IconText>
+  <IconText icon="clock">{readingTime}</IconText>
   {isCommentViewCountEnabled && (
-    <span class="inline-flex items-center gap-2" data-page-key={pageKey} data-post-view data-view-placeholder="-">
-      <IconBadge icon="chart" size="sm" tone="neutral" />
-      <span>
+    <IconText icon="chart">
+      <span data-page-key={pageKey} data-post-view data-view-placeholder="-">
         {t(I18nKey.postViews)}{" "}
-        <span aria-live="polite" data-post-view-value>
+        <span class="tabular-nums" aria-live="polite" data-post-view-value>
           -
         </span>
       </span>
-    </span>
+    </IconText>
   )}
 </div>

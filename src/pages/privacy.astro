@@ -24,8 +24,7 @@ const updatedAt = page.data.updatedAt;
   <div class="mx-auto w-full max-w-reading">
     <Card as="article" class="w-full overflow-hidden">
       <header class="border-b border-border px-5 py-8 tablet:px-12 tablet:py-10">
-        <p class="m-0 text-xs font-bold text-accent-strong">PRIVACY</p>
-        <h1 class="mt-2 mb-0 text-page-title font-bold">{title}</h1>
+        <h1 class="m-0 text-page-title font-semibold">{title}</h1>
         {updatedAt && (
           <p class="mt-3 mb-0 text-sm text-muted">{t(I18nKey.pageLastUpdated, { date: formatPostDate(updatedAt) })}</p>
         )}

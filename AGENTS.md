@@ -103,7 +103,7 @@ feature that owns it.
   `focus-visible:outline-hidden` (never `outline-none`). Inside `overflow-hidden` containers, inset the ring with
   `focus-visible:-outline-offset-2`.
 - Respect `prefers-reduced-motion` for every transition and animation.
-- Reuse the primitives in `src/components/ui/` (`Card`, `Icon`, `IconBadge`, `DraftBadge`, `TextLink`, `TagList`)
+- Reuse the primitives in `src/components/ui/` (`Card`, `Icon`, `IconText`, `PageHeader`, `DraftBadge`, `TextLink`, `TagList`)
   before writing new markup. When the same utility list appears twice, extract a component or render it from a data
   array.
 - Class names built in scripts or data arrays must be complete static strings so Tailwind can detect them.

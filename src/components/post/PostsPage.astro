@@ -2,6 +2,7 @@
 import PostList from "@/components/post/PostList.astro";
 import Card from "@/components/ui/Card.astro";
 import Icon from "@/components/ui/Icon.astro";
+import PageHeader from "@/components/ui/PageHeader.astro";
 import PostSort from "@/components/post/PostSort.astro";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
@@ -15,23 +16,12 @@ const pageDescription = t(I18nKey.postsPageDescription, { owner: siteConfig.owne
 
 <BaseLayout title={`${t(I18nKey.navigationPosts)} · ${siteConfig.title}`} description={pageDescription}>
   <div class="mx-auto w-full max-w-post">
-    <Card
-      as="header"
-      class="flex flex-col items-start gap-4 px-5 py-7 tablet:flex-row tablet:items-end tablet:justify-between tablet:gap-6 tablet:px-9 tablet:py-8"
-    >
-      <div>
-        <p class="m-0 text-xs font-bold text-accent-strong">POSTS</p>
-        <h1 class="mt-1 mb-0 text-page-title font-bold">{t(I18nKey.navigationPosts)}</h1>
-        <p class="mt-2 mb-0 text-sm leading-6 text-muted">{t(I18nKey.postsPageIntro)}</p>
-      </div>
+    <PageHeader title={t(I18nKey.navigationPosts)} intro={t(I18nKey.postsPageIntro)}>
       <div class="flex flex-none items-center gap-4">
-        <p class="m-0 inline-flex items-center gap-2 text-sm text-muted">
-          <Icon name="article" size={18} />
-          {t(I18nKey.postsCount, { count: posts.length })}
-        </p>
+        <p class="m-0 text-sm text-muted">{t(I18nKey.postsCount, { count: posts.length })}</p>
         <PostSort targetId="posts-page-list" />
       </div>
-    </Card>
+    </PageHeader>
 
     {posts.length > 0 ? (
       <PostList class="mt-4 tablet:mt-5" id="posts-page-list" posts={posts} ariaLabel={t(I18nKey.postsList)} />

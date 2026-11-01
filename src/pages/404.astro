@@ -1,6 +1,5 @@
 ---
 import Card from "@/components/ui/Card.astro";
-import Icon from "@/components/ui/Icon.astro";
 import TextLink from "@/components/ui/TextLink.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getTranslator, I18nKey } from "@/i18n";
@@ -14,15 +13,14 @@ const t = getTranslator();
     class="mt-5 px-6 py-12 text-center tablet:mt-6 tablet:px-12 tablet:py-16"
     aria-labelledby="not-found-title"
   >
-    <p class="m-0 text-6xl font-bold text-accent-strong" aria-hidden="true">
+    <p class="m-0 text-6xl font-semibold text-accent-strong" aria-hidden="true">
       404
     </p>
-    <h1 class="mt-4 mb-0 text-xl font-bold" id="not-found-title">
+    <h1 class="mt-4 mb-0 text-xl font-semibold" id="not-found-title">
       {t(I18nKey.notFoundTitle)}
     </h1>
     <p class="mt-2 mb-0 text-muted">{t(I18nKey.notFoundDescription)}</p>
     <TextLink class="mt-6" href="/">
-      <Icon class="size-5" name="home" size={20} />
       {t(I18nKey.notFoundBackHome)}
     </TextLink>
   </Card>

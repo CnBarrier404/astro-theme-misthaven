@@ -1,0 +1,17 @@
+---
+interface Props {
+  title: string;
+  intro: string;
+}
+
+const { title, intro } = Astro.props;
+---
+
+<!-- Sits directly on the page background; the default slot holds a summary or controls on the trailing side. -->
+<header class="flex flex-col items-start gap-4 px-1 pt-4 pb-2 tablet:flex-row tablet:items-end tablet:justify-between tablet:gap-6 tablet:pt-8">
+  <div class="min-w-0">
+    <h1 class="m-0 text-page-title font-semibold">{title}</h1>
+    <p class="mt-2 mb-0 text-sm leading-6 text-muted">{intro}</p>
+  </div>
+  <slot />
+</header>

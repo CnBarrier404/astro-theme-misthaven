@@ -3,7 +3,6 @@ import PostList from "@/components/post/PostList.astro";
 import Card from "@/components/ui/Card.astro";
 import CategoryBreakdown from "@/components/home/CategoryBreakdown.astro";
 import Hero from "@/components/home/Hero.astro";
-import Icon from "@/components/ui/Icon.astro";
 import PopularTags from "@/components/home/PopularTags.astro";
 import PostSort from "@/components/post/PostSort.astro";
 import SiteStats from "@/components/home/SiteStats.astro";
@@ -13,7 +12,6 @@ import BaseLayout from "@/layouts/BaseLayout.astro";
 import { getTranslator, I18nKey } from "@/i18n";
 import type { CategoryCount, SiteStat } from "@/types/home";
 import { resolveSiteAsset } from "@/utils/assets";
-import { nudgeForwardClass } from "@/utils/motion";
 import { getVisiblePosts } from "@/utils/posts";
 
 const t = getTranslator();
@@ -67,18 +65,15 @@ const heroImageDark = resolveSiteAsset(siteConfig.heroImageDark);
     <div class="grid content-start gap-4 tablet:gap-6">
       {posts.length > 0 ? (
         <section aria-labelledby="recent-title">
-          <div class="mb-4 flex items-center justify-between gap-4">
-            <h2 class="m-0 text-lg font-bold" id="recent-title">
+          <div class="mb-4 flex h-10 items-center justify-between gap-4">
+            <h2 class="m-0 text-lg font-semibold" id="recent-title">
               {t(I18nKey.postsList)}
             </h2>
             <PostSort targetId="home-post-list" />
           </div>
           <PostList id="home-post-list" posts={posts} limit={5} ariaLabel={t(I18nKey.postsList)} />
           <div class="mt-5 flex justify-end">
-            <TextLink href={postsHref}>
-              {t(I18nKey.viewAllPosts)}
-              <Icon class:list={["size-5", nudgeForwardClass]} name="arrow" size={20} />
-            </TextLink>
+            <TextLink href={postsHref}>{t(I18nKey.viewAllPosts)}</TextLink>
           </div>
         </section>
       ) : (
@@ -88,8 +83,12 @@ const heroImageDark = resolveSiteAsset(siteConfig.heroImageDark);
       )}
     </div>
 
+    <!-- On wide screens, `wide:mt-14` skips the list heading row (h-10 + mb-4) so the first cards line up. -->
     <aside
-      class="grid grid-cols-1 content-start gap-4 tablet:gap-6 tablet:max-wide:grid-cols-2"
+      class:list={[
+        "grid grid-cols-1 content-start gap-4 tablet:gap-6 tablet:max-wide:grid-cols-2",
+        posts.length > 0 && "wide:mt-14",
+      ]}
       aria-label={t(I18nKey.siteInformation)}
     >
       <SiteStats stats={stats} title={t(I18nKey.siteOverview)} />

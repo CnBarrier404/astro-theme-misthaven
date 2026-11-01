@@ -25,7 +25,7 @@ const items = headings
 {items.length > 0 && variant === "sidebar" && (
   <aside class="sticky top-4 mt-9 hidden w-sidebar shrink-0 wide:block" aria-label={t(I18nKey.tableOfContents)}>
     <Card as="nav" class="p-4">
-      <h2 class="m-0 px-1 text-sm font-bold tablet:text-base">{t(I18nKey.tableOfContents)}</h2>
+      <h2 class="m-0 px-1 text-sm font-semibold tablet:text-base">{t(I18nKey.tableOfContents)}</h2>
 
       <ol class="relative mt-4 flex flex-col gap-1">
         <li
@@ -43,7 +43,7 @@ const items = headings
 
 {items.length > 0 && variant === "inline" && (
   <details class="group border-b border-border [interpolate-size:allow-keywords] details-content:h-0 details-content:overflow-clip details-content:transition-[height,content-visibility] details-content:transition-discrete details-content:duration-250 details-content:ease-soft open:details-content:h-auto wide:hidden">
-    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-bold text-text transition-colors hover:text-accent-strong focus-visible:-outline-offset-2 tablet:px-12 [&::-webkit-details-marker]:hidden">
+    <summary class="flex cursor-pointer list-none items-center justify-between gap-3 px-5 py-4 text-sm font-semibold text-text transition-colors hover:text-accent-strong focus-visible:-outline-offset-2 tablet:px-12 [&::-webkit-details-marker]:hidden">
       {t(I18nKey.tableOfContents)}
       <Icon
         class="text-muted transition-transform duration-250 ease-soft group-open:rotate-90"
@@ -116,7 +116,6 @@ const items = headings
       headings.forEach(({ link }, index) => {
         const isActive = activeIndexes.includes(index);
         link.classList.toggle("text-accent-strong", isActive);
-        link.querySelector("[data-toc-marker]")?.classList.toggle("bg-accent", isActive);
 
         if (index === activeIndexes[0]) link.setAttribute("aria-current", "location");
         else link.removeAttribute("aria-current");

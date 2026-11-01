@@ -43,8 +43,7 @@ const bannerDark = resolveSiteAsset(siteConfig.heroImageDark);
         />
         <div class="mt-4 flex flex-col gap-5 tablet:flex-row tablet:items-end tablet:justify-between tablet:gap-8">
           <div class="min-w-0">
-            <p class="m-0 text-xs font-bold text-accent-strong">ABOUT</p>
-            <h1 class="mt-1 mb-0 text-page-title font-bold">{siteConfig.owner}</h1>
+            <h1 class="m-0 text-page-title font-semibold">{siteConfig.owner}</h1>
             <p class="mt-2 mb-0 max-w-xl text-sm leading-7 text-text-soft tablet:text-base">{aboutConfig.tagline}</p>
           </div>
           {aboutConfig.links.length > 0 && (

@@ -1,7 +1,7 @@
 ---
 import Card from "@/components/ui/Card.astro";
 import Icon from "@/components/ui/Icon.astro";
-import IconBadge from "@/components/ui/IconBadge.astro";
+import IconText from "@/components/ui/IconText.astro";
 import { postConfig } from "@/config/postConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import { nudgeBackClass, nudgeForwardClass } from "@/utils/motion";
@@ -21,20 +21,9 @@ const hasNavigation = Boolean(previousPost || nextPost);
 {(license || hasNavigation) && (
   <div class="mt-4 space-y-4">
     {license && (
-      <Card as="section" aria-labelledby="post-information-title" class="overflow-hidden">
-        <div class="px-5 py-5 tablet:px-8 tablet:py-6">
-          <h2 id="post-information-title" class="m-0 text-base font-bold">
-            {t(I18nKey.postInformation)}
-          </h2>
-          <div class="mt-4 flex items-center gap-3">
-            <IconBadge icon="cc" iconSize={18} />
-            <span class="min-w-0">
-              <span class="block text-xs text-muted">{t(I18nKey.postLicense)}</span>
-              <span class="block text-sm leading-6 text-text-soft">{license}</span>
-            </span>
-          </div>
-        </div>
-      </Card>
+      <p class="m-0 px-1 text-sm leading-6 text-muted">
+        <IconText icon="cc">{t(I18nKey.postLicense, { license })}</IconText>
+      </p>
     )}
 
     {hasNavigation && (

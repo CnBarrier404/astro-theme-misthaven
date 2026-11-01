@@ -13,18 +13,19 @@
     & h2 {
       margin: 3rem 0 1rem;
       font-size: 1.5rem;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     & h3 {
       margin: 2.25rem 0 0.75rem;
       font-size: 1.25rem;
-      font-weight: 700;
+      font-weight: 600;
     }
 
     & :where(h4, h5, h6) {
       margin: 1.75rem 0 0.75rem;
       font-size: 1.125rem;
+      font-weight: 600;
     }
 
     & :where(h2, h3):first-child {

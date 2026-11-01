@@ -2,6 +2,8 @@
 import Card from "@/components/ui/Card.astro";
 import DraftBadge from "@/components/ui/DraftBadge.astro";
 import Icon from "@/components/ui/Icon.astro";
+import IconText from "@/components/ui/IconText.astro";
+import PageHeader from "@/components/ui/PageHeader.astro";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
@@ -15,27 +17,18 @@ const pageDescription = t(I18nKey.archivePageDescription, { owner: siteConfig.ow
 
 <BaseLayout title={`${t(I18nKey.navigationArchive)} · ${siteConfig.title}`} description={pageDescription}>
   <div class="mx-auto w-full max-w-post">
-    <Card
-      as="header"
-      class="flex flex-col items-start gap-4 px-5 py-7 tablet:flex-row tablet:items-end tablet:justify-between tablet:gap-6 tablet:px-9 tablet:py-8"
-    >
-      <div>
-        <p class="m-0 text-xs font-bold text-accent-strong">ARCHIVE</p>
-        <h1 class="mt-1 mb-0 text-page-title font-bold">{t(I18nKey.navigationArchive)}</h1>
-        <p class="mt-2 mb-0 text-sm leading-6 text-muted">{t(I18nKey.archivePageIntro)}</p>
-      </div>
-      <p class="m-0 inline-flex flex-none items-center gap-2 text-sm text-muted">
-        <Icon name="history" size={18} />
+    <PageHeader title={t(I18nKey.navigationArchive)} intro={t(I18nKey.archivePageIntro)}>
+      <p class="m-0 flex-none text-sm text-muted">
         {t(I18nKey.archiveSummary, { count: posts.length, years: years.length })}
       </p>
-    </Card>
+    </PageHeader>
 
     {years.length > 0 ? (
       <div class="mt-4 grid gap-4 tablet:mt-5 tablet:gap-5" aria-label={t(I18nKey.archiveTimeline)} role="region">
         {years.map(({ year, posts: yearPosts }) => (
           <Card as="section" class="px-5 py-6 tablet:px-9 tablet:py-8" aria-labelledby={`archive-year-${year}`}>
             <div class="flex items-baseline justify-between gap-3">
-              <h2 class="m-0 text-2xl font-bold text-accent-strong tabular-nums" id={`archive-year-${year}`}>
+              <h2 class="m-0 text-2xl font-semibold tabular-nums" id={`archive-year-${year}`}>
                 {year}
               </h2>
               <span class="text-xs text-muted">
@@ -51,7 +44,7 @@ const pageDescription = t(I18nKey.archivePageDescription, { owner: siteConfig.ow
 
                 return (
                   <li class="relative">
-                    <span class="absolute top-5 -start-1 size-2 rounded-full bg-accent" aria-hidden="true" />
+                    <span class="absolute top-5 -start-1 size-2 rounded-full bg-border-strong" aria-hidden="true" />
                     <a
                       class="group ms-4 flex min-h-10 flex-col gap-1 rounded-md px-3 py-3 transition-colors hover:bg-accent-soft/50 tablet:flex-row tablet:items-center tablet:gap-4"
                       href={getPostHref(post)}
@@ -63,15 +56,14 @@ const pageDescription = t(I18nKey.archivePageDescription, { owner: siteConfig.ow
                         {date.slice(5)}
                       </time>
                       <span class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
-                        <span class="leading-6 font-semibold wrap-anywhere transition-colors group-hover:text-accent-strong">
+                        <span class="leading-6 font-medium wrap-anywhere transition-colors group-hover:text-accent-strong">
                           {post.data.title}
                         </span>
                         {post.data.draft && <DraftBadge>{t(I18nKey.postDraft)}</DraftBadge>}
                       </span>
-                      <span class="inline-flex flex-none items-center gap-1 text-xs text-muted">
-                        <Icon name="folder" size={14} />
+                      <IconText class="flex-none text-sm text-muted" icon="folder">
                         {post.data.category}
-                      </span>
+                      </IconText>
                     </a>
                   </li>
                 );

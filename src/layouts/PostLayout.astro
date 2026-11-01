@@ -8,15 +8,13 @@ import Spoiler from "@/components/post/Spoiler.astro";
 import TableOfContents from "@/components/post/TableOfContents.astro";
 import Card from "@/components/ui/Card.astro";
 import DraftBadge from "@/components/ui/DraftBadge.astro";
-import Icon from "@/components/ui/Icon.astro";
-import IconBadge from "@/components/ui/IconBadge.astro";
+import TagList from "@/components/ui/TagList.astro";
 import TextLink from "@/components/ui/TextLink.astro";
 import { postConfig } from "@/config/postConfig";
 import { siteConfig } from "@/config/siteConfig";
 import { getTranslator, I18nKey } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { nudgeBackClass } from "@/utils/motion";
-import { formatPostDate, getPostHref, getPostMetrics, getPostOgImageHref } from "@/utils/posts";
+import { getPostHref, getPostMetrics, getPostOgImageHref } from "@/utils/posts";
 import type { MarkdownHeading } from "astro";
 import type { CollectionEntry } from "astro:content";
 
@@ -30,7 +28,6 @@ interface Props {
 const { post, headings, previousPost, nextPost } = Astro.props;
 const t = getTranslator();
 const { title, description, publishedAt, updatedAt, category, tags, draft } = post.data;
-const publishedLabel = formatPostDate(publishedAt);
 const { wordCount, readingTime } = getPostMetrics(post);
 const pageKey = getPostHref(post);
 ---
@@ -53,45 +50,29 @@ const pageKey = getPostHref(post);
 
     <div class="w-full max-w-reading min-w-0">
       <TextLink class="mb-4 ml-1" href="/posts">
-        <Icon class:list={["rotate-180", nudgeBackClass]} name="arrow" size={16} />
         {t(I18nKey.backToPosts)}
       </TextLink>
 
       <Card as="article" class="w-full overflow-hidden" data-reading-content>
         <header class="border-b border-border px-5 py-8 tablet:px-12 tablet:py-10">
-          <PostMeta wordCount={wordCount} readingTime={readingTime} pageKey={pageKey} />
+          <h1 class="m-0 text-3xl leading-tight font-semibold tablet:text-4xl">{title}</h1>
 
-          <div class="mt-4 flex items-start gap-3 tablet:mt-5 tablet:gap-4">
-            <span class="h-4 w-1 flex-none self-center rounded-sm bg-accent tablet:h-5" aria-hidden="true"></span>
-            <h1 class="m-0 text-3xl font-bold tablet:text-4xl">{title}</h1>
-          </div>
+          <PostMeta
+            class="mt-4"
+            publishedAt={publishedAt}
+            updatedAt={updatedAt}
+            category={category}
+            wordCount={wordCount}
+            readingTime={readingTime}
+            pageKey={pageKey}
+          />
 
-          <div
-            class="mt-5 flex flex-wrap items-center gap-x-4 gap-y-3 text-sm text-muted tablet:gap-x-5"
-            aria-label={t(I18nKey.postInformation)}
-          >
-            <time class="inline-flex items-center gap-2" datetime={publishedAt.toISOString()}>
-              <IconBadge icon="calendar" />
-              {publishedLabel}
-            </time>
-            {updatedAt && (
-              <time class="inline-flex items-center gap-2" datetime={updatedAt.toISOString()}>
-                <IconBadge icon="clock" />
-                {t(I18nKey.postUpdatedAt, { date: formatPostDate(updatedAt) })}
-              </time>
-            )}
-            <span class="inline-flex items-center gap-2">
-              <IconBadge icon="article" />
-              {category}
-            </span>
-            {tags.length > 0 && (
-              <span class="inline-flex min-w-0 items-center gap-2">
-                <IconBadge class="font-bold">#</IconBadge>
-                <span class="text-text-soft">{tags.join(" / ")}</span>
-              </span>
-            )}
-            {draft && <DraftBadge>{t(I18nKey.postDraftPreview)}</DraftBadge>}
-          </div>
+          {(tags.length > 0 || draft) && (
+            <div class="mt-4 flex flex-wrap items-center gap-2">
+              {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} />}
+              {draft && <DraftBadge>{t(I18nKey.postDraftPreview)}</DraftBadge>}
+            </div>
+          )}
 
           {postConfig.outdatedWarning.enabled && (
             <PostOutdatedWarning

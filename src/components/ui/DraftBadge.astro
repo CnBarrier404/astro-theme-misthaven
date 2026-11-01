@@ -6,6 +6,6 @@ interface Props {
 const { class: className } = Astro.props;
 ---
 
-<span class:list={["rounded-panel bg-draft-soft px-2 py-1 text-xs text-draft", className]}>
+<span class:list={["rounded-md bg-draft-soft px-2 text-xs leading-5 text-draft", className]}>
   <slot />
 </span>

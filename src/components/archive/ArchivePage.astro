@@ -1,0 +1,90 @@
+---
+import Card from "@/components/ui/Card.astro";
+import DraftBadge from "@/components/ui/DraftBadge.astro";
+import Icon from "@/components/ui/Icon.astro";
+import { siteConfig } from "@/config/siteConfig";
+import { getTranslator, I18nKey } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { formatPostDate, getPostHref, getVisiblePosts, groupPostsByYear } from "@/utils/posts";
+
+const posts = await getVisiblePosts();
+const years = groupPostsByYear(posts);
+const t = getTranslator();
+const pageDescription = t(I18nKey.archivePageDescription, { owner: siteConfig.owner });
+---
+
+<BaseLayout title={`${t(I18nKey.navigationArchive)} · ${siteConfig.title}`} description={pageDescription}>
+  <div class="mx-auto w-full max-w-post">
+    <Card
+      as="header"
+      class="flex flex-col items-start gap-4 px-5 py-7 tablet:flex-row tablet:items-end tablet:justify-between tablet:gap-6 tablet:px-9 tablet:py-8"
+    >
+      <div>
+        <p class="m-0 text-xs font-bold text-accent-strong">ARCHIVE</p>
+        <h1 class="mt-1 mb-0 text-page-title font-bold">{t(I18nKey.navigationArchive)}</h1>
+        <p class="mt-2 mb-0 text-sm leading-6 text-muted">{t(I18nKey.archivePageIntro)}</p>
+      </div>
+      <p class="m-0 inline-flex flex-none items-center gap-2 text-sm text-muted">
+        <Icon name="history" size={18} />
+        {t(I18nKey.archiveSummary, { count: posts.length, years: years.length })}
+      </p>
+    </Card>
+
+    {years.length > 0 ? (
+      <div class="mt-4 grid gap-4 tablet:mt-5 tablet:gap-5" aria-label={t(I18nKey.archiveTimeline)} role="region">
+        {years.map(({ year, posts: yearPosts }) => (
+          <Card as="section" class="px-5 py-6 tablet:px-9 tablet:py-8" aria-labelledby={`archive-year-${year}`}>
+            <div class="flex items-baseline justify-between gap-3">
+              <h2 class="m-0 text-2xl font-bold text-accent-strong tabular-nums" id={`archive-year-${year}`}>
+                {year}
+              </h2>
+              <span class="text-xs text-muted">
+                {t(yearPosts.length === 1 ? I18nKey.archiveYearPostCountOne : I18nKey.archiveYearPostCount, {
+                  count: yearPosts.length,
+                })}
+              </span>
+            </div>
+
+            <ol class="mt-4 mb-0 ms-1 list-none border-s border-border-strong p-0">
+              {yearPosts.map((post) => {
+                const date = formatPostDate(post.data.publishedAt);
+
+                return (
+                  <li class="relative">
+                    <span class="absolute top-5 -start-1 size-2 rounded-full bg-accent" aria-hidden="true" />
+                    <a
+                      class="group ms-4 flex min-h-10 flex-col gap-1 rounded-md px-3 py-3 transition-colors hover:bg-accent-soft/50 tablet:flex-row tablet:items-center tablet:gap-4"
+                      href={getPostHref(post)}
+                    >
+                      <time
+                        class="flex-none text-sm text-muted tabular-nums tablet:w-14"
+                        datetime={post.data.publishedAt.toISOString()}
+                      >
+                        {date.slice(5)}
+                      </time>
+                      <span class="flex min-w-0 flex-1 flex-wrap items-center gap-2">
+                        <span class="leading-6 font-semibold wrap-anywhere transition-colors group-hover:text-accent-strong">
+                          {post.data.title}
+                        </span>
+                        {post.data.draft && <DraftBadge>{t(I18nKey.postDraft)}</DraftBadge>}
+                      </span>
+                      <span class="inline-flex flex-none items-center gap-1 text-xs text-muted">
+                        <Icon name="folder" size={14} />
+                        {post.data.category}
+                      </span>
+                    </a>
+                  </li>
+                );
+              })}
+            </ol>
+          </Card>
+        ))}
+      </div>
+    ) : (
+      <Card class="mt-4 grid justify-items-center gap-3 px-6 py-12 text-center text-muted tablet:mt-5">
+        <Icon name="article" size={28} />
+        <p class="m-0">{t(I18nKey.noPublishedPosts)}</p>
+      </Card>
+    )}
+  </div>
+</BaseLayout>

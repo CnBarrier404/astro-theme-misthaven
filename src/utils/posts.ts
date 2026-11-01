@@ -36,6 +36,24 @@ export function formatPostDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
+/** Groups posts that are already sorted newest first by their UTC publish year. */
+export function groupPostsByYear(posts: readonly PostEntry[]) {
+  const groups: { year: string; posts: PostEntry[] }[] = [];
+
+  for (const post of posts) {
+    const year = formatPostDate(post.data.publishedAt).slice(0, 4);
+    const lastGroup = groups.at(-1);
+
+    if (lastGroup?.year === year) {
+      lastGroup.posts.push(post);
+    } else {
+      groups.push({ year, posts: [post] });
+    }
+  }
+
+  return groups;
+}
+
 export function getPostMetrics(post: PostEntry) {
   const body = post.body ?? "";
   const hanCharacterCount = body.match(/\p{Script=Han}/gu)?.length ?? 0;

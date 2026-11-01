@@ -33,6 +33,7 @@ export async function generateMarkdownForAgents(options) {
   }
 
   entries.push(await writeEntry(distDir, null, "/posts", "posts/index.md", renderPostsIndex(posts, siteConfig)));
+  entries.push(await writeEntry(distDir, null, "/archive", "archive/index.md", renderArchive(posts, siteConfig)));
   entries.push(await writeEntry(distDir, null, "/", "index.md", renderHome(posts, siteConfig)));
   entries.push(await writeEntry(distDir, null, "/404.html", "404.md", render404()));
 
@@ -144,6 +145,25 @@ function renderPostsIndex(posts, siteConfig) {
     title: siteTitle ? `文章列表 · ${siteTitle}` : "文章列表",
     description,
   })}\n\n# 文章\n\n${items.join("\n")}\n`;
+}
+
+function renderArchive(posts, siteConfig) {
+  const siteTitle = String(siteConfig.title ?? "");
+  const sections = [];
+
+  for (const post of posts) {
+    const date = formatDate(post.data.publishedAt);
+    const year = date.slice(0, 4);
+    if (sections.at(-1)?.year !== year) sections.push({ year, items: [] });
+    sections.at(-1).items.push(`- ${date.slice(5)} [${escapeLinkText(post.data.title)}](${post.href})`);
+  }
+
+  const body = sections.map(({ year, items }) => `## ${year}\n\n${items.join("\n")}`).join("\n\n");
+
+  return `${renderFrontmatter({
+    title: siteTitle ? `归档 · ${siteTitle}` : "归档",
+    description: joinStrings(siteConfig.description),
+  })}\n\n# 归档\n\n${body}\n`;
 }
 
 function render404() {

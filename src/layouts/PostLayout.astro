@@ -43,6 +43,7 @@ const pageKey = getPostHref(post);
     height: 630,
     alt: `${title} · ${siteConfig.title}`,
   }}
+  article={{ headline: title, publishedAt, updatedAt, section: category, tags }}
 >
   <PostFloatingActions />
   <Spoiler />

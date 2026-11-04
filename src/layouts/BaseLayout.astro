@@ -19,9 +19,17 @@ interface Props {
     height: number;
     alt: string;
   };
+  /** Marks the page as a blog post for Open Graph and structured data. */
+  article?: {
+    headline: string;
+    publishedAt: Date;
+    updatedAt?: Date;
+    section: string;
+    tags: readonly string[];
+  };
 }
 
-const { title, description, ogImage } = Astro.props;
+const { title, description, ogImage, article } = Astro.props;
 const pageTitle = title ?? siteConfig.title;
 const pageDescription = description ?? siteConfig.description.join(" ");
 const canonicalPath = normalizeSitePath(Astro.url.pathname);
@@ -59,6 +67,30 @@ if (shouldRenderOpenGraph) {
 }
 
 const openGraphLocale = siteConfig.lang.replace("-", "_");
+const authorUrl = new URL("/about", siteConfig.siteUrl);
+const articleDates = article && {
+  published: article.publishedAt.toISOString(),
+  modified: (article.updatedAt ?? article.publishedAt).toISOString(),
+};
+// Escape "<" so post text can never close the script element early.
+const structuredData =
+  article &&
+  articleDates &&
+  JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.headline,
+    description: pageDescription,
+    url: canonicalUrl.href,
+    mainEntityOfPage: canonicalUrl.href,
+    datePublished: articleDates.published,
+    dateModified: articleDates.modified,
+    inLanguage: siteConfig.lang,
+    articleSection: article.section,
+    keywords: article.tags.length > 0 ? article.tags : undefined,
+    image: socialImage?.url.href,
+    author: { "@type": "Person", name: siteConfig.owner, url: authorUrl.href },
+  }).replaceAll("<", "\\u003c");
 const fontFamily = getFontFamily(fontConfig.font);
 const codeFontFamily = getFontFamily(fontConfig.codeFont);
 const configuredFonts = [...fontConfig.font, ...fontConfig.codeFont];
@@ -79,7 +111,18 @@ const faviconLinks = siteConfig.favicon.filter(({ src }) => src.trim());
     <link rel="canonical" href={canonicalUrl} />
     {shouldRenderOpenGraph && socialImage && (
       <>
-        <meta property="og:type" content="website" />
+        <meta property="og:type" content={article ? "article" : "website"} />
+        {article && articleDates && (
+          <>
+            <meta property="article:published_time" content={articleDates.published} />
+            <meta property="article:modified_time" content={articleDates.modified} />
+            <meta property="article:author" content={authorUrl} />
+            <meta property="article:section" content={article.section} />
+            {article.tags.map((tag) => (
+              <meta property="article:tag" content={tag} />
+            ))}
+          </>
+        )}
         <meta property="og:site_name" content={siteConfig.title} />
         <meta property="og:title" content={pageTitle} />
         <meta property="og:description" content={pageDescription} />
@@ -95,6 +138,7 @@ const faviconLinks = siteConfig.favicon.filter(({ src }) => src.trim());
         <meta name="twitter:image" content={socialImage.url} />
       </>
     )}
+    {structuredData && <script is:inline type="application/ld+json" set:html={structuredData} />}
     <script is:inline>
       (() => {
         const storageKey = "misthaven-theme";

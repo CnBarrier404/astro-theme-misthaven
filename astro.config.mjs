@@ -1,5 +1,4 @@
 // @ts-check
-import sitemap from "@astrojs/sitemap";
 import tailwindcss from "@tailwindcss/vite";
 import astroExpressiveCode from "astro-expressive-code";
 import icon from "astro-icon";
@@ -13,6 +12,7 @@ import { siteConfig } from "./src/config/siteConfig.ts";
 import { getTranslation, I18nKey } from "./src/i18n/index.ts";
 import { createCalloutPlugin } from "./src/integrations/markdownCallout/index.ts";
 import { markdownForAgents } from "./src/integrations/markdownForAgents/index.ts";
+import { sitemapWithLastmod } from "./src/integrations/sitemapLastmod/index.ts";
 
 const expressiveCodePlugins = [];
 const siteTranslation = getTranslation(siteConfig.lang);
@@ -153,7 +153,7 @@ export default defineConfig({
       },
       plugins: expressiveCodePlugins,
     }),
-    sitemap(),
+    sitemapWithLastmod(),
     markdownForAgents(),
   ],
 });

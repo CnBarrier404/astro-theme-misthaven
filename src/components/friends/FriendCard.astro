@@ -1,0 +1,47 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+import type { FriendLink } from "@/types/friends";
+import { getFriendHost } from "@/utils/friends";
+import { nudgeForwardClass } from "@/utils/motion";
+
+type Props = FriendLink;
+
+const { name, url, avatar, description } = Astro.props;
+const initial = Array.from(name.trim())[0] ?? "";
+const host = getFriendHost(url);
+---
+
+<a
+  class="group flex h-full flex-col gap-4 rounded-panel border border-border bg-panel p-5 transition-colors hover:border-border-strong hover:bg-accent-soft/50"
+  href={url}
+  target="_blank"
+  rel="noreferrer"
+>
+  <span class="flex items-center gap-4">
+    {avatar ? (
+      <img
+        class="size-14 flex-none rounded-full border-4 border-surface bg-surface object-cover shadow-sm shadow-shadow"
+        src={avatar}
+        width={56}
+        height={56}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        referrerpolicy="no-referrer"
+      />
+    ) : (
+      <span
+        class="grid size-14 flex-none place-items-center rounded-full border-4 border-surface bg-accent-soft text-xl font-semibold text-accent-strong shadow-sm shadow-shadow"
+        aria-hidden="true"
+      >
+        {initial}
+      </span>
+    )}
+    <span class="grid min-w-0 flex-1 gap-1">
+      <span class="truncate text-base font-semibold transition-colors group-hover:text-accent-strong">{name}</span>
+      <span class="truncate text-xs text-muted">{host}</span>
+    </span>
+    <Icon class:list={["text-muted group-hover:text-accent-strong", nudgeForwardClass]} name="arrow" size={18} />
+  </span>
+  {description && <span class="line-clamp-2 text-sm leading-6 text-text-soft">{description}</span>}
+</a>

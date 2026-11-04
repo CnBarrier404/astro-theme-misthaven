@@ -65,6 +65,7 @@ feature that owns it.
 | `archive/`  | Archive page view with posts grouped by year                                      |
 | `tags/`     | Tag index and per-tag post list pages                                             |
 | `about/`    | About page view and its cards                                                     |
+| `friends/`  | Friend links page view and its link cards                                         |
 | `comments/` | Comment integration and view counts                                               |
 
 ### Style Source Layout

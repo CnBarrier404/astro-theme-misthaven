@@ -1,0 +1,16 @@
+---
+import FriendsPage from "@/components/friends/FriendsPage.astro";
+import { getEntry, render } from "astro:content";
+
+const page = await getEntry("pages", "friends");
+
+if (!page) {
+  throw new Error("Missing content entry: src/content/pages/friends.md");
+}
+
+const { Content } = await render(page);
+---
+
+<FriendsPage title={page.data.title} description={page.data.description}>
+  <Content />
+</FriendsPage>

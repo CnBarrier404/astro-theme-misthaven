@@ -1,0 +1,71 @@
+---
+import CommentSection from "@/components/comments/CommentSection.astro";
+import FriendCard from "@/components/friends/FriendCard.astro";
+import SiteInfo from "@/components/friends/SiteInfo.astro";
+import Card from "@/components/ui/Card.astro";
+import Icon from "@/components/ui/Icon.astro";
+import PageHeader from "@/components/ui/PageHeader.astro";
+import { friendsConfig } from "@/config/friendsConfig";
+import { siteConfig } from "@/config/siteConfig";
+import { getTranslator, I18nKey } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { title = friendsConfig.pageTitle, description = friendsConfig.pageDescription } = Astro.props;
+const t = getTranslator();
+const links = friendsConfig.links;
+---
+
+<BaseLayout title={`${title} · ${siteConfig.title}`} description={description}>
+  <div class="mx-auto w-full max-w-post">
+    <PageHeader title={title} intro={friendsConfig.intro}>
+      <p class="m-0 flex-none text-sm text-muted">{t(I18nKey.friendsCount, { count: links.length })}</p>
+    </PageHeader>
+
+    {links.length > 0 ? (
+      <ul
+        class="mt-4 mb-0 grid list-none gap-4 p-0 tablet:mt-5 tablet:grid-cols-2 tablet:gap-5 wide:grid-cols-3"
+        aria-label={t(I18nKey.friendsList)}
+      >
+        {links.map((link) => (
+          <li class="min-w-0">
+            <FriendCard {...link} />
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <Card class="mt-4 grid justify-items-center gap-3 px-6 py-12 text-center text-muted tablet:mt-5">
+        <Icon name="link" size={28} />
+        <p class="m-0">{t(I18nKey.friendsEmpty)}</p>
+      </Card>
+    )}
+
+    <Card
+      as="section"
+      class="mt-8 grid gap-8 px-5 py-8 tablet:mt-10 tablet:px-9 tablet:py-9 wide:grid-cols-2 wide:gap-10"
+      aria-labelledby="friends-apply"
+    >
+      <div class="min-w-0">
+        <h2 class="m-0 flex items-center gap-3 text-2xl font-semibold" id="friends-apply">
+          <span
+            class="grid size-10 place-items-center rounded-full bg-accent-soft text-accent-strong"
+            aria-hidden="true"
+          >
+            <Icon name="link" size={18} />
+          </span>
+          {t(I18nKey.friendsApply)}
+        </h2>
+        <div class="prose-content mt-4">
+          <slot />
+        </div>
+      </div>
+      <SiteInfo />
+    </Card>
+
+    <CommentSection pageKey="/friends" pageTitle={title} />
+  </div>
+</BaseLayout>

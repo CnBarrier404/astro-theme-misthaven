@@ -1,0 +1,79 @@
+---
+import FriendCard from "@/components/friends/FriendCard.astro";
+import Icon from "@/components/ui/Icon.astro";
+import { getTranslator, I18nKey } from "@/i18n";
+import { siteFriendLink } from "@/utils/friends";
+
+const t = getTranslator();
+const fields = [
+  { label: t(I18nKey.friendsSiteName), value: siteFriendLink.name },
+  { label: t(I18nKey.friendsSiteDescription), value: siteFriendLink.description },
+  { label: t(I18nKey.friendsSiteUrl), value: siteFriendLink.url },
+  { label: t(I18nKey.friendsAvatarUrl), value: siteFriendLink.avatar },
+];
+---
+
+<!-- How this site looks as a friend card, followed by each field with a copy button. -->
+<section class="grid content-start gap-4" aria-labelledby="friends-site-info">
+  <h3 class="m-0 text-sm font-semibold text-muted" id="friends-site-info">
+    {t(I18nKey.friendsSiteInfo)}
+  </h3>
+  <FriendCard {...siteFriendLink} />
+
+  <dl class="m-0 grid rounded-panel border border-border bg-surface">
+    {fields.map(({ label, value }) => (
+      <div class="flex items-center gap-3 border-b border-border py-2 ps-4 pe-2 last:border-b-0">
+        <div class="grid min-w-0 flex-1 gap-1">
+          <dt class="text-xs text-muted">{label}</dt>
+          <dd class="m-0 truncate text-sm text-text-soft" title={value}>
+            {value}
+          </dd>
+        </div>
+        <button
+          class="group grid size-10 flex-none cursor-pointer place-items-center rounded-md text-muted transition-colors hover:bg-accent-soft hover:text-accent-strong data-copied:text-accent-strong"
+          type="button"
+          aria-label={t(I18nKey.friendsCopy, { label })}
+          data-friends-copy={value}
+          data-copy-label={t(I18nKey.friendsCopy, { label })}
+          data-copied-label={t(I18nKey.friendsCopied, { label })}
+        >
+          <Icon class="group-data-copied:hidden" name="copy" size={16} />
+          <Icon class="hidden group-data-copied:block" name="check" size={16} />
+        </button>
+      </div>
+    ))}
+  </dl>
+  <div class="sr-only" data-friends-copy-announcer aria-live="polite" aria-atomic="true"></div>
+</section>
+
+<script>
+  const resetTimeouts = new WeakMap<HTMLButtonElement, ReturnType<typeof setTimeout>>();
+
+  // The document survives ClientRouter body swaps, so new buttons work without rebinding.
+  document.addEventListener("click", async (event) => {
+    const button = event.target instanceof Element ? event.target.closest("[data-friends-copy]") : null;
+    if (!(button instanceof HTMLButtonElement)) return;
+
+    try {
+      await navigator.clipboard.writeText(button.dataset.friendsCopy ?? "");
+    } catch {
+      return;
+    }
+
+    const copiedLabel = button.dataset.copiedLabel ?? "";
+    button.toggleAttribute("data-copied", true);
+    button.setAttribute("aria-label", copiedLabel);
+    const announcer = document.querySelector<HTMLElement>("[data-friends-copy-announcer]");
+    if (announcer) announcer.textContent = copiedLabel;
+
+    clearTimeout(resetTimeouts.get(button));
+    resetTimeouts.set(
+      button,
+      setTimeout(() => {
+        button.removeAttribute("data-copied");
+        button.setAttribute("aria-label", button.dataset.copyLabel ?? "");
+        if (announcer) announcer.textContent = "";
+      }, 2000),
+    );
+  });
+</script>

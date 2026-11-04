@@ -20,7 +20,7 @@ const menuId = "mobile-navigation";
 ---
 
 <button
-  class="grid size-10 flex-none cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong tablet:hidden"
+  class="grid size-10 flex-none cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong wide:hidden"
   type="button"
   aria-label={t(I18nKey.navigationMenu)}
   popovertarget={menuId}
@@ -29,7 +29,7 @@ const menuId = "mobile-navigation";
 </button>
 
 <nav
-  class="absolute inset-auto top-16 right-4 m-0 w-44 -translate-y-1 rounded-panel border border-border bg-panel p-1 text-text opacity-0 transition transition-discrete duration-150 ease-soft open:translate-y-0 open:opacity-100 starting:open:-translate-y-1 starting:open:opacity-0"
+  class="absolute inset-auto top-16 right-4 m-0 w-44 -translate-y-1 rounded-panel border border-border bg-panel p-1 text-text opacity-0 transition transition-discrete duration-150 ease-soft open:translate-y-0 open:opacity-100 starting:open:-translate-y-1 starting:open:opacity-0 tablet:right-6"
   id={menuId}
   aria-label={t(I18nKey.primaryNavigation)}
   popover

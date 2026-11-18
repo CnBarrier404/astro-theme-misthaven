@@ -22,6 +22,7 @@ export const I18nKey = {
   themeLight: "theme.light",
   themeDark: "theme.dark",
   siteInformation: "home.siteInformation",
+  latestPosts: "home.latestPosts",
   viewAllPosts: "home.viewAllPosts",
   siteOverview: "home.siteOverview",
   popularTags: "home.popularTags",

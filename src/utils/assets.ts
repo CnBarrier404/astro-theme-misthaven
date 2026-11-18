@@ -1,17 +1,13 @@
+import { getSiteAssetPath } from "@/utils/assetPaths";
+
 const assetModules = import.meta.glob<ImageMetadata>("/src/assets/**/*", {
   eager: true,
   import: "default",
 });
 
 export function resolveSiteAsset(configuredPath: string): ImageMetadata | null {
-  const normalizedPath = configuredPath.trim().replaceAll("\\", "/");
-  if (!normalizedPath) return null;
-
-  const assetPath = normalizedPath.startsWith("/src/assets/")
-    ? normalizedPath
-    : normalizedPath.startsWith("src/assets/")
-      ? `/${normalizedPath}`
-      : `/src/assets/${normalizedPath}`;
+  const assetPath = getSiteAssetPath(configuredPath);
+  if (!assetPath) return null;
   const asset = assetModules[assetPath];
 
   if (!asset) {

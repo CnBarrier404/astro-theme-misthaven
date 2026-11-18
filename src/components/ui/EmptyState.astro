@@ -1,0 +1,18 @@
+---
+import Card from "@/components/ui/Card.astro";
+import Icon from "@/components/ui/Icon.astro";
+import type { ComponentProps } from "astro/types";
+
+interface Props {
+  icon: ComponentProps<typeof Icon>["name"];
+}
+
+const { icon } = Astro.props;
+---
+
+<Card class="mt-4 grid justify-items-center gap-3 px-6 py-12 text-center text-muted tablet:mt-5">
+  <Icon name={icon} size={28} />
+  <p class="m-0">
+    <slot />
+  </p>
+</Card>

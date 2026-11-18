@@ -1,6 +1,8 @@
 ---
+import HeaderIconButton from "@/components/layout/HeaderIconButton.astro";
 import Icon from "@/components/ui/Icon.astro";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
+import { anchoredPopoverClass, popoverMotionClass } from "@/utils/motion";
 import type { ComponentProps } from "astro/types";
 
 interface NavigationItem {
@@ -15,23 +17,27 @@ interface Props {
 }
 
 const { items } = Astro.props;
-const t = getTranslator();
 const menuId = "mobile-navigation";
 ---
 
-<button
-  class="grid size-10 flex-none cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong wide:hidden"
-  type="button"
+<HeaderIconButton
+  class="wide:hidden"
+  name="menu"
+  size={18}
   aria-label={t(I18nKey.navigationMenu)}
   popovertarget={menuId}
->
-  <Icon name="menu" size={18} />
-</button>
+/>
 
 <nav
-  class="absolute inset-auto top-16 right-4 m-0 w-44 -translate-y-1 rounded-panel border border-border bg-panel p-1 text-text opacity-0 transition transition-discrete duration-150 ease-soft open:translate-y-0 open:opacity-100 starting:open:-translate-y-1 starting:open:opacity-0 tablet:right-6"
+  class:list={[
+    "w-44 rounded-panel border border-border bg-panel p-1 text-text wide:hidden",
+    anchoredPopoverClass,
+    popoverMotionClass,
+  ]}
   id={menuId}
   aria-label={t(I18nKey.primaryNavigation)}
+  data-mobile-navigation
+  data-anchored-popover
   popover
 >
   {items.map(({ href, label, icon, isActive }) => (

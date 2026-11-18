@@ -1,0 +1,13 @@
+---
+import { fontConfig } from "@/config/fontConfig";
+import { getFontFaceCss, getFontFamily, getFontPreconnects } from "@/utils/fonts";
+
+const fonts = [...fontConfig.font, ...fontConfig.codeFont];
+const fontPreconnects = getFontPreconnects(fonts);
+const fontCss = `:root{--font-family:${getFontFamily(fontConfig.font)};--code-font-family:${getFontFamily(fontConfig.codeFont)}}\n${getFontFaceCss(fonts)}`;
+---
+
+{fontPreconnects.map((href) => (
+  <link rel="preconnect" href={href} crossorigin="anonymous" />
+))}
+<style is:inline set:html={fontCss}></style>

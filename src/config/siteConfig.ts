@@ -1,17 +1,13 @@
 import type { SiteConfig } from "@/types/siteConfig";
 
 export const siteConfig = {
-  // 站点语言
   // 可用： zh-CN, en-US
   lang: "zh-CN",
 
-  // 站点名称
   title: "Misthaven",
 
-  // 站点副标题
   subTitle: "A calm place for stories and ideas",
 
-  // 站点描述
   description: ["一个简洁、安静的 Astro 博客主题。", "在这里记录想法、故事与日常生活。"],
 
   // 站点 URL（决定 sitemap 和链接的生成；部署前请替换为你的站点地址）
@@ -20,10 +16,8 @@ export const siteConfig = {
   // OpenGraph/Twitter 社交元数据总开关，仅生产构建时生效，开启后会在构建时生成分享链接解析后的图片，推荐开启
   generateOpenGraph: false,
 
-  // 站点维护者
   owner: "CnBarrier",
 
-  // 头像链接
   gravatarUrl:
     "https://gravatar.com/avatar/b2aecd98f763fccfa425a4fb9329ff4294e4bf4257a166986ed75a02ced26010?v=1778975002000&size=256",
 

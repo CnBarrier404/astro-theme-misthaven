@@ -1,6 +1,6 @@
 ---
 import Card from "@/components/ui/Card.astro";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 import type { CategoryCount } from "@/types/home";
 import { formatPostCount } from "@/utils/posts";
 
@@ -10,7 +10,6 @@ interface Props {
 }
 
 const { categories, title } = Astro.props;
-const t = getTranslator();
 const maxCount = Math.max(1, ...categories.map((category) => category.count));
 ---
 
@@ -18,7 +17,6 @@ const maxCount = Math.max(1, ...categories.map((category) => category.count));
   <h2 class="m-0 text-sm font-semibold tablet:text-base" id="categories-title">
     {title}
   </h2>
-  <!-- Each row runs a site search for its category; see `Search.astro`. -->
   <ul class="-mx-2 mt-3 mb-0 grid list-none gap-1 p-0">
     {categories.map((category) => (
       <li>

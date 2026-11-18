@@ -1,175 +1,27 @@
 ---
 import Footer from "@/components/layout/Footer.astro";
 import NavigationBar from "@/components/layout/NavigationBar.astro";
-import CommentViewCounts from "@/components/comments/CommentViewCounts.astro";
-import { fontConfig } from "@/config/fontConfig";
+import SeoHead from "@/components/layout/SeoHead.astro";
+import SiteFonts from "@/components/layout/SiteFonts.astro";
+import ThemeHead from "@/components/layout/ThemeHead.astro";
 import { siteConfig } from "@/config/siteConfig";
 import "@/styles/global.css";
-import { resolveSiteAsset } from "@/utils/assets";
-import { getFontFaceCss, getFontFamily, getFontPreconnects } from "@/utils/fonts";
-import { normalizeSitePath } from "@/utils/paths";
 import { ClientRouter } from "astro:transitions";
+import type { ComponentProps } from "astro/types";
 
-interface Props {
-  title?: string;
-  description?: string;
-  ogImage?: {
-    src: string;
-    width: number;
-    height: number;
-    alt: string;
-  };
-  /** Marks the page as a blog post for Open Graph and structured data. */
-  article?: {
-    headline: string;
-    publishedAt: Date;
-    updatedAt?: Date;
-    section: string;
-    tags: readonly string[];
-  };
-}
-
-const { title, description, ogImage, article } = Astro.props;
-const pageTitle = title ?? siteConfig.title;
-const pageDescription = description ?? siteConfig.description.join(" ");
-const canonicalPath = normalizeSitePath(Astro.url.pathname);
-const canonicalUrl = new URL(canonicalPath, siteConfig.siteUrl);
-const shouldRenderOpenGraph = siteConfig.generateOpenGraph && import.meta.env.PROD;
-let socialImage: {
-  url: URL;
-  width: number;
-  height: number;
-  alt: string;
-} | null = null;
-
-if (shouldRenderOpenGraph) {
-  if (ogImage) {
-    socialImage = {
-      url: new URL(ogImage.src, siteConfig.siteUrl),
-      width: ogImage.width,
-      height: ogImage.height,
-      alt: ogImage.alt,
-    };
-  } else {
-    const heroImage = resolveSiteAsset(siteConfig.heroImageLight) ?? resolveSiteAsset(siteConfig.heroImageDark);
-
-    if (!heroImage) {
-      throw new Error("A light or dark Hero image must be configured to generate social metadata.");
-    }
-
-    socialImage = {
-      url: new URL(heroImage.src, siteConfig.siteUrl),
-      width: heroImage.width,
-      height: heroImage.height,
-      alt: siteConfig.title,
-    };
-  }
-}
-
-const openGraphLocale = siteConfig.lang.replace("-", "_");
-const authorUrl = new URL("/about", siteConfig.siteUrl);
-const articleDates = article && {
-  published: article.publishedAt.toISOString(),
-  modified: (article.updatedAt ?? article.publishedAt).toISOString(),
-};
-// Escape "<" so post text can never close the script element early.
-const structuredData =
-  article &&
-  articleDates &&
-  JSON.stringify({
-    "@context": "https://schema.org",
-    "@type": "BlogPosting",
-    headline: article.headline,
-    description: pageDescription,
-    url: canonicalUrl.href,
-    mainEntityOfPage: canonicalUrl.href,
-    datePublished: articleDates.published,
-    dateModified: articleDates.modified,
-    inLanguage: siteConfig.lang,
-    articleSection: article.section,
-    keywords: article.tags.length > 0 ? article.tags : undefined,
-    image: socialImage?.url.href,
-    author: { "@type": "Person", name: siteConfig.owner, url: authorUrl.href },
-  }).replaceAll("<", "\\u003c");
-const fontFamily = getFontFamily(fontConfig.font);
-const codeFontFamily = getFontFamily(fontConfig.codeFont);
-const configuredFonts = [...fontConfig.font, ...fontConfig.codeFont];
-const fontFaceCss = getFontFaceCss(configuredFonts);
-const fontPreconnects = getFontPreconnects(configuredFonts);
-const fontFamilyStyle = `--font-family: ${fontFamily}; --code-font-family: ${codeFontFamily}`;
+type Props = ComponentProps<typeof SeoHead>;
 const faviconLinks = siteConfig.favicon.filter(({ src }) => src.trim());
 ---
 
 <!doctype html>
-<html lang={siteConfig.lang} style={fontFamilyStyle}>
+<html lang={siteConfig.lang}>
   <head>
     <meta charset="UTF-8" />
-    <meta name="description" content={pageDescription} />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="theme-color" content="#fdfdfc" data-theme-color-light="#fdfdfc" data-theme-color-dark="#141a1b" />
-    <link rel="canonical" href={canonicalUrl} />
-    {shouldRenderOpenGraph && socialImage && (
-      <>
-        <meta property="og:type" content={article ? "article" : "website"} />
-        {article && articleDates && (
-          <>
-            <meta property="article:published_time" content={articleDates.published} />
-            <meta property="article:modified_time" content={articleDates.modified} />
-            <meta property="article:author" content={authorUrl} />
-            <meta property="article:section" content={article.section} />
-            {article.tags.map((tag) => (
-              <meta property="article:tag" content={tag} />
-            ))}
-          </>
-        )}
-        <meta property="og:site_name" content={siteConfig.title} />
-        <meta property="og:title" content={pageTitle} />
-        <meta property="og:description" content={pageDescription} />
-        <meta property="og:url" content={canonicalUrl} />
-        <meta property="og:locale" content={openGraphLocale} />
-        <meta property="og:image" content={socialImage.url} />
-        <meta property="og:image:width" content={String(socialImage.width)} />
-        <meta property="og:image:height" content={String(socialImage.height)} />
-        <meta property="og:image:alt" content={socialImage.alt} />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={pageTitle} />
-        <meta name="twitter:description" content={pageDescription} />
-        <meta name="twitter:image" content={socialImage.url} />
-      </>
-    )}
-    {structuredData && <script is:inline type="application/ld+json" set:html={structuredData} />}
-    <script is:inline>
-      (() => {
-        const storageKey = "misthaven-theme";
-        let preference = "system";
-
-        try {
-          const storedPreference = localStorage.getItem(storageKey);
-          if (storedPreference === "light" || storedPreference === "dark") preference = storedPreference;
-        } catch {
-          // Keep following the system preference when storage is unavailable.
-        }
-
-        const theme =
-          preference === "system"
-            ? window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light"
-            : preference;
-        const root = document.documentElement;
-        const themeColor = document.querySelector("meta[name='theme-color']");
-
-        root.dataset.themePreference = preference;
-        root.dataset.theme = theme;
-        root.style.colorScheme = theme;
-
-        if (themeColor) {
-          const color = theme === "dark" ? themeColor.dataset.themeColorDark : themeColor.dataset.themeColorLight;
-          if (color) themeColor.content = color;
-        }
-      })();
-    </script>
+    <ThemeHead />
+    <SeoHead {...Astro.props} />
+    <SiteFonts />
     <link rel="sitemap" href="/sitemap-index.xml" />
     <link
       rel="alternate"
@@ -180,16 +32,11 @@ const faviconLinks = siteConfig.favicon.filter(({ src }) => src.trim());
     {faviconLinks.map(({ src, sizes, rel, type }) => (
       <link href={src.trim()} sizes={sizes} rel={rel} type={type} />
     ))}
-    {fontPreconnects.map((href) => (
-      <link rel="preconnect" href={href} crossorigin="anonymous" />
-    ))}
-    {fontFaceCss && <style is:inline set:html={fontFaceCss}></style>}
-    <title>{pageTitle}</title>
     <ClientRouter fallback="animate" />
   </head>
   <body>
     <div class="flex min-h-screen flex-col">
-      <NavigationBar currentPath={Astro.url.pathname} />
+      <NavigationBar />
 
       <main
         class="mx-auto mt-1 w-layout-width max-w-page flex-1 pb-12 tablet:mt-2 tablet:w-layout-width-tablet tablet:pb-16 wide:w-layout-width-wide"
@@ -199,38 +46,9 @@ const faviconLinks = siteConfig.favicon.filter(({ src }) => src.trim());
       </main>
       <Footer />
     </div>
-    <CommentViewCounts />
   </body>
 </html>
 
 <script>
-  import { normalizeSitePath } from "@/utils/paths";
-
-  // ClientRouter re-fetches and swaps the page even when a link points at the page already on screen.
-  // Treat such clicks as "back to top" instead. This capture listener runs before the router's own
-  // click handler, which skips events that are already default-prevented.
-  document.addEventListener(
-    "click",
-    (event) => {
-      if (event.defaultPrevented || event.button !== 0) return;
-      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-
-      const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
-      if (!(link instanceof HTMLAnchorElement)) return;
-      if ((link.target && link.target !== "_self") || link.hasAttribute("download")) return;
-
-      const url = new URL(link.href);
-      const isCurrentPage =
-        url.origin === location.origin &&
-        !url.hash &&
-        url.search === location.search &&
-        normalizeSitePath(url.pathname) === normalizeSitePath(location.pathname);
-      if (!isCurrentPage) return;
-
-      event.preventDefault();
-      link.closest<HTMLElement>("[popover]")?.hidePopover();
-      window.scrollTo({ top: 0 });
-    },
-    { capture: true },
-  );
+  import "@/components/layout/popovers";
 </script>

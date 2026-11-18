@@ -18,7 +18,7 @@
     scrollbar-gutter: stable;
   }
 
-  /* Keep the page still behind modal dialogs such as the mobile search sheet. */
+  /* Keep scrolling inside a modal, such as the mobile search sheet, from moving the page behind it. */
   :root:has(dialog:modal) {
     overflow: hidden;
   }
@@ -50,10 +50,6 @@
     text-decoration: none;
   }
 
-  /*
-   * Shared keyboard focus ring for every interactive element.
-   * Items inside menus and listboxes may replace it with a background state plus `outline-hidden`.
-   */
   :focus-visible {
     outline: 2px solid var(--color-focus-ring);
     outline-offset: 2px;

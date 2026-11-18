@@ -1,21 +1,21 @@
 ---
+import { viewCountPlaceholder } from "@/components/comments/viewCounts";
 import IconText from "@/components/ui/IconText.astro";
-import { isCommentViewCountEnabled } from "@/config/commentConfig";
-import { getTranslator, I18nKey } from "@/i18n";
-import { formatPostDate } from "@/utils/posts";
+import { postConfig } from "@/config/postConfig";
+import { I18nKey, t } from "@/i18n";
+import { formatPostDate } from "@/utils/postDates";
+import { countPostWords, type PostEntry } from "@/utils/posts";
 
 interface Props {
-  publishedAt: Date;
-  updatedAt?: Date;
-  category: string;
-  wordCount: string;
-  readingTime: string;
-  pageKey: string;
+  post: PostEntry;
+  viewCountId?: string;
   class?: string;
 }
 
-const { publishedAt, updatedAt, category, wordCount, readingTime, pageKey, class: className } = Astro.props;
-const t = getTranslator();
+const { post, viewCountId, class: className } = Astro.props;
+const { publishedAt, updatedAt, category } = post.data;
+const wordCount = countPostWords(post);
+const minutes = Math.max(1, Math.ceil(wordCount / postConfig.readingUnitsPerMinute));
 ---
 
 <div
@@ -35,14 +35,14 @@ const t = getTranslator();
     </IconText>
   )}
   <IconText icon="folder">{category}</IconText>
-  <IconText icon="menu">{wordCount}</IconText>
-  <IconText icon="clock">{readingTime}</IconText>
-  {isCommentViewCountEnabled && (
+  <IconText icon="menu">{t(I18nKey.postWordCount, { count: wordCount })}</IconText>
+  <IconText icon="clock">{t(I18nKey.postReadingTime, { minutes })}</IconText>
+  {viewCountId && (
     <IconText icon="chart">
-      <span data-page-key={pageKey} data-post-view data-view-placeholder="-">
+      <span>
         {t(I18nKey.postViews)}{" "}
-        <span class="tabular-nums" aria-live="polite" data-post-view-value>
-          -
+        <span class="artalk-pv-count tabular-nums" id={viewCountId} aria-live="polite">
+          {viewCountPlaceholder}
         </span>
       </span>
     </IconText>

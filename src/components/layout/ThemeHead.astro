@@ -1,0 +1,118 @@
+<!-- Match the light --color-page token so browsers have a color before CSS or JavaScript runs. -->
+<meta name="theme-color" content="#fdfdfc" transition:persist="theme-color" />
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement;
+    if (root.dataset.themePreference) return;
+
+    const storageKey = "misthaven-theme";
+    const systemTheme = matchMedia("(prefers-color-scheme: dark)");
+    const reducedMotion = matchMedia("(prefers-reduced-motion: reduce)");
+    const themeColor = document.querySelector("meta[name='theme-color']");
+    let activeTransition;
+
+    const normalizePreference = (value) => (value === "light" || value === "dark" ? value : "system");
+
+    function readPreference() {
+      try {
+        return normalizePreference(localStorage.getItem(storageKey));
+      } catch {
+        return "system";
+      }
+    }
+
+    let preference = readPreference();
+
+    function syncThemeControls() {
+      for (const toggle of document.querySelectorAll("[data-theme-toggle]")) {
+        const trigger = toggle.querySelector("button[popovertarget]");
+        for (const option of toggle.querySelectorAll("button[data-theme-option]")) {
+          const active = option.dataset.themeOption === preference;
+          option.setAttribute("aria-pressed", String(active));
+          if (active && trigger) {
+            const label = option.textContent.trim();
+            trigger.setAttribute("aria-label", `${toggle.dataset.themeLabel}: ${label}`);
+            trigger.title = label;
+          }
+        }
+      }
+    }
+
+    function applyTheme() {
+      const theme = preference === "system" ? (systemTheme.matches ? "dark" : "light") : preference;
+      root.dataset.themePreference = preference;
+      root.dataset.theme = theme;
+      const pageColor = getComputedStyle(root).getPropertyValue("--color-page").trim();
+      if (themeColor && pageColor) themeColor.content = pageColor;
+      syncThemeControls();
+    }
+
+    function selectTheme(nextPreference, origin) {
+      if (nextPreference === preference) return;
+
+      const update = () => {
+        preference = nextPreference;
+        try {
+          if (preference === "system") localStorage.removeItem(storageKey);
+          else localStorage.setItem(storageKey, preference);
+        } catch {
+          // Browsers can block storage. The current tab still keeps its preference in memory.
+        }
+        applyTheme();
+      };
+
+      if (!("startViewTransition" in document) || reducedMotion.matches) {
+        update();
+        return;
+      }
+
+      const { left, top, width, height } = origin.getBoundingClientRect();
+      const x = left + width / 2;
+      const y = top + height / 2;
+      const radius = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      root.style.setProperty("--theme-transition-x", `${x}px`);
+      root.style.setProperty("--theme-transition-y", `${y}px`);
+      root.style.setProperty("--theme-transition-radius", `${radius}px`);
+      root.classList.add("theme-transition");
+
+      const transition = document.startViewTransition(update);
+      activeTransition = transition;
+      const cleanup = () => {
+        if (activeTransition !== transition) return;
+        activeTransition = undefined;
+        root.classList.remove("theme-transition");
+        root.style.removeProperty("--theme-transition-x");
+        root.style.removeProperty("--theme-transition-y");
+        root.style.removeProperty("--theme-transition-radius");
+      };
+      transition.finished.then(cleanup, cleanup);
+    }
+
+    document.addEventListener("click", (event) => {
+      const option = event.target instanceof Element ? event.target.closest("button[data-theme-option]") : null;
+      const toggle = option?.closest("[data-theme-toggle]");
+      if (!toggle) return;
+
+      selectTheme(normalizePreference(option.dataset.themeOption), option);
+      option.closest("[popover]")?.hidePopover();
+      toggle.querySelector("button[popovertarget]")?.focus();
+    });
+
+    systemTheme.addEventListener("change", () => {
+      if (preference === "system") applyTheme();
+    });
+
+    window.addEventListener("storage", (event) => {
+      if (event.key === storageKey || event.key === null) {
+        preference = readPreference();
+        applyTheme();
+      }
+    });
+
+    // Astro replaces the root attributes while swapping pages. Reapply before it paints the new page.
+    document.addEventListener("astro:after-swap", applyTheme);
+    document.addEventListener("astro:page-load", applyTheme);
+    applyTheme();
+  })();
+</script>

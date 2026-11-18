@@ -1,0 +1,95 @@
+---
+import { siteConfig } from "@/config/siteConfig";
+import { resolveSiteAsset } from "@/utils/assets";
+import { shouldGenerateOpenGraph } from "@/utils/ogMetadata";
+import { normalizeSitePath } from "@/utils/paths";
+import { getPostModifiedAt } from "@/utils/postDates";
+
+interface SocialImage {
+  src: string;
+  width: number;
+  height: number;
+  alt: string;
+}
+
+interface Article {
+  headline: string;
+  publishedAt: Date;
+  updatedAt?: Date;
+  section: string;
+  tags: readonly string[];
+}
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: SocialImage;
+  article?: Article;
+}
+
+function getDefaultSocialImage(): SocialImage {
+  const image = resolveSiteAsset(siteConfig.heroImageLight) ?? resolveSiteAsset(siteConfig.heroImageDark);
+  if (!image) throw new Error("A light or dark Hero image must be configured to generate social metadata.");
+  return { src: image.src, width: image.width, height: image.height, alt: siteConfig.title };
+}
+
+const { title = siteConfig.title, description = siteConfig.description.join(" "), ogImage, article } = Astro.props;
+const canonicalUrl = new URL(normalizeSitePath(Astro.url.pathname), siteConfig.siteUrl);
+const socialImage = shouldGenerateOpenGraph ? (ogImage ?? getDefaultSocialImage()) : undefined;
+const socialImageUrl = socialImage && new URL(socialImage.src, siteConfig.siteUrl);
+const authorUrl = new URL("/about", siteConfig.siteUrl);
+const published = article?.publishedAt.toISOString();
+const modified = article && getPostModifiedAt(article).toISOString();
+// Escape "<" so post text can never close the script element early.
+const structuredData =
+  article &&
+  JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: article.headline,
+    description,
+    url: canonicalUrl.href,
+    mainEntityOfPage: canonicalUrl.href,
+    datePublished: published,
+    dateModified: modified,
+    inLanguage: siteConfig.lang,
+    articleSection: article.section,
+    keywords: article.tags.length > 0 ? article.tags : undefined,
+    image: socialImageUrl?.href,
+    author: { "@type": "Person", name: siteConfig.owner, url: authorUrl.href },
+  }).replaceAll("<", "\\u003c");
+---
+
+<meta name="description" content={description} />
+<link rel="canonical" href={canonicalUrl} />
+{socialImage && socialImageUrl && (
+  <>
+    <meta property="og:type" content={article ? "article" : "website"} />
+    {article && (
+      <>
+        <meta property="article:published_time" content={published} />
+        <meta property="article:modified_time" content={modified} />
+        <meta property="article:author" content={authorUrl} />
+        <meta property="article:section" content={article.section} />
+        {article.tags.map((tag) => (
+          <meta property="article:tag" content={tag} />
+        ))}
+      </>
+    )}
+    <meta property="og:site_name" content={siteConfig.title} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:locale" content={siteConfig.lang.replace("-", "_")} />
+    <meta property="og:image" content={socialImageUrl} />
+    <meta property="og:image:width" content={String(socialImage.width)} />
+    <meta property="og:image:height" content={String(socialImage.height)} />
+    <meta property="og:image:alt" content={socialImage.alt} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={socialImageUrl} />
+  </>
+)}
+{structuredData && <script is:inline type="application/ld+json" set:html={structuredData} />}
+<title>{title}</title>

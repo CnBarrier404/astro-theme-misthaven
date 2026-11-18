@@ -1,13 +1,12 @@
 ---
+import HeaderIconButton from "@/components/layout/HeaderIconButton.astro";
 import Icon from "@/components/ui/Icon.astro";
-import { getTranslator, I18nKey } from "@/i18n";
-import { dropdownMotionClass } from "@/utils/motion";
+import { I18nKey, t } from "@/i18n";
+import { anchoredPopoverClass, popoverMotionClass } from "@/utils/motion";
 
-const t = getTranslator();
 const menuId = "theme-preference-menu";
 
 // `visibleClass` must stay a complete static string so Tailwind can detect it.
-// The trigger icon follows the root attribute that BaseLayout sets before the first paint.
 const themeOptions = [
   {
     value: "system",
@@ -33,38 +32,27 @@ const themeOptions = [
 ] as const;
 ---
 
-<theme-toggle class="relative flex-none" data-theme-label={t(I18nKey.themeLabel)}>
-  <button
-    class="grid size-10 cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong focus-visible:border-focus-ring focus-visible:text-accent-strong focus-visible:outline-hidden"
-    type="button"
-    aria-label={`${t(I18nKey.themeLabel)}: ${t(I18nKey.themeSystem)}`}
-    aria-controls={menuId}
-    aria-expanded="false"
-    aria-haspopup="true"
-    data-theme-trigger
-  >
-    {themeOptions.map(({ value, icon, triggerIconSize, visibleClass }) => (
+<div class="flex-none" data-theme-toggle data-theme-label={t(I18nKey.themeLabel)}>
+  <HeaderIconButton aria-label={`${t(I18nKey.themeLabel)}: ${t(I18nKey.themeSystem)}`} popovertarget={menuId}>
+    {themeOptions.map(({ icon, triggerIconSize, visibleClass }) => (
       <span
         class:list={[
           "hidden items-center justify-center transition duration-300 ease-soft starting:in-[.theme-transition]:-rotate-90 starting:in-[.theme-transition]:opacity-0",
           visibleClass,
         ]}
-        data-theme-trigger-icon={value}
       >
         <Icon name={icon} size={triggerIconSize} />
       </span>
     ))}
-  </button>
+  </HeaderIconButton>
 
   <div
-    class:list={[
-      "absolute top-full right-0 z-50 mt-2 w-40 rounded-panel border border-border bg-panel p-1",
-      dropdownMotionClass,
-    ]}
+    class:list={["w-40 rounded-panel border border-border bg-panel p-1", anchoredPopoverClass, popoverMotionClass]}
     id={menuId}
     role="group"
     aria-label={t(I18nKey.themeLabel)}
-    data-theme-menu
+    data-anchored-popover
+    popover
   >
     {themeOptions.map(({ value, icon, label }) => (
       <button
@@ -72,182 +60,10 @@ const themeOptions = [
         type="button"
         aria-pressed={value === "system" ? "true" : "false"}
         data-theme-option={value}
-        data-theme-option-label={label}
       >
         <Icon name={icon} size={16} />
         <span>{label}</span>
       </button>
     ))}
   </div>
-</theme-toggle>
-
-<script>
-  type Theme = "light" | "dark";
-  type ThemePreference = "system" | Theme;
-
-  const themeStorageKey = "misthaven-theme";
-  const systemTheme = window.matchMedia("(prefers-color-scheme: dark)");
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-
-  const isThemePreference = (value: string | undefined | null): value is ThemePreference => {
-    return value === "system" || value === "light" || value === "dark";
-  };
-
-  const getThemePreference = (): ThemePreference => {
-    const currentPreference = document.documentElement.dataset.themePreference;
-    if (isThemePreference(currentPreference)) return currentPreference;
-
-    try {
-      const storedPreference = localStorage.getItem(themeStorageKey);
-      return isThemePreference(storedPreference) ? storedPreference : "system";
-    } catch {
-      return "system";
-    }
-  };
-
-  const resolveTheme = (preference: ThemePreference): Theme => {
-    return preference === "system" ? (systemTheme.matches ? "dark" : "light") : preference;
-  };
-
-  const updateThemeColor = (theme: Theme) => {
-    const themeColor = document.querySelector<HTMLMetaElement>("meta[name='theme-color']");
-    const color = theme === "dark" ? themeColor?.dataset.themeColorDark : themeColor?.dataset.themeColorLight;
-    if (themeColor && color) themeColor.content = color;
-  };
-
-  const transitionThemePreference = (preference: ThemePreference, origin: HTMLElement) => {
-    const root = document.documentElement;
-    const originRect = origin.getBoundingClientRect();
-    const originX = originRect.left + originRect.width / 2;
-    const originY = originRect.top + originRect.height / 2;
-    const revealRadius = Math.hypot(
-      Math.max(originX, window.innerWidth - originX),
-      Math.max(originY, window.innerHeight - originY),
-    );
-
-    if (!("startViewTransition" in document) || reducedMotion.matches) {
-      applyThemePreference(preference, true);
-      return;
-    }
-
-    root.style.setProperty("--theme-transition-x", `${originX}px`);
-    root.style.setProperty("--theme-transition-y", `${originY}px`);
-    root.style.setProperty("--theme-transition-radius", `${revealRadius}px`);
-    root.classList.add("theme-transition");
-
-    const transition = document.startViewTransition(() => {
-      applyThemePreference(preference, true);
-    });
-
-    transition.finished.finally(() => {
-      root.classList.remove("theme-transition");
-      root.style.removeProperty("--theme-transition-x");
-      root.style.removeProperty("--theme-transition-y");
-      root.style.removeProperty("--theme-transition-radius");
-    });
-  };
-
-  const syncThemeToggle = (toggle: HTMLElement, preference: ThemePreference) => {
-    const trigger = toggle.querySelector<HTMLButtonElement>("[data-theme-trigger]");
-    const options = toggle.querySelectorAll<HTMLButtonElement>("[data-theme-option]");
-    const activeOption = [...options].find((option) => option.dataset.themeOption === preference);
-    const preferenceLabel = activeOption?.dataset.themeOptionLabel ?? "";
-    const themeLabel = toggle.dataset.themeLabel ?? "";
-
-    if (trigger) {
-      trigger.setAttribute("aria-label", [themeLabel, preferenceLabel].filter(Boolean).join(": "));
-      trigger.title = preferenceLabel;
-    }
-
-    options.forEach((option) => {
-      option.setAttribute("aria-pressed", String(option === activeOption));
-    });
-  };
-
-  const applyThemePreference = (preference: ThemePreference, persist: boolean) => {
-    if (persist) {
-      try {
-        if (preference === "system") localStorage.removeItem(themeStorageKey);
-        else localStorage.setItem(themeStorageKey, preference);
-      } catch {
-        // The active page can still use the selected theme when storage is unavailable.
-      }
-    }
-
-    const theme = resolveTheme(preference);
-    document.documentElement.dataset.themePreference = preference;
-    document.documentElement.dataset.theme = theme;
-    document.documentElement.style.colorScheme = theme;
-    updateThemeColor(theme);
-    document.querySelectorAll<HTMLElement>("theme-toggle").forEach((toggle) => {
-      syncThemeToggle(toggle, preference);
-    });
-  };
-
-  const closeThemeToggle = (toggle: HTMLElement) => {
-    const trigger = toggle.querySelector<HTMLButtonElement>("[data-theme-trigger]");
-    const menu = toggle.querySelector<HTMLElement>("[data-theme-menu]");
-    if (!trigger || !menu) return;
-
-    trigger.setAttribute("aria-expanded", "false");
-    menu.removeAttribute("data-open");
-  };
-
-  const setupThemeToggles = () => {
-    const preference = getThemePreference();
-    applyThemePreference(preference, false);
-
-    document.querySelectorAll<HTMLElement>("theme-toggle").forEach((toggle) => {
-      if (toggle.dataset.themeReady) return;
-
-      const trigger = toggle.querySelector<HTMLButtonElement>("[data-theme-trigger]");
-      const menu = toggle.querySelector<HTMLElement>("[data-theme-menu]");
-      const options = toggle.querySelectorAll<HTMLButtonElement>("[data-theme-option]");
-      if (!trigger || !menu) return;
-
-      toggle.dataset.themeReady = "true";
-      trigger.addEventListener("click", () => {
-        const shouldOpen = !menu.hasAttribute("data-open");
-        document.querySelectorAll<HTMLElement>("theme-toggle").forEach(closeThemeToggle);
-        trigger.setAttribute("aria-expanded", String(shouldOpen));
-        menu.toggleAttribute("data-open", shouldOpen);
-      });
-
-      options.forEach((option) => {
-        option.addEventListener("click", () => {
-          const nextPreference = option.dataset.themeOption;
-          if (!isThemePreference(nextPreference)) return;
-
-          transitionThemePreference(nextPreference, option);
-          closeThemeToggle(toggle);
-          trigger.focus();
-        });
-      });
-
-      toggle.addEventListener("keydown", (event) => {
-        if (event.key !== "Escape" || !menu.hasAttribute("data-open")) return;
-        closeThemeToggle(toggle);
-        trigger.focus();
-      });
-    });
-  };
-
-  document.addEventListener("pointerdown", (event) => {
-    const target = event.target;
-    document.querySelectorAll<HTMLElement>("theme-toggle").forEach((toggle) => {
-      if (!(target instanceof Node) || !toggle.contains(target)) closeThemeToggle(toggle);
-    });
-  });
-
-  systemTheme.addEventListener("change", () => {
-    if (getThemePreference() === "system") applyThemePreference("system", false);
-  });
-
-  window.addEventListener("storage", (event) => {
-    if (event.key !== themeStorageKey) return;
-    applyThemePreference(isThemePreference(event.newValue) ? event.newValue : "system", false);
-  });
-
-  setupThemeToggles();
-  document.addEventListener("astro:page-load", setupThemeToggles);
-</script>
+</div>

@@ -1,3 +1,5 @@
+export const recentPostLimit = 5;
+
 export const postConfig = {
   // 预计阅读时长使用的每分钟内容单位数
   readingUnitsPerMinute: 200,

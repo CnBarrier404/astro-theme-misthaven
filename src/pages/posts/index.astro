@@ -1,5 +1,30 @@
 ---
-import PostsPage from "@/components/post/PostsPage.astro";
+import PostList from "@/components/post/PostList.astro";
+import EmptyState from "@/components/ui/EmptyState.astro";
+import PageHeader from "@/components/ui/PageHeader.astro";
+import PostSort from "@/components/post/PostSort.astro";
+import { siteConfig } from "@/config/siteConfig";
+import { I18nKey, t } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getVisiblePosts } from "@/utils/posts";
+
+const posts = await getVisiblePosts();
+const pageDescription = t(I18nKey.postsPageDescription, { owner: siteConfig.owner });
 ---
 
-<PostsPage />
+<BaseLayout title={`${t(I18nKey.navigationPosts)} · ${siteConfig.title}`} description={pageDescription}>
+  <div class="mx-auto w-full max-w-post">
+    <PageHeader title={t(I18nKey.navigationPosts)} intro={t(I18nKey.postsPageIntro)}>
+      <div class="flex flex-none items-center gap-4">
+        <p class="m-0 text-sm text-muted">{t(I18nKey.postsCount, { count: posts.length })}</p>
+        <PostSort targetId="posts-page-list" />
+      </div>
+    </PageHeader>
+
+    {posts.length > 0 ? (
+      <PostList class="mt-4 tablet:mt-5" id="posts-page-list" posts={posts} ariaLabel={t(I18nKey.postsList)} />
+    ) : (
+      <EmptyState icon="article">{t(I18nKey.noPublishedPosts)}</EmptyState>
+    )}
+  </div>
+</BaseLayout>

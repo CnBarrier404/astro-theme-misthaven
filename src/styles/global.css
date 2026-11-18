@@ -1,11 +1,3 @@
-/*
- * Stylesheet entry point. Each file owns one concern:
- * - theme.css: design tokens, dark theme overrides, and custom variants
- * - base.css: element defaults, the shared focus ring, and reduced-motion defaults
- * - transitions.css: View Transitions for navigation and theme changes
- * - prose.css: Markdown content typography
- * Component styling lives in Tailwind utilities inside each component.
- */
 @import "tailwindcss";
 @import "./theme.css";
 @import "./base.css";

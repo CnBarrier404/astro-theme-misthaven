@@ -1,102 +1,101 @@
 ---
+import HeaderIconButton from "@/components/layout/HeaderIconButton.astro";
 import SearchBox from "@/components/search/SearchBox.astro";
 import Icon from "@/components/ui/Icon.astro";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 
-const t = getTranslator();
 const dialogId = "mobile-search-dialog";
 ---
 
-<SearchBox class="hidden min-w-0 tablet:block" id="site-search" variant="popover" />
+<site-search-controls class="contents">
+  <SearchBox class="hidden min-w-0 tablet:block" id="site-search" variant="field" />
 
-<button
-  class="grid size-10 flex-none cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong tablet:hidden"
-  type="button"
-  aria-label={t(I18nKey.searchLabel)}
-  aria-haspopup="dialog"
-  aria-controls={dialogId}
-  data-search-dialog-open
->
-  <Icon name="search" size={16} />
-</button>
+  <HeaderIconButton
+    class="tablet:hidden"
+    name="search"
+    size={16}
+    aria-label={t(I18nKey.searchLabel)}
+    aria-haspopup="dialog"
+    aria-controls={dialogId}
+    data-search-dialog-open
+  />
 
-<dialog
-  class="m-0 w-full max-w-none -translate-y-2 border-0 bg-transparent p-0 text-text opacity-0 transition transition-discrete duration-200 ease-soft backdrop:bg-overlay backdrop:opacity-0 backdrop:transition backdrop:transition-discrete backdrop:duration-200 open:translate-y-0 open:opacity-100 open:backdrop:opacity-100 starting:open:-translate-y-2 starting:open:opacity-0 starting:open:backdrop:opacity-0"
-  id={dialogId}
-  aria-label={t(I18nKey.searchLabel)}
-  data-search-dialog
->
-  <div class="border-b border-border bg-page px-4 py-3">
-    <SearchBox id="mobile-search" variant="sheet">
-      <button
-        class="grid size-11 flex-none cursor-pointer place-items-center rounded-panel text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong"
-        type="button"
-        aria-label={t(I18nKey.searchClose)}
-        data-search-dialog-close
-      >
-        <Icon name="close" size={18} />
-      </button>
-    </SearchBox>
-  </div>
-</dialog>
+  <dialog
+    class="m-0 w-full max-w-none -translate-y-2 border-0 bg-transparent p-0 text-text opacity-0 transition transition-discrete duration-200 ease-soft backdrop:bg-overlay backdrop:opacity-0 backdrop:transition backdrop:transition-discrete backdrop:duration-200 open:translate-y-0 open:opacity-100 open:backdrop:opacity-100 starting:open:-translate-y-2 starting:open:opacity-0 starting:open:backdrop:opacity-0"
+    id={dialogId}
+    aria-label={t(I18nKey.searchLabel)}
+  >
+    <div class="border-b border-border bg-page px-4 py-3">
+      <SearchBox id="mobile-search" variant="sheet">
+        <button
+          class="grid size-11 flex-none cursor-pointer place-items-center rounded-panel text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong"
+          type="button"
+          aria-label={t(I18nKey.searchClose)}
+          data-search-dialog-close
+        >
+          <Icon name="close" size={18} />
+        </button>
+      </SearchBox>
+    </div>
+  </dialog>
+</site-search-controls>
 
 <script>
-  const isHidden = (element: HTMLElement) => getComputedStyle(element).display === "none";
+  import { SiteSearch } from "./siteSearch";
 
-  const setupSearchDialogs = () => {
-    document.querySelectorAll<HTMLDialogElement>("[data-search-dialog]").forEach((dialog) => {
-      if (dialog.dataset.searchDialogReady) return;
-      dialog.dataset.searchDialogReady = "true";
+  class SiteSearchControls extends HTMLElement {
+    private listeners?: AbortController;
+    private observer?: ResizeObserver;
 
-      const trigger = document.querySelector<HTMLButtonElement>(
-        `[data-search-dialog-open][aria-controls="${CSS.escape(dialog.id)}"]`,
+    connectedCallback() {
+      const desktop = this.querySelector(":scope > site-search");
+      const dialog = this.querySelector("dialog");
+      const mobile = dialog?.querySelector("site-search");
+      const openButton = this.querySelector<HTMLButtonElement>("[data-search-dialog-open]");
+      const closeButton = dialog?.querySelector("[data-search-dialog-close]");
+      if (!dialog || !openButton || !(desktop instanceof SiteSearch) || !(mobile instanceof SiteSearch)) return;
+
+      this.listeners = new AbortController();
+      const { signal } = this.listeners;
+      openButton.addEventListener("click", () => dialog.showModal(), { signal });
+      closeButton?.addEventListener("click", () => dialog.close(), { signal });
+      dialog.addEventListener(
+        "click",
+        (event) => {
+          if (event.target === dialog) dialog.close();
+        },
+        { signal },
       );
 
-      trigger?.addEventListener("click", () => dialog.showModal());
-      dialog.querySelector("[data-search-dialog-close]")?.addEventListener("click", () => dialog.close());
-      dialog.addEventListener("click", (event) => {
-        // Clicks on the backdrop target the dialog itself.
-        if (event.target === dialog) dialog.close();
+      this.observer = new ResizeObserver(() => {
+        if (dialog.open && openButton.getClientRects().length === 0) dialog.close();
       });
-    });
-  };
+      this.observer.observe(openButton);
 
-  // The dialog is a mobile-only surface; close it when the layout grows past the trigger's breakpoint.
-  window.addEventListener(
-    "resize",
-    () => {
-      document.querySelectorAll<HTMLDialogElement>("[data-search-dialog][open]").forEach((dialog) => {
-        const trigger = document.querySelector<HTMLElement>(`[aria-controls="${CSS.escape(dialog.id)}"]`);
-        if (trigger && isHidden(trigger)) dialog.close();
-      });
-    },
-    { passive: true },
-  );
+      document.addEventListener(
+        "click",
+        (event) => {
+          const trigger =
+            event.target instanceof Element ? event.target.closest<HTMLElement>("[data-search-query]") : null;
+          const query = trigger?.dataset.searchQuery;
+          if (!query) return;
 
-  // Elements marked with `data-search-query`, such as home page categories, run a search for their text: in the header
-  // field when it is visible, otherwise in the mobile search dialog.
-  document.addEventListener("click", (event) => {
-    const trigger = event.target instanceof Element ? event.target.closest<HTMLElement>("[data-search-query]") : null;
-    const query = trigger?.dataset.searchQuery;
-    if (!query) return;
-
-    const headerInput = document.querySelector<HTMLInputElement>("#site-search-input");
-    const headerSearch = headerInput?.closest<HTMLElement>("site-search");
-    let input = headerSearch && !isHidden(headerSearch) ? headerInput : null;
-
-    if (!input) {
-      const dialog = document.querySelector<HTMLDialogElement>("[data-search-dialog]");
-      if (!dialog) return;
-      if (!dialog.open) dialog.showModal();
-      input = dialog.querySelector("input");
+          if (desktop.getClientRects().length > 0) {
+            desktop.search(query);
+          } else {
+            if (!dialog.open) dialog.showModal();
+            mobile.search(query);
+          }
+        },
+        { signal },
+      );
     }
 
-    if (!input) return;
-    input.value = query;
-    input.focus();
-    input.dispatchEvent(new Event("input", { bubbles: true }));
-  });
+    disconnectedCallback() {
+      this.listeners?.abort();
+      this.observer?.disconnect();
+    }
+  }
 
-  setupSearchDialogs();
-  document.addEventListener("astro:page-load", setupSearchDialogs);
+  if (!customElements.get("site-search-controls")) customElements.define("site-search-controls", SiteSearchControls);
 </script>

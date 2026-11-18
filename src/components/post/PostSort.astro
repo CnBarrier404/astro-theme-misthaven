@@ -1,32 +1,30 @@
 ---
 import Icon from "@/components/ui/Icon.astro";
 import { isCommentViewCountEnabled } from "@/config/commentConfig";
-import { getTranslator, I18nKey } from "@/i18n";
-import { dropdownMotionClass } from "@/utils/motion";
+import { I18nKey, t } from "@/i18n";
+import { anchoredPopoverClass, popoverMotionClass } from "@/utils/motion";
 
 interface Props {
   targetId: string;
 }
 
 const { targetId } = Astro.props;
-const t = getTranslator();
 const menuId = `${targetId}-sort-menu`;
-const sortOptions = [
+const options = [
   { value: "latest", label: t(I18nKey.sortLatest) },
   ...(isCommentViewCountEnabled ? [{ value: "views", label: t(I18nKey.sortMostRead) }] : []),
 ];
 ---
 
-<div class="relative flex-none" data-post-sort data-post-sort-mode="latest" data-post-sort-target={targetId}>
+<post-sort class="relative flex-none" data-target={targetId}>
   <button
     class="group inline-flex h-10 cursor-pointer items-center gap-2 rounded-panel border border-border bg-panel px-4 text-sm text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong focus-visible:border-focus-ring focus-visible:text-accent-strong focus-visible:outline-hidden"
     type="button"
     aria-label={t(I18nKey.postSort)}
-    aria-controls={menuId}
     aria-expanded="false"
-    data-post-sort-trigger
+    popovertarget={menuId}
   >
-    <span data-post-sort-current>{t(I18nKey.sortLatest)}</span>
+    <span data-current-sort>{options[0].label}</span>
     <Icon
       class="size-4 rotate-90 text-muted transition-transform duration-200 ease-soft group-aria-expanded:-rotate-90"
       name="chevron"
@@ -36,27 +34,25 @@ const sortOptions = [
 
   <div
     class:list={[
-      "absolute top-full right-0 z-10 mt-2 w-max min-w-full rounded-panel border border-border bg-panel p-1",
-      dropdownMotionClass,
+      "z-10 w-max min-w-[anchor-size(width,var(--popover-trigger-width))] rounded-panel border border-border bg-panel p-1 supports-not-[top:anchor(bottom)]:min-w-(--popover-trigger-width)",
+      anchoredPopoverClass,
+      popoverMotionClass,
     ]}
     id={menuId}
-    data-post-sort-menu
+    data-anchored-popover
+    popover
   >
-    {sortOptions.map(({ value, label }, index) => (
+    {options.map(({ value, label }, index) => (
       <button
-        class="flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-left text-sm whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong focus-visible:bg-accent-soft focus-visible:text-accent-strong focus-visible:outline-hidden aria-pressed:text-accent-strong"
+        class="group flex w-full cursor-pointer items-center gap-2 rounded-lg px-3 py-2 text-start text-sm whitespace-nowrap text-text-soft transition-colors hover:bg-accent-soft hover:text-accent-strong focus-visible:bg-accent-soft focus-visible:text-accent-strong focus-visible:outline-hidden aria-pressed:text-accent-strong"
         type="button"
         aria-pressed={index === 0 ? "true" : "false"}
-        data-post-sort-label={label}
-        data-post-sort-option={value}
+        data-sort-option={value}
+        data-sort-label={label}
       >
         <span
-          class:list={[
-            "grid size-4 shrink-0 place-items-center text-accent-strong transition-opacity duration-150",
-            index > 0 && "opacity-0",
-          ]}
+          class="grid size-4 shrink-0 place-items-center text-accent-strong opacity-0 transition-opacity duration-150 group-aria-pressed:opacity-100"
           aria-hidden="true"
-          data-post-sort-check
         >
           <Icon class="size-3.5" name="check" size={14} />
         </span>
@@ -64,182 +60,41 @@ const sortOptions = [
       </button>
     ))}
   </div>
-</div>
+</post-sort>
 
 <script>
-  import { fadeInUpdatedText, softEasing } from "@/utils/motion";
+  import type { PostListElement } from "./postList";
 
-  type SortMode = "latest" | "views";
-  type ViewCounts = Record<string, number>;
+  class PostSortElement extends HTMLElement {
+    connectedCallback() {
+      const trigger = this.querySelector<HTMLButtonElement>("button[popovertarget]");
+      const menu = this.querySelector<HTMLElement>("[popover]");
+      const current = trigger?.querySelector("[data-current-sort]");
+      const targetId = this.dataset.target;
 
-  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
-  const activeItemAnimations = new WeakMap<HTMLElement, Animation>();
+      if (!trigger || !menu || !current || !targetId) return;
 
-  const getNumericData = (item: HTMLElement, key: "publishedAt" | "viewCount") => {
-    return Number(item.dataset[key] ?? 0);
-  };
+      menu.ontoggle = () => {
+        trigger.setAttribute("aria-expanded", String(menu.matches(":popover-open")));
+      };
 
-  const cancelItemAnimations = (items: HTMLElement[]) => {
-    items.forEach((item) => {
-      activeItemAnimations.get(item)?.cancel();
-      activeItemAnimations.delete(item);
-    });
-  };
+      menu.onclick = (event) => {
+        const option =
+          event.target instanceof Element ? event.target.closest<HTMLButtonElement>("[data-sort-option]") : null;
+        const mode = option?.dataset.sortOption;
+        const list = document.getElementById(targetId) as PostListElement | null;
+        if (!option || (mode !== "latest" && mode !== "views") || !list?.sortBy) return;
 
-  const getVisibleItemPositions = (items: HTMLElement[]) => {
-    return new Map(items.filter((item) => !item.hidden).map((item) => [item, item.getBoundingClientRect()]));
-  };
-
-  const animatePostItems = (items: HTMLElement[], previousPositions: Map<HTMLElement, DOMRect>) => {
-    if (reducedMotion.matches) return;
-
-    items.forEach((item) => {
-      if (item.hidden) return;
-
-      const previousPosition = previousPositions.get(item);
-      const currentPosition = item.getBoundingClientRect();
-      const keyframes = previousPosition
-        ? [
-            {
-              transform: `translate(${previousPosition.left - currentPosition.left}px, ${previousPosition.top - currentPosition.top}px)`,
-            },
-            { transform: "translate(0, 0)" },
-          ]
-        : [
-            { opacity: 0, transform: "translateY(8px)" },
-            { opacity: 1, transform: "translateY(0)" },
-          ];
-
-      if (
-        previousPosition &&
-        previousPosition.left === currentPosition.left &&
-        previousPosition.top === currentPosition.top
-      ) {
-        return;
-      }
-
-      const animation = item.animate(keyframes, { duration: 260, easing: softEasing });
-      activeItemAnimations.set(item, animation);
-      animation.finished
-        .then(() => {
-          if (activeItemAnimations.get(item) === animation) activeItemAnimations.delete(item);
-        })
-        .catch(() => {});
-    });
-  };
-
-  const sortPostList = (sort: HTMLElement) => {
-    const targetId = sort.dataset.postSortTarget;
-    const list = targetId ? document.getElementById(targetId) : null;
-
-    if (!(list instanceof HTMLOListElement)) return;
-
-    const mode = (sort.dataset.postSortMode ?? "latest") as SortMode;
-    const items = [...list.querySelectorAll<HTMLElement>("[data-post-list-item]")];
-    const limit = Number(list.dataset.limit ?? items.length);
-    cancelItemAnimations(items);
-    const previousPositions = getVisibleItemPositions(items);
-
-    items.sort((left, right) => {
-      if (mode === "views") {
-        const viewDifference = getNumericData(right, "viewCount") - getNumericData(left, "viewCount");
-        if (viewDifference !== 0) return viewDifference;
-      }
-
-      const dateDifference = getNumericData(right, "publishedAt") - getNumericData(left, "publishedAt");
-      return dateDifference || (left.dataset.postPath ?? "").localeCompare(right.dataset.postPath ?? "");
-    });
-
-    items.forEach((item, index) => {
-      item.hidden = index >= limit;
-      list.append(item);
-    });
-
-    animatePostItems(items, previousPositions);
-  };
-
-  // The menu's open and close motion lives in CSS; this only flips the state attributes.
-  const setPostSortOpen = (sort: HTMLElement, open: boolean) => {
-    const trigger = sort.querySelector<HTMLButtonElement>("[data-post-sort-trigger]");
-    const menu = sort.querySelector<HTMLElement>("[data-post-sort-menu]");
-
-    if (!trigger || !menu) return;
-
-    trigger.setAttribute("aria-expanded", String(open));
-    menu.toggleAttribute("data-open", open);
-  };
-
-  const closePostSort = (sort: HTMLElement) => setPostSortOpen(sort, false);
-
-  const setupPostSort = () => {
-    document.querySelectorAll<HTMLElement>("[data-post-sort]").forEach((sort) => {
-      if (sort.dataset.postSortReady) return;
-
-      const trigger = sort.querySelector<HTMLButtonElement>("[data-post-sort-trigger]");
-      const menu = sort.querySelector<HTMLElement>("[data-post-sort-menu]");
-      const current = sort.querySelector<HTMLElement>("[data-post-sort-current]");
-      const options = sort.querySelectorAll<HTMLButtonElement>("[data-post-sort-option]");
-
-      if (!trigger || !menu || !current) return;
-
-      sort.dataset.postSortReady = "true";
-      trigger.addEventListener("click", () => {
-        const shouldOpen = trigger.getAttribute("aria-expanded") !== "true";
-        document.querySelectorAll<HTMLElement>("[data-post-sort]").forEach(closePostSort);
-        if (shouldOpen) setPostSortOpen(sort, true);
-      });
-
-      options.forEach((option) => {
-        option.addEventListener("click", () => {
-          const mode = (option.dataset.postSortOption ?? "latest") as SortMode;
-          sort.dataset.postSortMode = mode;
-          current.textContent = option.dataset.postSortLabel ?? option.textContent?.trim() ?? "";
-
-          options.forEach((candidate) => {
-            candidate.setAttribute("aria-pressed", String(candidate === option));
-            candidate
-              .querySelector<HTMLElement>("[data-post-sort-check]")
-              ?.classList.toggle("opacity-0", candidate !== option);
-          });
-
-          sortPostList(sort);
-          closePostSort(sort);
+        list.sortBy(mode);
+        current.textContent = option.dataset.sortLabel ?? "";
+        menu.querySelectorAll("[data-sort-option]").forEach((button) => {
+          button.setAttribute("aria-pressed", String(button === option));
         });
-      });
-    });
-  };
+        menu.hidePopover();
+        trigger.focus();
+      };
+    }
+  }
 
-  document.addEventListener("pointerdown", (event) => {
-    const target = event.target;
-
-    document.querySelectorAll<HTMLElement>("[data-post-sort]").forEach((sort) => {
-      if (!(target instanceof Node) || !sort.contains(target)) closePostSort(sort);
-    });
-  });
-
-  document.addEventListener("post-view-counts", (event) => {
-    const counts = (event as CustomEvent<{ counts?: ViewCounts }>).detail?.counts;
-    if (!counts) return;
-
-    document.querySelectorAll<HTMLElement>("[data-post-list-item]").forEach((item) => {
-      const path = item.dataset.postPath;
-      const count = path ? counts[path] : undefined;
-      if (typeof count !== "number" || !Number.isFinite(count)) return;
-
-      item.dataset.viewCount = String(count);
-      const value = item.querySelector<HTMLElement>("[data-post-card-view-value]");
-      const label = count > 0 ? String(count) : "-";
-      if (value && value.textContent?.trim() !== label) {
-        value.textContent = label;
-        fadeInUpdatedText(value);
-      }
-    });
-
-    document.querySelectorAll<HTMLElement>("[data-post-sort]").forEach((sort) => {
-      if (sort.dataset.postSortMode === "views") sortPostList(sort);
-    });
-  });
-
-  setupPostSort();
-  document.addEventListener("astro:page-load", setupPostSort);
+  customElements.define("post-sort", PostSortElement);
 </script>

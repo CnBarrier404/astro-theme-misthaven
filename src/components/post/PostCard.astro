@@ -1,17 +1,19 @@
 ---
+import { viewCountPlaceholder } from "@/components/comments/viewCounts";
 import DraftBadge from "@/components/ui/DraftBadge.astro";
 import IconText from "@/components/ui/IconText.astro";
 import TagList from "@/components/ui/TagList.astro";
 import { isCommentViewCountEnabled } from "@/config/commentConfig";
-import { getTranslator, I18nKey } from "@/i18n";
-import { formatPostDate, getPostHref, type PostEntry } from "@/utils/posts";
+import { I18nKey, t } from "@/i18n";
+import { getPostHref } from "@/utils/paths";
+import { formatPostDate } from "@/utils/postDates";
+import type { PostEntry } from "@/utils/posts";
 
 interface Props {
   post: PostEntry;
 }
 
 const { post } = Astro.props;
-const t = getTranslator();
 const { title, description, publishedAt, category, tags, draft } = post.data;
 const href = getPostHref(post);
 ---
@@ -27,7 +29,6 @@ const href = getPostHref(post);
     </a>
   </h2>
 
-  <!-- Shared list columns keep metadata aligned across cards with different category names. -->
   <div
     class="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm text-muted tablet:col-span-full tablet:grid tablet:grid-cols-subgrid"
     aria-label={t(I18nKey.postInformation)}
@@ -45,7 +46,7 @@ const href = getPostHref(post);
         <span>
           {t(I18nKey.postViews)}{" "}
           <span class="tabular-nums" aria-live="polite" data-post-card-view-value>
-            -
+            {viewCountPlaceholder}
           </span>
         </span>
       </IconText>
@@ -55,6 +56,10 @@ const href = getPostHref(post);
 
   <p class="m-0 line-clamp-2 text-sm leading-6 text-text-soft tablet:col-span-full">{description}</p>
   {tags.length > 0 && (
-    <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} linked class="tablet:col-span-full" />
+    <TagList
+      tags={tags}
+      ariaLabel={t(I18nKey.postTagsForTitle, { title })}
+      class="tablet:col-span-full [&>a]:relative [&>a]:z-10"
+    />
   )}
 </article>

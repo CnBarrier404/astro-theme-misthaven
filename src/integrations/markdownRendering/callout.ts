@@ -1,54 +1,64 @@
 import type { Element, ElementContent } from "hast";
+import type { HastPluginDefinition, HastVisitorContext } from "satteri";
 
-interface HastVisitorContext {
-  setProperty(node: Readonly<Element>, key: string, value: unknown): void;
-  textContent(node: Readonly<Element>): string;
-}
+import { I18nKey } from "../../i18n/i18nKey";
+import type { Translator } from "../../types/i18n";
 
-export type CalloutType = "note" | "tip" | "important" | "warning" | "caution";
+const callouts = {
+  note: {
+    title: I18nKey.calloutNote,
+    icon: [
+      { type: "element", tagName: "circle", properties: { cx: "12", cy: "12", r: "9" }, children: [] },
+      { type: "element", tagName: "path", properties: { d: "M12 10v6" }, children: [] },
+      { type: "element", tagName: "path", properties: { d: "M12 7h.01" }, children: [] },
+    ],
+  },
+  tip: {
+    title: I18nKey.calloutTip,
+    icon: [
+      { type: "element", tagName: "path", properties: { d: "M9 18h6M10 22h4" }, children: [] },
+      {
+        type: "element",
+        tagName: "path",
+        properties: { d: "M8.5 14.5A6 6 0 1 1 15.5 14.5c-.9.7-1.5 1.5-1.5 2.5h-4c0-1-.6-1.8-1.5-2.5Z" },
+        children: [],
+      },
+      { type: "element", tagName: "path", properties: { d: "M8 11h8M12 5v2" }, children: [] },
+    ],
+  },
+  important: {
+    title: I18nKey.calloutImportant,
+    icon: [
+      { type: "element", tagName: "circle", properties: { cx: "12", cy: "12", r: "9" }, children: [] },
+      { type: "element", tagName: "path", properties: { d: "M12 8v5" }, children: [] },
+      { type: "element", tagName: "path", properties: { d: "M12 16h.01" }, children: [] },
+    ],
+  },
+  warning: {
+    title: I18nKey.calloutWarning,
+    icon: [
+      { type: "element", tagName: "path", properties: { d: "m12 3 9 18H3L12 3Z" }, children: [] },
+      { type: "element", tagName: "path", properties: { d: "M12 9v4" }, children: [] },
+      { type: "element", tagName: "path", properties: { d: "M12 17h.01" }, children: [] },
+    ],
+  },
+  caution: {
+    title: I18nKey.calloutCaution,
+    icon: [
+      {
+        type: "element",
+        tagName: "path",
+        properties: { d: "m7.86 2 8.28 0L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2Z" },
+        children: [],
+      },
+      { type: "element", tagName: "path", properties: { d: "M12 8v5" }, children: [] },
+      { type: "element", tagName: "path", properties: { d: "M12 16h.01" }, children: [] },
+    ],
+  },
+} satisfies Record<string, { title: I18nKey; icon: ElementContent[] }>;
 
-/** Titles shown when a callout marker has no custom title, such as `> [!NOTE]`. */
-export type CalloutTitles = Record<CalloutType, string>;
-
-const calloutPattern = /^\[!(NOTE|TIP|IMPORTANT|WARNING|CAUTION)\](?:[ \t]+)?/i;
-
-const calloutIconPaths: Record<CalloutType, ElementContent[]> = {
-  note: [
-    { type: "element", tagName: "circle", properties: { cx: "12", cy: "12", r: "9" }, children: [] },
-    { type: "element", tagName: "path", properties: { d: "M12 10v6" }, children: [] },
-    { type: "element", tagName: "path", properties: { d: "M12 7h.01" }, children: [] },
-  ],
-  tip: [
-    { type: "element", tagName: "path", properties: { d: "M9 18h6M10 22h4" }, children: [] },
-    {
-      type: "element",
-      tagName: "path",
-      properties: { d: "M8.5 14.5A6 6 0 1 1 15.5 14.5c-.9.7-1.5 1.5-1.5 2.5h-4c0-1-.6-1.8-1.5-2.5Z" },
-      children: [],
-    },
-    { type: "element", tagName: "path", properties: { d: "M8 11h8M12 5v2" }, children: [] },
-  ],
-  important: [
-    { type: "element", tagName: "circle", properties: { cx: "12", cy: "12", r: "9" }, children: [] },
-    { type: "element", tagName: "path", properties: { d: "M12 8v5" }, children: [] },
-    { type: "element", tagName: "path", properties: { d: "M12 16h.01" }, children: [] },
-  ],
-  warning: [
-    { type: "element", tagName: "path", properties: { d: "m12 3 9 18H3L12 3Z" }, children: [] },
-    { type: "element", tagName: "path", properties: { d: "M12 9v4" }, children: [] },
-    { type: "element", tagName: "path", properties: { d: "M12 17h.01" }, children: [] },
-  ],
-  caution: [
-    {
-      type: "element",
-      tagName: "path",
-      properties: { d: "m7.86 2 8.28 0L22 7.86v8.28L16.14 22H7.86L2 16.14V7.86L7.86 2Z" },
-      children: [],
-    },
-    { type: "element", tagName: "path", properties: { d: "M12 8v5" }, children: [] },
-    { type: "element", tagName: "path", properties: { d: "M12 16h.01" }, children: [] },
-  ],
-};
+type CalloutType = keyof typeof callouts;
+const calloutPattern = new RegExp(`^\\[!(${Object.keys(callouts).join("|")})\\][ \\t]*`, "i");
 
 function createCalloutIcon(type: CalloutType): Element {
   return {
@@ -65,7 +75,7 @@ function createCalloutIcon(type: CalloutType): Element {
       ariaHidden: "true",
       focusable: "false",
     },
-    children: calloutIconPaths[type],
+    children: callouts[type].icon,
   };
 }
 
@@ -149,15 +159,12 @@ function splitParagraph(paragraph: Readonly<Element>, markerLength: number, cont
   };
 }
 
-function getCalloutData(node: Readonly<Element>, context: HastVisitorContext, titles: CalloutTitles) {
+function getCalloutData(node: Readonly<Element>, context: HastVisitorContext) {
   const firstParagraphData = getFirstParagraph(node);
   if (!firstParagraphData) return;
 
   const { index, paragraph } = firstParagraphData;
-  const text = context.textContent(paragraph);
-  const lineBreakIndex = text.search(/\r?\n/);
-  const markerLine = lineBreakIndex === -1 ? text : text.slice(0, lineBreakIndex);
-  const match = markerLine.match(calloutPattern);
+  const match = context.textContent(paragraph).match(calloutPattern);
 
   if (!match) return;
 
@@ -167,8 +174,7 @@ function getCalloutData(node: Readonly<Element>, context: HastVisitorContext, ti
   return {
     index,
     type,
-    title: split.title || titles[type],
-    titleChildren: split.titleChildren,
+    titleChildren: split.title ? split.titleChildren : [],
     bodyParagraph: split.bodyParagraph,
   };
 }
@@ -183,12 +189,12 @@ function getClassNames(node: Readonly<Element>) {
   return typeof className === "string" ? [className] : [];
 }
 
-export const createCalloutPlugin = (titles: CalloutTitles) => ({
+export const createCalloutPlugin = (t: Translator): HastPluginDefinition => ({
   name: "callout-icons",
   element: {
     filter: ["blockquote"],
     visit(node: Readonly<Element>, context: HastVisitorContext) {
-      const callout = getCalloutData(node, context, titles);
+      const callout = getCalloutData(node, context);
       if (!callout) return;
 
       const classNames = getClassNames(node);
@@ -200,7 +206,7 @@ export const createCalloutPlugin = (titles: CalloutTitles) => ({
           createCalloutIcon(callout.type),
           ...(callout.titleChildren.length > 0
             ? callout.titleChildren
-            : ([{ type: "text", value: callout.title }] as ElementContent[])),
+            : [{ type: "text" as const, value: t(callouts[callout.type].title) }]),
         ],
       };
 

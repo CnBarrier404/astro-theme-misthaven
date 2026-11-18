@@ -1,10 +1,13 @@
 ---
 import { footerConfig } from "@/config/footerConfig";
 import { siteConfig } from "@/config/siteConfig";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 
 const currentYear = new Date().getFullYear();
-const t = getTranslator();
+const credits = [
+  { label: "Astro", href: "https://astro.build" },
+  { label: "Misthaven", href: "https://github.com/CnBarrier404/astro-theme-misthaven" },
+];
 ---
 
 <footer class="mx-auto mt-4 w-layout-width max-w-page py-6 text-center text-xs leading-7 text-muted tablet:w-layout-width-tablet tablet:py-8 tablet:text-sm wide:w-layout-width-wide">
@@ -23,22 +26,18 @@ const t = getTranslator();
   <p class="m-0">{t(I18nKey.footerCopyright, { year: currentYear, owner: siteConfig.owner })}</p>
   <p class="mt-1 mb-0">
     {t(I18nKey.footerPoweredBy)}{" "}
-    <a
-      class="font-semibold text-text-soft transition-colors hover:text-accent-strong"
-      href="https://astro.build"
-      target="_blank"
-      rel="noreferrer"
-    >
-      Astro
-    </a>{" "}
-    &amp;{" "}
-    <a
-      class="font-semibold text-text-soft transition-colors hover:text-accent-strong"
-      href="https://github.com/CnBarrier404/astro-theme-misthaven"
-      target="_blank"
-      rel="noreferrer"
-    >
-      Misthaven
-    </a>
+    {credits.map(({ label, href }, index) => (
+      <>
+        {index > 0 && " & "}
+        <a
+          class="font-semibold text-text-soft transition-colors hover:text-accent-strong"
+          href={href}
+          target="_blank"
+          rel="noreferrer"
+        >
+          {label}
+        </a>
+      </>
+    ))}
   </p>
 </footer>

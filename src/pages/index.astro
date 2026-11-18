@@ -1,5 +1,91 @@
 ---
-import HomePage from "@/components/home/HomePage.astro";
+import PostList from "@/components/post/PostList.astro";
+import Card from "@/components/ui/Card.astro";
+import CategoryBreakdown from "@/components/home/CategoryBreakdown.astro";
+import Hero from "@/components/home/Hero.astro";
+import PopularTags from "@/components/home/PopularTags.astro";
+import PostSort from "@/components/post/PostSort.astro";
+import SiteStats from "@/components/home/SiteStats.astro";
+import TextLink from "@/components/ui/TextLink.astro";
+import { recentPostLimit } from "@/config/postConfig";
+import { siteConfig } from "@/config/siteConfig";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { I18nKey, t } from "@/i18n";
+import type { CategoryCount, SiteStat } from "@/types/home";
+import { resolveSiteAsset } from "@/utils/assets";
+import { formatPostDate } from "@/utils/postDates";
+import { countPostWords, getLatestUpdate, getVisiblePosts, groupPostsBy, groupPostsByTag } from "@/utils/posts";
+
+const posts = await getVisiblePosts();
+const popularTags = groupPostsByTag(posts)
+  .slice(0, 6)
+  .map(({ name }) => name);
+const categories = groupPostsBy(posts, ({ data }) => [data.category])
+  .slice(0, 6)
+  .map(({ name, posts }) => ({ name, count: posts.length })) satisfies CategoryCount[];
+const numberFormat = new Intl.NumberFormat(siteConfig.lang);
+const totalWords = posts.reduce((total, post) => total + countPostWords(post), 0);
+const latestUpdate = getLatestUpdate(posts);
+const stats: SiteStat[] = [
+  { value: numberFormat.format(posts.length), icon: "article", label: t(I18nKey.statsPosts) },
+  { value: numberFormat.format(totalWords), icon: "pen", label: t(I18nKey.statsWords) },
+];
+
+if (latestUpdate) {
+  stats.push({ value: formatPostDate(latestUpdate), icon: "history", label: t(I18nKey.statsLastUpdated) });
+}
+const heroImageLight = resolveSiteAsset(siteConfig.heroImageLight);
+const heroImageDark = resolveSiteAsset(siteConfig.heroImageDark);
 ---
 
-<HomePage />
+<BaseLayout title={`${siteConfig.title} · ${siteConfig.subTitle}`}>
+  <Hero
+    title={siteConfig.title}
+    subTitle={siteConfig.subTitle}
+    description={siteConfig.description}
+    imageLightSrc={heroImageLight}
+    imageDarkSrc={heroImageDark}
+  />
+
+  <div
+    class="mt-5 grid grid-cols-1 gap-5 tablet:mt-6 tablet:gap-6 wide:grid-cols-[minmax(0,8fr)_minmax(0,2fr)] wide:gap-y-0"
+    id="latest"
+  >
+    {posts.length > 0 ? (
+      <section
+        class="wide:col-start-1 wide:row-span-2 wide:row-start-1 wide:grid wide:grid-rows-subgrid"
+        aria-labelledby="recent-title"
+      >
+        <div class="mb-4 flex h-10 items-center justify-between gap-4">
+          <h2 class="m-0 text-lg font-semibold" id="recent-title">
+            {t(I18nKey.postsList)}
+          </h2>
+          <PostSort targetId="home-post-list" />
+        </div>
+        <div>
+          <PostList id="home-post-list" posts={posts} limit={recentPostLimit} ariaLabel={t(I18nKey.postsList)} />
+          <div class="mt-5 flex justify-end">
+            <TextLink href="/posts">{t(I18nKey.viewAllPosts)}</TextLink>
+          </div>
+        </div>
+      </section>
+    ) : (
+      <Card as="section" class="self-start px-6 py-10 text-center text-muted wide:col-start-1 wide:row-start-1">
+        <p class="m-0">{t(I18nKey.noPublishedPosts)}</p>
+      </Card>
+    )}
+    <aside
+      class:list={[
+        "grid grid-cols-1 content-start gap-4 tablet:gap-6 tablet:max-wide:grid-cols-2 wide:col-start-2",
+        posts.length > 0 ? "wide:row-start-2" : "wide:row-start-1",
+      ]}
+      aria-label={t(I18nKey.siteInformation)}
+    >
+      <SiteStats stats={stats} title={t(I18nKey.siteOverview)} />
+      {popularTags.length > 0 && (
+        <PopularTags tags={popularTags} title={t(I18nKey.popularTags)} tagsLabel={t(I18nKey.navigationTags)} />
+      )}
+      {categories.length > 0 && <CategoryBreakdown categories={categories} title={t(I18nKey.categoryBreakdown)} />}
+    </aside>
+  </div>
+</BaseLayout>

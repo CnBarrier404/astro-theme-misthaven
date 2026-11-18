@@ -1,5 +1,71 @@
 ---
-import TagsPage from "@/components/tags/TagsPage.astro";
+import Card from "@/components/ui/Card.astro";
+import EmptyState from "@/components/ui/EmptyState.astro";
+import PageHeader from "@/components/ui/PageHeader.astro";
+import TextLink from "@/components/ui/TextLink.astro";
+import { siteConfig } from "@/config/siteConfig";
+import { I18nKey, t } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getPostHref, getTagHref } from "@/utils/paths";
+import { formatPostDate } from "@/utils/postDates";
+import { formatPostCount, getVisiblePosts, groupPostsByTag } from "@/utils/posts";
+
+/** Recent posts listed under each tag; the tag page lists the rest. */
+const previewSize = 3;
+
+const tags = groupPostsByTag(await getVisiblePosts());
+const pageDescription = t(I18nKey.tagsPageDescription, { owner: siteConfig.owner });
 ---
 
-<TagsPage />
+<BaseLayout title={`${t(I18nKey.navigationTags)} · ${siteConfig.title}`} description={pageDescription}>
+  <div class="mx-auto w-full max-w-post">
+    <PageHeader title={t(I18nKey.navigationTags)} intro={t(I18nKey.tagsPageIntro)}>
+      <p class="m-0 flex-none text-sm text-muted">{t(I18nKey.tagsCount, { count: tags.length })}</p>
+    </PageHeader>
+
+    {tags.length > 0 ? (
+      <Card as="div" class="mt-4 px-5 py-6 tablet:mt-5 tablet:px-9 tablet:py-8">
+        <div class="grid gap-x-10 gap-y-8 tablet:grid-cols-2">
+          {tags.map(({ name, posts }, index) => (
+            <section aria-labelledby={`tag-${index}`}>
+              <div class="flex items-baseline justify-between gap-3 border-b border-border pb-2">
+                <h2 class="m-0 min-w-0 text-base font-semibold wrap-anywhere" id={`tag-${index}`}>
+                  <a class="transition-colors hover:text-accent-strong" href={getTagHref(name)}>
+                    {name}
+                  </a>
+                </h2>
+                <span class="flex-none text-xs text-muted">{formatPostCount(posts.length)}</span>
+              </div>
+
+              <ul class="mt-2 mb-0 list-none p-0">
+                {posts.slice(0, previewSize).map((post) => (
+                  <li>
+                    <a
+                      class="group -mx-2 flex items-baseline gap-3 rounded-md px-2 py-2 text-sm transition-colors hover:bg-accent-soft/50"
+                      href={getPostHref(post)}
+                    >
+                      <time class="flex-none text-muted tabular-nums" datetime={post.data.publishedAt.toISOString()}>
+                        {formatPostDate(post.data.publishedAt)}
+                      </time>
+                      <span class="min-w-0 truncate text-text-soft transition-colors group-hover:text-accent-strong">
+                        {post.data.title}
+                      </span>
+                    </a>
+                  </li>
+                ))}
+              </ul>
+
+              {posts.length > previewSize && (
+                <TextLink class="mt-2" href={getTagHref(name)}>
+                  {t(I18nKey.viewAllPosts)}
+                </TextLink>
+              )}
+            </section>
+          ))}
+        </div>
+      </Card>
+    ) : (
+      <EmptyState icon="tag">{t(I18nKey.noPublishedPosts)}</EmptyState>
+    )}
+  </div>
+</BaseLayout>

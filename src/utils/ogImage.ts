@@ -9,14 +9,15 @@ import { createElement, type CSSProperties } from "satori/jsx";
 import { fontConfig } from "@/config/fontConfig";
 import { siteConfig } from "@/config/siteConfig";
 import type { FontDefinition } from "@/types/fontConfig";
-import { formatPostDate, type PostEntry } from "@/utils/posts";
+import { getSiteAssetPath } from "@/utils/assetPaths";
+import { ogImageSize } from "@/utils/ogMetadata";
+import { formatPostDate } from "@/utils/postDates";
+import type { PostEntry } from "@/utils/posts";
 
-const CARD_WIDTH = 1200;
-const CARD_HEIGHT = 630;
+const { width: CARD_WIDTH, height: CARD_HEIGHT } = ogImageSize;
 
 const PROJECT_ROOT = process.cwd();
 const PUBLIC_DIRECTORY = join(PROJECT_ROOT, "public");
-const ASSETS_DIRECTORY = join(PROJECT_ROOT, "src", "assets");
 
 const CARD_COLORS = {
   page: "#fdfdfc",
@@ -85,25 +86,14 @@ function toArrayBuffer(buffer: Buffer): ArrayBuffer {
   return buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
 }
 
-/**
- * Maps a site config asset path (for example `images/hero_light.png`) to the
- * filesystem path under `src/assets/`, mirroring `resolveSiteAsset`.
- */
-function siteAssetPath(configuredPath: string): string {
-  const normalized = configuredPath.trim().replaceAll("\\", "/");
-  const relative = normalized.startsWith("/src/assets/")
-    ? normalized.slice("/src/assets/".length)
-    : normalized.startsWith("src/assets/")
-      ? normalized.slice("src/assets/".length)
-      : normalized;
-  return join(ASSETS_DIRECTORY, ...relative.split("/").filter(Boolean));
-}
-
-async function resolveHeroBackground(): Promise<string> {
-  const configuredPaths = [siteConfig.heroImageLight, siteConfig.heroImageDark].filter((path) => path.trim() !== "");
+function resolveHeroBackground(): string {
+  const configuredPaths = [siteConfig.heroImageLight, siteConfig.heroImageDark];
 
   for (const configuredPath of configuredPaths) {
-    const filePath = siteAssetPath(configuredPath);
+    const assetPath = getSiteAssetPath(configuredPath);
+    if (!assetPath) continue;
+
+    const filePath = join(PROJECT_ROOT, assetPath);
     if (existsSync(filePath)) return filePath;
   }
 
@@ -116,7 +106,7 @@ async function resolveHeroBackground(): Promise<string> {
  * Uses the post cover when defined (resolved relative to the post directory),
  * otherwise falls back to the configured hero image (light, then dark).
  */
-async function resolvePostBackground(post: PostEntry): Promise<string> {
+function resolvePostBackground(post: PostEntry): string {
   const cover = post.data.cover;
 
   if (cover?.trim()) {
@@ -352,8 +342,7 @@ function renderCard(post: PostEntry, backgroundUri: string, siteHostname: string
 }
 
 export async function renderOgCard(post: PostEntry): Promise<Buffer> {
-  const [backgroundPath, fonts] = await Promise.all([resolvePostBackground(post), loadFonts()]);
-  const backgroundUri = await toDataUri(backgroundPath);
+  const [backgroundUri, fonts] = await Promise.all([toDataUri(resolvePostBackground(post)), loadFonts()]);
   const siteHostname = new URL(siteConfig.siteUrl).hostname;
   const fontFamily = fonts[0]?.name ?? "system-ui";
   const svg = await satori(renderCard(post, backgroundUri, siteHostname, fontFamily), {

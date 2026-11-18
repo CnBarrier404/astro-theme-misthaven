@@ -3,9 +3,10 @@ import Card from "@/components/ui/Card.astro";
 import Icon from "@/components/ui/Icon.astro";
 import IconText from "@/components/ui/IconText.astro";
 import { postConfig } from "@/config/postConfig";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 import { nudgeBackClass, nudgeForwardClass } from "@/utils/motion";
-import { getPostHref, type PostEntry } from "@/utils/posts";
+import { getPostHref } from "@/utils/paths";
+import type { PostEntry } from "@/utils/posts";
 
 interface Props {
   previousPost?: PostEntry;
@@ -13,9 +14,12 @@ interface Props {
 }
 
 const { previousPost, nextPost } = Astro.props;
-const t = getTranslator();
 const license = postConfig.license.trim();
-const hasNavigation = Boolean(previousPost || nextPost);
+const neighbors = [
+  { post: previousPost, label: I18nKey.postPrevious, linkLabel: I18nKey.postPreviousLink, next: false },
+  { post: nextPost, label: I18nKey.postNext, linkLabel: I18nKey.postNextLink, next: true },
+];
+const hasNavigation = neighbors.some(({ post }) => post !== undefined);
 ---
 
 {(license || hasNavigation) && (
@@ -27,36 +31,34 @@ const hasNavigation = Boolean(previousPost || nextPost);
     )}
 
     {hasNavigation && (
-      <Card as="nav" class="grid grid-cols-2 overflow-hidden" aria-label={t(I18nKey.postNavigation)}>
-        {previousPost ? (
-          <a
-            class="group flex min-h-24 min-w-0 items-center gap-3 border-r border-border px-4 py-4 transition-colors hover:bg-accent-soft focus-visible:-outline-offset-2 tablet:gap-4 tablet:px-6"
-            href={getPostHref(previousPost)}
-            aria-label={t(I18nKey.postPreviousLink, { title: previousPost.data.title })}
-          >
-            <Icon class:list={["flex-none rotate-180 text-accent-strong", nudgeBackClass]} name="arrow" size={20} />
-            <span class="min-w-0">
-              <span class="block text-xs font-medium text-accent-strong">{t(I18nKey.postPrevious)}</span>
-              <span class="mt-1 line-clamp-2 block text-sm leading-6 text-text-soft">{previousPost.data.title}</span>
-            </span>
-          </a>
-        ) : (
-          <span aria-hidden="true" />
-        )}
-        {nextPost ? (
-          <a
-            class="group flex min-h-24 min-w-0 items-center justify-end gap-3 px-4 py-4 text-right transition-colors hover:bg-accent-soft focus-visible:-outline-offset-2 tablet:gap-4 tablet:px-6"
-            href={getPostHref(nextPost)}
-            aria-label={t(I18nKey.postNextLink, { title: nextPost.data.title })}
-          >
-            <span class="min-w-0">
-              <span class="block text-xs font-medium text-accent-strong">{t(I18nKey.postNext)}</span>
-              <span class="mt-1 line-clamp-2 block text-sm leading-6 text-text-soft">{nextPost.data.title}</span>
-            </span>
-            <Icon class:list={["flex-none text-accent-strong", nudgeForwardClass]} name="arrow" size={20} />
-          </a>
-        ) : (
-          <span aria-hidden="true" />
+      <Card as="nav" class="grid grid-cols-1 overflow-hidden tablet:grid-cols-2" aria-label={t(I18nKey.postNavigation)}>
+        {neighbors.map(
+          ({ post, label, linkLabel, next }) =>
+            post && (
+              <a
+                class:list={[
+                  "group flex min-h-24 min-w-0 items-center gap-3 px-4 py-4 transition-colors hover:bg-accent-soft focus-visible:-outline-offset-2 tablet:gap-4 tablet:px-6",
+                  next
+                    ? "justify-end text-end tablet:col-start-2"
+                    : "border-border has-[+a]:border-b tablet:has-[+a]:border-e tablet:has-[+a]:border-b-0",
+                ]}
+                href={getPostHref(post)}
+                aria-label={t(linkLabel, { title: post.data.title })}
+              >
+                <Icon
+                  class:list={[
+                    "flex-none text-accent-strong",
+                    next ? ["order-last", nudgeForwardClass] : ["rotate-180", nudgeBackClass],
+                  ]}
+                  name="arrow"
+                  size={20}
+                />
+                <span class="min-w-0">
+                  <span class="block text-xs font-medium text-accent-strong">{t(label)}</span>
+                  <span class="mt-1 line-clamp-2 block text-sm leading-6 text-text-soft">{post.data.title}</span>
+                </span>
+              </a>
+            ),
         )}
       </Card>
     )}

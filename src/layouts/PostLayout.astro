@@ -1,22 +1,24 @@
 ---
 import CommentSection from "@/components/comments/CommentSection.astro";
-import CodeBlockCollapse from "@/components/post/CodeBlockCollapse.astro";
 import PostEndMatter from "@/components/post/PostEndMatter.astro";
 import PostFloatingActions from "@/components/post/PostFloatingActions.astro";
 import PostMeta from "@/components/post/PostMeta.astro";
 import PostOutdatedWarning from "@/components/post/PostOutdatedWarning.astro";
-import Spoiler from "@/components/post/Spoiler.astro";
 import TableOfContents from "@/components/post/TableOfContents.astro";
+import { readingGridClass } from "@/components/post/readingLayout";
 import Card from "@/components/ui/Card.astro";
 import DraftBadge from "@/components/ui/DraftBadge.astro";
+import ReadingBody from "@/components/prose/ReadingBody.astro";
 import TagList from "@/components/ui/TagList.astro";
 import TextLink from "@/components/ui/TextLink.astro";
 import { postConfig } from "@/config/postConfig";
-import { expressiveCodeConfig } from "@/config/expressiveCodeConfig";
+import { isCommentViewCountEnabled } from "@/config/commentConfig";
 import { siteConfig } from "@/config/siteConfig";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getPostHref, getPostMetrics, getPostOgImageHref } from "@/utils/posts";
+import { getPostOgImage } from "@/utils/ogMetadata";
+import { getPostHref } from "@/utils/paths";
+import { getPostModifiedAt } from "@/utils/postDates";
 import type { MarkdownHeading } from "astro";
 import type { CollectionEntry } from "astro:content";
 
@@ -28,59 +30,42 @@ interface Props {
 }
 
 const { post, headings, previousPost, nextPost } = Astro.props;
-const t = getTranslator();
 const { title, description, publishedAt, updatedAt, category, tags, draft } = post.data;
-const { wordCount, readingTime } = getPostMetrics(post);
 const pageKey = getPostHref(post);
+const viewCountId = isCommentViewCountEnabled ? `post-view-count-${post.id}` : undefined;
+const readingContentId = "post-reading-content";
 ---
 
 <BaseLayout
   title={`${title} · ${siteConfig.title}`}
   description={description}
-  ogImage={{
-    src: getPostOgImageHref(post),
-    width: 1200,
-    height: 630,
-    alt: `${title} · ${siteConfig.title}`,
-  }}
+  ogImage={getPostOgImage(post)}
   article={{ headline: title, publishedAt, updatedAt, section: category, tags }}
 >
-  <PostFloatingActions />
-  <Spoiler />
-  {expressiveCodeConfig.pluginCollapsible.enable && <CodeBlockCollapse />}
+  <PostFloatingActions contentId={readingContentId} />
 
-  <div class="mx-auto w-full max-w-reading wide:flex wide:max-w-chrome wide:items-start wide:justify-center wide:gap-8">
-    <div class="hidden w-sidebar shrink-0 wide:block" aria-hidden="true"></div>
-
-    <div class="w-full max-w-reading min-w-0">
+  <div class={readingGridClass}>
+    <div class="min-w-0 wide:col-start-2">
       <TextLink class="mb-4 ml-1" href="/posts">
         {t(I18nKey.backToPosts)}
       </TextLink>
 
-      <Card as="article" class="w-full overflow-hidden" data-reading-content>
+      <Card as="article" class="w-full overflow-hidden" id={readingContentId}>
         <header class="border-b border-border px-5 py-8 tablet:px-12 tablet:py-10">
           <h1 class="m-0 text-3xl leading-tight font-semibold tablet:text-4xl">{title}</h1>
 
-          <PostMeta
-            class="mt-4"
-            publishedAt={publishedAt}
-            updatedAt={updatedAt}
-            category={category}
-            wordCount={wordCount}
-            readingTime={readingTime}
-            pageKey={pageKey}
-          />
+          <PostMeta class="mt-4" post={post} viewCountId={viewCountId} />
 
           {(tags.length > 0 || draft) && (
             <div class="mt-4 flex flex-wrap items-center gap-2">
-              {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} linked />}
+              {tags.length > 0 && <TagList tags={tags} ariaLabel={t(I18nKey.postTagsForTitle, { title })} />}
               {draft && <DraftBadge>{t(I18nKey.postDraftPreview)}</DraftBadge>}
             </div>
           )}
 
           {postConfig.outdatedWarning.enabled && (
             <PostOutdatedWarning
-              lastUpdatedAt={updatedAt ?? publishedAt}
+              lastUpdatedAt={getPostModifiedAt(post.data)}
               thresholdDays={postConfig.outdatedWarning.days}
             />
           )}
@@ -88,14 +73,14 @@ const pageKey = getPostHref(post);
 
         <TableOfContents headings={headings} variant="inline" />
 
-        <div class="prose-content px-5 py-8 tablet:px-12 tablet:py-10 tablet:pb-14">
+        <ReadingBody>
           <slot />
-        </div>
+        </ReadingBody>
       </Card>
 
       <PostEndMatter previousPost={previousPost} nextPost={nextPost} />
 
-      <CommentSection pageKey={pageKey} pageTitle={title} />
+      <CommentSection pageKey={pageKey} pageTitle={title} viewCountId={viewCountId} />
     </div>
 
     <TableOfContents headings={headings} variant="sidebar" />

@@ -1,20 +1,13 @@
 ---
 import FriendCard from "@/components/friends/FriendCard.astro";
+import { getSiteInfoFields, siteFriendLink } from "@/components/friends/siteInfo";
 import Icon from "@/components/ui/Icon.astro";
-import { getTranslator, I18nKey } from "@/i18n";
-import { siteFriendLink } from "@/utils/friends";
+import { I18nKey, t } from "@/i18n";
 
-const t = getTranslator();
-const fields = [
-  { label: t(I18nKey.friendsSiteName), value: siteFriendLink.name },
-  { label: t(I18nKey.friendsSiteDescription), value: siteFriendLink.description },
-  { label: t(I18nKey.friendsSiteUrl), value: siteFriendLink.url },
-  { label: t(I18nKey.friendsAvatarUrl), value: siteFriendLink.avatar },
-];
+const fields = getSiteInfoFields();
 ---
 
-<!-- How this site looks as a friend card, followed by each field with a copy button. -->
-<section class="grid content-start gap-4" aria-labelledby="friends-site-info">
+<section class="grid content-start gap-4" aria-labelledby="friends-site-info" data-friends-site-info>
   <h3 class="m-0 text-sm font-semibold text-muted" id="friends-site-info">
     {t(I18nKey.friendsSiteInfo)}
   </h3>
@@ -60,10 +53,12 @@ const fields = [
       return;
     }
 
+    if (!button.isConnected) return;
+
     const copiedLabel = button.dataset.copiedLabel ?? "";
     button.toggleAttribute("data-copied", true);
     button.setAttribute("aria-label", copiedLabel);
-    const announcer = document.querySelector<HTMLElement>("[data-friends-copy-announcer]");
+    const announcer = button.closest("[data-friends-site-info]")?.querySelector("[data-friends-copy-announcer]");
     if (announcer) announcer.textContent = copiedLabel;
 
     clearTimeout(resetTimeouts.get(button));

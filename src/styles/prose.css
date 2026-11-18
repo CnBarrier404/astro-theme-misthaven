@@ -77,7 +77,6 @@
       }
     }
 
-    /* Callout variants only set colors; the shared rules below consume them. */
     & blockquote.prose-callout {
       background: var(--prose-callout-background);
       border-inline-start: 0;
@@ -221,7 +220,6 @@
       }
     }
 
-    /* Keyboard focus uses the shared `:focus-visible` ring from global.css. */
     & spoiler {
       padding-inline: 0.25rem;
       border-radius: var(--radius-sm);
@@ -283,7 +281,6 @@
     display: none;
   }
 
-  /* Match the collapse control to the site's semantic control colors. */
   & .ec-collapse__toggle {
     padding: 0.5rem 1rem;
     background-color: var(--color-surface);

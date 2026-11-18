@@ -1,17 +1,21 @@
-import type { FriendLink } from "@/types/friends";
+export interface FriendLink {
+  name: string;
+  url: string;
+  avatar?: string;
+  description?: string;
+}
 
 export const friendsConfig = {
   // 页面标题与描述；src/content/pages/friends.md 的 frontmatter 优先
   pageTitle: "友链",
   pageDescription: "Misthaven 的朋友们，以及交换友链的方式。",
 
-  // 显示在页面标题下方的一句话介绍
   intro: "散落在各处的好朋友，欢迎去他们那里坐坐",
 
   // “本站信息”中的站点描述；站点名称、链接与头像来自 siteConfig 的 title、siteUrl 与 gravatarUrl
   siteDescription: "一个简洁、安静的 Astro 博客主题",
 
-  // 友链列表，按填写顺序展示
+  // 友链按填写顺序展示。
   // `avatar` 填写图片的完整链接，留空时显示名称的首字
   // `description` 为一句话简介，可以省略
   links: [

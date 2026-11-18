@@ -1,20 +1,38 @@
 ---
-import TagPage from "@/components/tags/TagPage.astro";
-import { getTagCounts, getVisiblePosts } from "@/utils/posts";
+import PostList from "@/components/post/PostList.astro";
+import PageHeader from "@/components/ui/PageHeader.astro";
+import TextLink from "@/components/ui/TextLink.astro";
+import { siteConfig } from "@/config/siteConfig";
+import { I18nKey, t } from "@/i18n";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+import { groupPostsByTag, getVisiblePosts } from "@/utils/posts";
 import type { GetStaticPaths, InferGetStaticPropsType } from "astro";
 
 export const getStaticPaths = (async () => {
   const posts = await getVisiblePosts();
 
-  return getTagCounts(posts).map(({ name }) => ({
+  return groupPostsByTag(posts).map(({ name, posts }) => ({
     params: { tag: name },
-    props: { tag: name, posts: posts.filter((post) => post.data.tags.includes(name)) },
+    props: { tag: name, posts },
   }));
 }) satisfies GetStaticPaths;
 
 type Props = InferGetStaticPropsType<typeof getStaticPaths>;
 
-const { tag, posts } = Astro.props as Props;
+const { tag, posts } = Astro.props;
+const pageDescription = t(I18nKey.tagPageDescription, { owner: siteConfig.owner, tag });
 ---
 
-<TagPage tag={tag} posts={posts} />
+<BaseLayout title={`${tag} · ${t(I18nKey.navigationTags)} · ${siteConfig.title}`} description={pageDescription}>
+  <div class="mx-auto w-full max-w-post">
+    <PageHeader title={tag} intro={t(I18nKey.tagPageIntro)}>
+      <div class="flex flex-none items-center gap-4">
+        <p class="m-0 text-sm text-muted">{t(I18nKey.postsCount, { count: posts.length })}</p>
+        <TextLink href="/tags">{t(I18nKey.viewAllTags)}</TextLink>
+      </div>
+    </PageHeader>
+
+    <PostList class="mt-4 tablet:mt-5" posts={posts} ariaLabel={t(I18nKey.postsList)} />
+  </div>
+</BaseLayout>

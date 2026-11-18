@@ -1,0 +1,23 @@
+---
+import Icon from "@/components/ui/Icon.astro";
+import type { ComponentProps, HTMLAttributes } from "astro/types";
+
+interface Props extends HTMLAttributes<"button"> {
+  name?: ComponentProps<typeof Icon>["name"];
+  size?: number;
+}
+
+const { name, size, class: className, ...attributes } = Astro.props;
+---
+
+<button
+  type="button"
+  {...attributes}
+  class:list={[
+    "grid size-10 flex-none cursor-pointer place-items-center rounded-panel border border-border bg-surface/90 text-text-soft transition-colors hover:border-border-strong hover:text-accent-strong",
+    className,
+  ]}
+>
+  {name && <Icon name={name} size={size} />}
+  <slot />
+</button>

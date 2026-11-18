@@ -1,19 +1,18 @@
 ---
+import { getElapsedDays } from "@/components/post/outdatedWarning";
 import Icon from "@/components/ui/Icon.astro";
-import { getTranslator, I18nKey } from "@/i18n";
-import { formatPostDate } from "@/utils/posts";
+import { I18nKey, t } from "@/i18n";
+import { formatPostDate } from "@/utils/postDates";
 
 interface Props {
   lastUpdatedAt: Date;
   thresholdDays: number;
 }
 
-const millisecondsPerDay = 86_400_000;
 const { lastUpdatedAt, thresholdDays } = Astro.props;
 const normalizedThresholdDays = Math.max(1, Math.floor(thresholdDays));
-const elapsedDays = Math.max(0, Math.floor((Date.now() - lastUpdatedAt.getTime()) / millisecondsPerDay));
+const elapsedDays = getElapsedDays(lastUpdatedAt.getTime());
 const formattedDate = formatPostDate(lastUpdatedAt);
-const t = getTranslator();
 const summaryTemplate = t(I18nKey.postOutdatedSummary, { date: formattedDate, days: "{days}" });
 ---
 
@@ -36,7 +35,7 @@ const summaryTemplate = t(I18nKey.postOutdatedSummary, { date: formattedDate, da
 </aside>
 
 <script>
-  const millisecondsPerDay = 86_400_000;
+  import { getElapsedDays } from "@/components/post/outdatedWarning";
 
   const updatePostOutdatedWarnings = () => {
     document.querySelectorAll<HTMLElement>("[data-post-outdated-warning]").forEach((warning) => {
@@ -45,7 +44,7 @@ const summaryTemplate = t(I18nKey.postOutdatedSummary, { date: formattedDate, da
 
       if (!Number.isFinite(lastUpdatedAt) || !Number.isFinite(thresholdDays)) return;
 
-      const elapsedDays = Math.max(0, Math.floor((Date.now() - lastUpdatedAt) / millisecondsPerDay));
+      const elapsedDays = getElapsedDays(lastUpdatedAt);
       const summary = warning.querySelector<HTMLElement>("[data-post-outdated-summary]");
 
       warning.hidden = elapsedDays < thresholdDays;

@@ -25,6 +25,7 @@ export const zhCN = {
   [I18nKey.themeLight]: "浅色模式",
   [I18nKey.themeDark]: "深色模式",
   [I18nKey.siteInformation]: "站点信息",
+  [I18nKey.latestPosts]: "最新文章",
   [I18nKey.viewAllPosts]: "查看全部文章",
   [I18nKey.siteOverview]: "站点概览",
   [I18nKey.popularTags]: "热门标签",

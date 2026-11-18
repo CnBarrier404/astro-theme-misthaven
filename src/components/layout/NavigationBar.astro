@@ -6,18 +6,12 @@ import Search from "@/components/search/Search.astro";
 import Icon from "@/components/ui/Icon.astro";
 import { navigationConfig } from "@/config/navigationConfig";
 import { siteConfig } from "@/config/siteConfig";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 import { normalizeSitePath } from "@/utils/paths";
 
-interface Props {
-  currentPath: string;
-}
-
-const { currentPath } = Astro.props;
-const t = getTranslator();
 const homeHref = "/";
 const aboutHref = "/about";
-const normalizedCurrentPath = normalizeSitePath(currentPath);
+const normalizedCurrentPath = normalizeSitePath(Astro.url.pathname);
 const navigationItems = navigationConfig.map((item) => {
   const normalizedHref = normalizeSitePath(item.href);
   const isActive =
@@ -30,7 +24,10 @@ const navigationItems = navigationConfig.map((item) => {
 ---
 
 <header class="mx-auto flex h-18 w-full max-w-chrome items-center gap-2 px-4 tablet:gap-5 tablet:px-6 wide:px-18">
-  <a class="min-w-0 truncate text-lg font-semibold text-accent-strong tablet:shrink-0 tablet:text-xl" href={homeHref}>
+  <a
+    class="min-w-0 truncate text-lg font-semibold text-accent-strong underline-offset-4 hover:underline tablet:shrink-0 tablet:text-xl"
+    href={homeHref}
+  >
     {siteConfig.title}
   </a>
   <nav
@@ -41,8 +38,8 @@ const navigationItems = navigationConfig.map((item) => {
     {navigationItems.map(({ href, icon, label, isActive }) => (
       <a
         class:list={[
-          "relative isolate inline-flex h-10 items-center gap-2 rounded-panel px-3 text-sm font-semibold whitespace-nowrap text-text-soft transition-colors",
-          !isActive && "hover:bg-accent-soft/50 hover:text-accent-strong",
+          "relative isolate inline-flex h-10 items-center gap-2 rounded-panel px-3 text-sm font-semibold whitespace-nowrap text-text-soft transition-colors hover:text-accent-strong",
+          !isActive && "hover:bg-accent-soft/50",
         ]}
         href={href}
         aria-current={isActive ? "page" : undefined}
@@ -64,7 +61,7 @@ const navigationItems = navigationConfig.map((item) => {
   <ThemeToggle />
 
   <a
-    class="hidden flex-none overflow-hidden rounded-full border border-border bg-surface tablet:block"
+    class="hidden flex-none overflow-hidden rounded-full border border-border bg-surface transition-colors hover:border-border-strong tablet:block"
     href={aboutHref}
     aria-label={`${t(I18nKey.navigationAbout)} ${siteConfig.owner}`}
   >
@@ -80,3 +77,33 @@ const navigationItems = navigationConfig.map((item) => {
 
   <MobileNavigation items={navigationItems} />
 </header>
+
+<script>
+  import { normalizeSitePath } from "@/utils/paths";
+
+  // ClientRouter swaps the document on current-page clicks unless a capture listener cancels the event first.
+  document.addEventListener(
+    "click",
+    (event) => {
+      if (event.defaultPrevented || event.button !== 0) return;
+      if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+
+      const link = event.target instanceof Element ? event.target.closest("a[href]") : null;
+      if (!(link instanceof HTMLAnchorElement)) return;
+      if ((link.target && link.target !== "_self") || link.hasAttribute("download")) return;
+
+      const url = new URL(link.href);
+      const isCurrentPage =
+        url.origin === location.origin &&
+        !url.hash &&
+        url.search === location.search &&
+        normalizeSitePath(url.pathname) === normalizeSitePath(location.pathname);
+      if (!isCurrentPage) return;
+
+      event.preventDefault();
+      link.closest<HTMLElement>("[data-mobile-navigation]")?.hidePopover();
+      window.scrollTo({ top: 0 });
+    },
+    { capture: true },
+  );
+</script>

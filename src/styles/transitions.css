@@ -68,7 +68,6 @@
   animation: page-fade-out 140ms ease-out both;
 }
 
-/* The new page settles in from slightly below once the old one has mostly faded. */
 ::view-transition-new(page-content) {
   animation: page-fade-in 280ms var(--ease-soft) 60ms both;
 }

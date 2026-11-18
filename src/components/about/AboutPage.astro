@@ -2,10 +2,11 @@
 import { Image } from "astro:assets";
 import ContactLink from "@/components/about/ContactLink.astro";
 import Card from "@/components/ui/Card.astro";
+import ReadingBody from "@/components/prose/ReadingBody.astro";
 import ThemedImage from "@/components/ui/ThemedImage.astro";
 import { aboutConfig } from "@/config/aboutConfig";
 import { siteConfig } from "@/config/siteConfig";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 import BaseLayout from "@/layouts/BaseLayout.astro";
 import { resolveSiteAsset } from "@/utils/assets";
 
@@ -15,7 +16,6 @@ interface Props {
 }
 
 const { title = aboutConfig.pageTitle, description = aboutConfig.pageDescription } = Astro.props;
-const t = getTranslator();
 const bannerLight = resolveSiteAsset(siteConfig.heroImageLight);
 const bannerDark = resolveSiteAsset(siteConfig.heroImageDark);
 ---
@@ -60,9 +60,9 @@ const bannerDark = resolveSiteAsset(siteConfig.heroImageDark);
     </Card>
 
     <Card as="article">
-      <div class="prose-content px-5 py-8 tablet:px-12 tablet:py-10 tablet:pb-14">
+      <ReadingBody>
         <slot />
-      </div>
+      </ReadingBody>
     </Card>
   </div>
 </BaseLayout>

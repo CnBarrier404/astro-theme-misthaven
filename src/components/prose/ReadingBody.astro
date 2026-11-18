@@ -1,0 +1,17 @@
+---
+import CodeBlockCollapse from "./CodeBlockCollapse.astro";
+import Spoiler from "./Spoiler.astro";
+import { expressiveCodeConfig } from "@/config/expressiveCodeConfig";
+
+interface Props {
+  class?: string;
+}
+
+const { class: className = "px-5 py-8 tablet:px-12 tablet:py-10 tablet:pb-14" } = Astro.props;
+---
+
+<div class:list={["prose-content", className]}>
+  <slot />
+</div>
+<Spoiler />
+{expressiveCodeConfig.pluginCollapsible.enable && <CodeBlockCollapse />}

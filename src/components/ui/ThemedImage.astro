@@ -2,9 +2,7 @@
 import { Image } from "astro:assets";
 
 interface Props {
-  /** Image for the light theme; falls back to `dark` when omitted. */
   light: ImageMetadata | null;
-  /** Image for the dark theme; falls back to `light` when omitted. */
   dark: ImageMetadata | null;
   class?: string;
   priority?: boolean;

@@ -1,13 +1,9 @@
 ---
 import AboutPage from "@/components/about/AboutPage.astro";
-import { getEntry, render } from "astro:content";
+import { getStandalonePage } from "@/utils/standalonePages";
+import { render } from "astro:content";
 
-const page = await getEntry("pages", "about");
-
-if (!page) {
-  throw new Error("Missing content entry: src/content/pages/about.md");
-}
-
+const { entry: page } = await getStandalonePage("about");
 const { Content } = await render(page);
 ---
 

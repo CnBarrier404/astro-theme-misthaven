@@ -1,6 +1,8 @@
 <div class="sr-only" data-code-collapse-announcer aria-live="polite" aria-atomic="true"></div>
 
 <script>
+  import { prefersReducedMotion } from "@/utils/motion";
+
   const toggleSelector = ".ec-collapse__toggle, .ec-collapse__header-toggle";
   let announcementTimeout: ReturnType<typeof setTimeout>;
 
@@ -38,7 +40,7 @@
 
     if (!expanded && frame.getBoundingClientRect().top < 0) {
       frame.scrollIntoView({
-        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+        behavior: prefersReducedMotion() ? "instant" : "smooth",
         block: "start",
       });
     }

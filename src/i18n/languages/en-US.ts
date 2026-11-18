@@ -25,6 +25,7 @@ export const enUS = {
   [I18nKey.themeLight]: "Light mode",
   [I18nKey.themeDark]: "Dark mode",
   [I18nKey.siteInformation]: "Site information",
+  [I18nKey.latestPosts]: "Latest posts",
   [I18nKey.viewAllPosts]: "View all posts",
   [I18nKey.siteOverview]: "Site overview",
   [I18nKey.popularTags]: "Popular tags",

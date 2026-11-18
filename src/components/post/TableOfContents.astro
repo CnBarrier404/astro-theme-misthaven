@@ -2,17 +2,15 @@
 import TableOfContentsItem from "@/components/post/TableOfContentsItem.astro";
 import Card from "@/components/ui/Card.astro";
 import Icon from "@/components/ui/Icon.astro";
-import { getTranslator, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 import type { MarkdownHeading } from "astro";
 
 interface Props {
   headings: MarkdownHeading[];
-  /** `sidebar` is the sticky panel on wide screens; `inline` collapses inside the article below `wide`. */
   variant: "sidebar" | "inline";
 }
 
 const { headings, variant } = Astro.props;
-const t = getTranslator();
 let sectionIndex = 0;
 const items = headings
   .filter(({ depth }) => depth >= 2 && depth <= 4)
@@ -24,20 +22,22 @@ const items = headings
 
 {items.length > 0 && variant === "sidebar" && (
   <aside class="sticky top-4 mt-9 hidden w-sidebar shrink-0 wide:block" aria-label={t(I18nKey.tableOfContents)}>
-    <Card as="nav" class="p-4">
-      <h2 class="m-0 px-1 text-sm font-semibold tablet:text-base">{t(I18nKey.tableOfContents)}</h2>
+    <post-table-of-contents class="block">
+      <Card as="nav" class="p-4">
+        <h2 class="m-0 px-1 text-sm font-semibold tablet:text-base">{t(I18nKey.tableOfContents)}</h2>
 
-      <ol class="relative mt-4 flex flex-col gap-1">
-        <li
-          class="pointer-events-none absolute inset-x-0 top-0 rounded-panel bg-accent-soft opacity-0 transition-[top,height,opacity] duration-250 ease-soft"
-          data-toc-indicator
-          aria-hidden="true"
-        />
-        {items.map((item) => (
-          <TableOfContentsItem {...item} tracked />
-        ))}
-      </ol>
-    </Card>
+        <ol class="relative mt-4 flex flex-col gap-1">
+          <li
+            class="pointer-events-none absolute inset-x-0 top-0 rounded-panel bg-accent-soft opacity-0 transition-[top,height,opacity] duration-250 ease-soft"
+            data-toc-indicator
+            aria-hidden="true"
+          />
+          {items.map((item) => (
+            <TableOfContentsItem {...item} />
+          ))}
+        </ol>
+      </Card>
+    </post-table-of-contents>
   </aside>
 )}
 
@@ -62,88 +62,86 @@ const items = headings
 )}
 
 <script>
-  let cleanupTableOfContents = () => {};
+  class PostTableOfContents extends HTMLElement {
+    private listeners?: AbortController;
 
-  const setupTableOfContents = () => {
-    cleanupTableOfContents();
+    connectedCallback() {
+      const list = this.querySelector("ol");
+      const indicator = this.querySelector<HTMLElement>("[data-toc-indicator]");
+      if (!list || !indicator) return;
 
-    const links = Array.from(document.querySelectorAll<HTMLAnchorElement>("[data-toc-link]"));
-    const indicator = document.querySelector<HTMLElement>("[data-toc-indicator]");
-    const headings = links
-      .map((link) => {
-        const id = decodeURIComponent(link.hash.slice(1));
-        const heading = document.getElementById(id);
-
-        return heading ? { heading, link } : undefined;
-      })
-      .filter((item) => item !== undefined);
-
-    if (headings.length === 0 || !indicator) return;
-
-    const updateActiveHeading = () => {
-      let activeIndexes = headings.flatMap(({ heading }, index) => {
-        const bounds = heading.getBoundingClientRect();
-        return bounds.top < window.innerHeight && bounds.bottom > 0 ? [index] : [];
+      const headings = Array.from(list.querySelectorAll<HTMLAnchorElement>("a[href]")).flatMap((link) => {
+        const heading = document.getElementById(decodeURIComponent(link.hash.slice(1)));
+        return heading ? [{ heading, link }] : [];
       });
+      if (headings.length === 0) return;
 
-      if (activeIndexes.length === 0) {
+      this.listeners = new AbortController();
+      const { signal } = this.listeners;
+      const update = () => {
+        if (this.getClientRects().length === 0) return;
+
         let closestIndex = 0;
         let closestDistance = Number.POSITIVE_INFINITY;
-
+        const active = new Set<number>();
         headings.forEach(({ heading }, index) => {
-          const distance = Math.abs(heading.getBoundingClientRect().top);
+          const { top, bottom } = heading.getBoundingClientRect();
+          if (top < window.innerHeight && bottom > 0) active.add(index);
+
+          const distance = Math.abs(top);
           if (distance < closestDistance) {
             closestIndex = index;
             closestDistance = distance;
           }
         });
+        if (active.size === 0) active.add(closestIndex);
 
-        activeIndexes = [closestIndex];
-      }
-
-      const firstActiveLink = headings[activeIndexes[0]].link;
-      const lastActiveLink = headings[activeIndexes[activeIndexes.length - 1]].link;
-      const listBounds = firstActiveLink.closest("ol")?.getBoundingClientRect();
-      const firstBounds = firstActiveLink.getBoundingClientRect();
-      const lastBounds = lastActiveLink.getBoundingClientRect();
-
-      if (listBounds) {
-        indicator.style.top = `${firstBounds.top - listBounds.top}px`;
-        indicator.style.height = `${lastBounds.bottom - firstBounds.top}px`;
+        const activeIndexes = Array.from(active);
+        const first = activeIndexes[0];
+        const last = activeIndexes[activeIndexes.length - 1];
+        const listTop = list.getBoundingClientRect().top;
+        const top = headings[first].link.getBoundingClientRect().top;
+        const bottom = headings[last].link.getBoundingClientRect().bottom;
+        indicator.style.top = `${top - listTop}px`;
+        indicator.style.height = `${bottom - top}px`;
         indicator.classList.remove("opacity-0");
-      }
 
-      headings.forEach(({ link }, index) => {
-        const isActive = activeIndexes.includes(index);
-        link.classList.toggle("text-accent-strong", isActive);
+        headings.forEach(({ link }, index) => {
+          link.classList.toggle("text-accent-strong", active.has(index));
+          if (index === first) link.setAttribute("aria-current", "location");
+          else link.removeAttribute("aria-current");
+        });
+      };
 
-        if (index === activeIndexes[0]) link.setAttribute("aria-current", "location");
-        else link.removeAttribute("aria-current");
-      });
-    };
+      let frame = 0;
+      const scheduleUpdate = () => {
+        if (frame) return;
+        frame = requestAnimationFrame(() => {
+          frame = 0;
+          update();
+        });
+      };
+      const observer = new ResizeObserver(scheduleUpdate);
+      observer.observe(list);
 
-    let frame = 0;
-    const scheduleUpdate = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(updateActiveHeading);
-    };
+      document.addEventListener("scroll", scheduleUpdate, { passive: true, signal });
+      window.addEventListener("resize", scheduleUpdate, { passive: true, signal });
+      signal.addEventListener(
+        "abort",
+        () => {
+          cancelAnimationFrame(frame);
+          observer.disconnect();
+        },
+        { once: true },
+      );
 
-    updateActiveHeading();
-    document.addEventListener("scroll", scheduleUpdate, { passive: true });
-    window.addEventListener("resize", scheduleUpdate, { passive: true });
+      update();
+    }
 
-    cleanupTableOfContents = () => {
-      cancelAnimationFrame(frame);
-      document.removeEventListener("scroll", scheduleUpdate);
-      window.removeEventListener("resize", scheduleUpdate);
-    };
-  };
-
-  if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", setupTableOfContents, { once: true });
-  } else {
-    setupTableOfContents();
+    disconnectedCallback() {
+      this.listeners?.abort();
+    }
   }
 
-  document.addEventListener("astro:page-load", setupTableOfContents);
+  customElements.define("post-table-of-contents", PostTableOfContents);
 </script>

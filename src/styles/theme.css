@@ -1,11 +1,4 @@
-/*
- * Design tokens.
- * Light values live in `@theme` so Tailwind generates utilities from them; the dark theme
- * overrides the same custom properties when BaseLayout sets `data-theme="dark"` on <html>.
- * Components use these semantic tokens only, never Tailwind's default palette or raw colors.
- */
-
-/* Bind `dark:` utilities to the resolved theme attribute instead of the OS preference. */
+/* Use the site's resolved theme so a manual theme choice can override the system setting. */
 @custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme {
@@ -52,7 +45,7 @@
   --color-spoiler-particle: rgba(18, 18, 18, 0.98);
   --color-spoiler-particle-soft: rgba(52, 52, 52, 0.86);
 
-  /* Only `tablet` and `wide` exist; do not add one-off breakpoints. */
+  /* Use only tablet and wide so responsive components switch layouts together. */
   --breakpoint-*: initial;
   --breakpoint-tablet: 47.5625rem;
   --breakpoint-wide: 73.8125rem;
@@ -64,7 +57,6 @@
   --radius-panel: var(--panel-radius);
   --radius-full: 9999px;
 
-  /* A soft ease-out shared by every movement: quick to respond, slow to settle. */
   --ease-soft: cubic-bezier(0.22, 1, 0.36, 1);
 
   --container-page: 100rem;

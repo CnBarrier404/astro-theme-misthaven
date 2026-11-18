@@ -1,5 +1,6 @@
 import { siteConfig } from "@/config/siteConfig";
-import { getPostHref, getVisiblePosts } from "@/utils/posts";
+import { getPostHref } from "@/utils/paths";
+import { getVisiblePosts } from "@/utils/posts";
 import rss from "@astrojs/rss";
 import type { APIRoute } from "astro";
 

@@ -1,6 +1,5 @@
-import { postConfig } from "@/config/postConfig";
 import { siteConfig } from "@/config/siteConfig";
-import { i18n, I18nKey } from "@/i18n";
+import { I18nKey, t } from "@/i18n";
 import { getCollection, type CollectionEntry } from "astro:content";
 
 export type PostEntry = CollectionEntry<"posts">;
@@ -14,64 +13,26 @@ export async function getVisiblePosts() {
   );
 }
 
-export function getPostHref(post: PostEntry) {
-  const encodedId = post.id.split("/").map(encodeURIComponent).join("/");
-  return `/posts/${encodedId}`;
-}
-
-export function getTagHref(tag: string) {
-  return `/tags/${encodeURIComponent(tag)}`;
-}
-
-/** Every tag with its post count, most used first and then alphabetically in the site language. */
-export function getTagCounts(posts: readonly PostEntry[]) {
-  const counts = new Map<string, number>();
+export function groupPostsBy<T extends PostEntry>(posts: readonly T[], getNames: (post: T) => Iterable<string>) {
+  const groups = new Map<string, T[]>();
 
   for (const post of posts) {
-    for (const tag of new Set(post.data.tags)) {
-      counts.set(tag, (counts.get(tag) ?? 0) + 1);
+    for (const name of getNames(post)) {
+      const group = groups.get(name);
+      if (group) group.push(post);
+      else groups.set(name, [post]);
     }
   }
 
-  return [...counts.entries()]
-    .map(([name, count]) => ({ name, count }))
-    .sort((left, right) => right.count - left.count || left.name.localeCompare(right.name, siteConfig.lang));
+  return [...groups]
+    .map(([name, entries]) => ({ name, posts: entries }))
+    .sort(
+      (left, right) => right.posts.length - left.posts.length || left.name.localeCompare(right.name, siteConfig.lang),
+    );
 }
 
-export function getAdjacentPosts(posts: readonly PostEntry[], post: PostEntry) {
-  const currentIndex = posts.findIndex((candidate) => candidate.id === post.id);
-
-  return {
-    previousPost: currentIndex > 0 ? posts[currentIndex - 1] : undefined,
-    nextPost: currentIndex >= 0 && currentIndex < posts.length - 1 ? posts[currentIndex + 1] : undefined,
-  };
-}
-
-export function getPostOgImageHref(post: PostEntry) {
-  const encodedId = post.id.split("/").map(encodeURIComponent).join("/");
-  return `/og/${encodedId}.png`;
-}
-
-export function formatPostDate(date: Date) {
-  return date.toISOString().slice(0, 10);
-}
-
-/** Groups posts that are already sorted newest first by their UTC publish year. */
-export function groupPostsByYear(posts: readonly PostEntry[]) {
-  const groups: { year: string; posts: PostEntry[] }[] = [];
-
-  for (const post of posts) {
-    const year = formatPostDate(post.data.publishedAt).slice(0, 4);
-    const lastGroup = groups.at(-1);
-
-    if (lastGroup?.year === year) {
-      lastGroup.posts.push(post);
-    } else {
-      groups.push({ year, posts: [post] });
-    }
-  }
-
-  return groups;
+export function groupPostsByTag(posts: readonly PostEntry[]) {
+  return groupPostsBy(posts, ({ data }) => new Set(data.tags));
 }
 
 /** Counts each Han character and each Latin word as one unit, matching how readers estimate length. */
@@ -94,17 +55,6 @@ export function getLatestUpdate(posts: readonly PostEntry[], now = new Date()) {
   return dates.length > 0 ? new Date(Math.max(...dates.map((date) => date.getTime()))) : undefined;
 }
 
-/** "3 posts" / "1 post" in the site language. */
 export function formatPostCount(count: number) {
-  return i18n(count === 1 ? I18nKey.postCountOne : I18nKey.postCount, { count });
-}
-
-export function getPostMetrics(post: PostEntry) {
-  const wordCount = countPostWords(post);
-  const minutes = Math.max(1, Math.ceil(wordCount / postConfig.readingUnitsPerMinute));
-
-  return {
-    wordCount: i18n(I18nKey.postWordCount, { count: wordCount }),
-    readingTime: i18n(I18nKey.postReadingTime, { minutes }),
-  };
+  return t(count === 1 ? I18nKey.postCountOne : I18nKey.postCount, { count });
 }

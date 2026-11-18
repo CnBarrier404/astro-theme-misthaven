@@ -4,11 +4,9 @@ interface Props {
   slug: string;
   text: string;
   sectionIndex?: number;
-  /** Tracked links drive the active-section indicator of the sidebar table of contents. */
-  tracked?: boolean;
 }
 
-const { depth, slug, text, sectionIndex, tracked = false } = Astro.props;
+const { depth, slug, text, sectionIndex } = Astro.props;
 ---
 
 <li>
@@ -20,7 +18,6 @@ const { depth, slug, text, sectionIndex, tracked = false } = Astro.props;
       depth === 4 && "pl-12",
     ]}
     href={`#${slug}`}
-    data-toc-link={tracked ? "" : undefined}
   >
     {depth === 2 && <span class="w-4 shrink-0 text-xs text-muted tabular-nums">{sectionIndex}</span>}
     <span class="min-w-0 truncate">{text}</span>

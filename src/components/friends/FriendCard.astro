@@ -1,14 +1,13 @@
 ---
 import Icon from "@/components/ui/Icon.astro";
-import type { FriendLink } from "@/types/friends";
-import { getFriendHost } from "@/utils/friends";
+import type { FriendLink } from "@/config/friendsConfig";
 import { nudgeForwardClass } from "@/utils/motion";
 
 type Props = FriendLink;
 
 const { name, url, avatar, description } = Astro.props;
 const initial = Array.from(name.trim())[0] ?? "";
-const host = getFriendHost(url);
+const host = URL.parse(url)?.host.replace(/^www\./, "") ?? url;
 ---
 
 <a

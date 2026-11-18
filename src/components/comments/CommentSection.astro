@@ -1,15 +1,163 @@
 ---
-import ArtalkComments from "@/components/comments/ArtalkComments.astro";
+import Card from "@/components/ui/Card.astro";
 import { commentConfig } from "@/config/commentConfig";
+import { siteConfig } from "@/config/siteConfig";
+import { I18nKey, t } from "@/i18n";
+import "artalk/Artalk.css";
+import "@/styles/integrations/artalk.css";
 
 interface Props {
   pageKey: string;
   pageTitle: string;
+  viewCountId?: string;
 }
 
-const { pageKey, pageTitle } = Astro.props;
+const { pageKey, pageTitle, viewCountId } = Astro.props;
 ---
 
-{commentConfig.enabled && commentConfig.type === "artalk" && (
-  <ArtalkComments config={commentConfig.artalk} pageKey={pageKey} pageTitle={pageTitle} />
+{commentConfig.enabled && (
+  <artalk-comments
+    class="contents"
+    data-server={commentConfig.server}
+    data-site={siteConfig.title}
+    data-site-origin={new URL(siteConfig.siteUrl).origin}
+    data-locale={siteConfig.lang}
+    data-page-key={pageKey}
+    data-page-title={pageTitle}
+    data-comment-error={t(I18nKey.commentsLoadError)}
+    data-visitor-count={String(commentConfig.visitorCount)}
+    data-view-count-id={viewCountId}
+  >
+    <Card as="section" class="mt-5 px-5 py-7 tablet:mt-6 tablet:px-12 tablet:py-9" aria-labelledby="comments-title">
+      <header class="mb-6 border-b border-border pb-4">
+        <h2 class="m-0 text-xl font-semibold" id="comments-title">
+          {t(I18nKey.commentsTitle)}
+        </h2>
+        <p class="mt-2 mb-0 text-sm leading-6 text-warning" data-comment-read-only-notice hidden>
+          {t(I18nKey.commentsReadOnly)}
+        </p>
+        <p class="mt-2 mb-0 text-sm leading-6 text-draft" role="status" data-comment-status hidden></p>
+      </header>
+      <div data-artalk-container></div>
+    </Card>
+  </artalk-comments>
 )}
+
+<script>
+  import { viewCountPlaceholder } from "@/components/comments/viewCounts";
+  import { fadeInUpdatedText } from "@/utils/motion";
+
+  class ArtalkCommentsElement extends HTMLElement {
+    #lifecycle?: AbortController;
+
+    connectedCallback() {
+      this.#lifecycle = new AbortController();
+      void this.#init(this.#lifecycle.signal);
+    }
+
+    disconnectedCallback() {
+      this.#lifecycle?.abort();
+    }
+
+    async #init(signal: AbortSignal) {
+      const container = this.querySelector<HTMLElement>("[data-artalk-container]");
+      const notice = this.querySelector<HTMLElement>("[data-comment-read-only-notice]");
+      const status = this.querySelector<HTMLElement>("[data-comment-status]");
+      const { server, site, siteOrigin, locale, pageKey, pageTitle, viewCountId, commentError } = this.dataset;
+
+      if (!container || !notice || !status || !server || !site || !siteOrigin || !locale || !pageKey || !pageTitle)
+        return;
+
+      const readOnly = !(import.meta.env.PROD && window.location.origin === siteOrigin);
+      this.toggleAttribute("data-comment-read-only", readOnly);
+      notice.hidden = !readOnly;
+
+      const viewCount = viewCountId ? document.getElementById(viewCountId) : null;
+      const root = document.documentElement;
+      const isDark = () => root.dataset.theme === "dark";
+      const showError = () => {
+        status.textContent = commentError ?? "";
+        status.hidden = false;
+      };
+
+      try {
+        const { default: Artalk } = await import("artalk");
+        if (signal.aborted) return;
+
+        if (viewCount) this.#observeViewCount(viewCount, signal);
+
+        const instance = Artalk.init({
+          el: container,
+          server,
+          site,
+          locale,
+          pageKey,
+          pageTitle,
+          darkMode: isDark(),
+          preferRemoteConf: false,
+          pvAdd: !readOnly && this.dataset.visitorCount === "true",
+          pvEl: viewCount ? `#${CSS.escape(viewCount.id)}` : "[data-artalk-pv-disabled]",
+          ...(readOnly
+            ? {
+                vote: false,
+                voteDown: false,
+                pageVote: false,
+                imgUpload: false,
+                beforeSubmit: (editor) => editor.showNotify(notice.textContent?.trim() ?? "", "w"),
+              }
+            : {}),
+        });
+
+        const loadTimeout = window.setTimeout(showError, 10000);
+        instance.on("list-loaded", () => {
+          window.clearTimeout(loadTimeout);
+          status.hidden = true;
+        });
+        instance.on("list-failed", () => {
+          window.clearTimeout(loadTimeout);
+          showError();
+        });
+
+        const themeObserver = new MutationObserver(() => instance.setDarkMode(isDark()));
+        themeObserver.observe(root, { attributes: true, attributeFilter: ["data-theme"] });
+        signal.addEventListener(
+          "abort",
+          () => {
+            window.clearTimeout(loadTimeout);
+            themeObserver.disconnect();
+            instance.destroy();
+          },
+          { once: true },
+        );
+      } catch (error) {
+        if (signal.aborted) return;
+        showError();
+        console.error("Failed to initialize Artalk comments", error);
+      }
+    }
+
+    #observeViewCount(viewCount: HTMLElement, signal: AbortSignal) {
+      const observer = new MutationObserver(() => {
+        const count = Number(viewCount.textContent?.trim());
+        if (!Number.isFinite(count)) return;
+
+        observer.disconnect();
+        window.clearTimeout(timeout);
+        if (count > 0) fadeInUpdatedText(viewCount);
+        else viewCount.textContent = viewCountPlaceholder;
+      });
+      observer.observe(viewCount, { childList: true, characterData: true, subtree: true });
+      const timeout = window.setTimeout(() => observer.disconnect(), 10000);
+      signal.addEventListener(
+        "abort",
+        () => {
+          window.clearTimeout(timeout);
+          observer.disconnect();
+        },
+        { once: true },
+      );
+    }
+  }
+
+  customElements.define("artalk-comments", ArtalkCommentsElement);
+</script>

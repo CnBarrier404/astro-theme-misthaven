@@ -1,7 +1,10 @@
 ---
 import PostCard from "@/components/post/PostCard.astro";
 import Card from "@/components/ui/Card.astro";
-import { getPostHref, type PostEntry } from "@/utils/posts";
+import { commentConfig, isCommentViewCountEnabled } from "@/config/commentConfig";
+import { siteConfig } from "@/config/siteConfig";
+import { getPostHref } from "@/utils/paths";
+import type { PostEntry } from "@/utils/posts";
 
 interface Props {
   posts: readonly PostEntry[];
@@ -14,27 +17,35 @@ interface Props {
 const { posts, ariaLabel, class: className, id, limit = posts.length } = Astro.props;
 ---
 
-<Card
-  as="ol"
-  class:list={[
-    "m-0 list-none divide-y divide-border overflow-hidden p-0 tablet:grid tablet:grid-cols-[max-content_fit-content(10rem)_max-content_minmax(0,1fr)] tablet:gap-x-5",
-    className,
-  ]}
-  aria-label={ariaLabel}
+<post-list
+  class="contents"
   data-limit={limit}
-  data-post-list
+  data-view-server={isCommentViewCountEnabled ? commentConfig.server : undefined}
+  data-view-site={isCommentViewCountEnabled ? siteConfig.title : undefined}
   id={id}
 >
-  {posts.map((post, index) => (
-    <li
-      class="tablet:col-span-full tablet:grid tablet:grid-cols-subgrid"
-      data-post-list-item
-      data-post-path={getPostHref(post)}
-      data-published-at={post.data.publishedAt.getTime()}
-      data-view-count="0"
-      hidden={index >= limit}
-    >
-      <PostCard post={post} />
-    </li>
-  ))}
-</Card>
+  <Card
+    as="ol"
+    class:list={[
+      "m-0 list-none divide-y divide-border overflow-hidden p-0 tablet:grid tablet:grid-cols-[max-content_fit-content(10rem)_max-content_minmax(0,1fr)] tablet:gap-x-5",
+      className,
+    ]}
+    aria-label={ariaLabel}
+  >
+    {posts.map((post, index) => (
+      <li
+        class="tablet:col-span-full tablet:grid tablet:grid-cols-subgrid"
+        data-post-path={getPostHref(post)}
+        hidden={index >= limit}
+      >
+        <PostCard post={post} />
+      </li>
+    ))}
+  </Card>
+</post-list>
+
+<script>
+  import { PostListElement } from "./postList";
+
+  customElements.define("post-list", PostListElement);
+</script>

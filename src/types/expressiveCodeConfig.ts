@@ -1,7 +1,8 @@
 import type { PluginCollapsibleOptions } from "expressive-code-collapsible";
 import type { pluginLanguageLogo } from "ec-lang-logo";
-import type { BundledTheme } from "shiki";
+import type { ThemeObjectOrShikiThemeName } from "astro-expressive-code";
 
+type BundledTheme = Extract<ThemeObjectOrShikiThemeName, string>;
 type LanguageLogoPluginOptions = NonNullable<Parameters<typeof pluginLanguageLogo>[0]>;
 
 export interface ExpressiveCodeConfig {

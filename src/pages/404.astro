@@ -2,9 +2,7 @@
 import Card from "@/components/ui/Card.astro";
 import TextLink from "@/components/ui/TextLink.astro";
 import BaseLayout from "@/layouts/BaseLayout.astro";
-import { getTranslator, I18nKey } from "@/i18n";
-
-const t = getTranslator();
+import { I18nKey, t } from "@/i18n";
 ---
 
 <BaseLayout title={t(I18nKey.notFoundTitle)} description={t(I18nKey.notFoundDescription)}>

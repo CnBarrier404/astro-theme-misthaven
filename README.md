@@ -2,24 +2,48 @@
 
 > A calm place for stories and ideas.
 
-Misthaven 是一个简洁、安静的 Astro 博客主题。
+**English** · [简体中文](README_ZH-CN.md)
 
-它以舒展的留白、克制的色彩和舒适的排版，让内容自然成为焦点。这里适合记录想法、故事与日常生活，也适合那些愿意让文字慢慢沉淀的人。
+Misthaven is a clean, minimalist blog theme for [Astro](https://astro.build). It is made for people who want a quiet
+corner of the web to share ideas, stories, and everyday life — a place where the words come first and everything else
+steps back.
 
-[在线预览](https://misthaven.cnbarrier.com) · [Astro](https://astro.build)
+[Live demo](https://misthaven.cnbarrier.com)
 
-## 特点
+## Design
 
-- 清晰而从容的阅读布局
-- 明暗主题与响应式设计
-- Markdown 写作与文章搜索
-- RSS、Sitemap 和友好的 SEO 基础
-- 文章目录、预计阅读时长与过时提示
-- 可选的 Open Graph 图片和 Artalk 评论
+**Calm colors.** A warm off-white page, soft gray text, and a single misty teal accent. Color is used to show where you
+are and what you can do, never just for decoration. The dark theme keeps the same mood at night.
 
-## 开始使用
+**Room to breathe.** Generous whitespace and a steady spacing rhythm separate one idea from the next, so pages feel
+open without feeling empty.
 
-需要 Node.js `22.23.4+`（22.x）、`24.22.1+`（24.x），或 `26.12.1` 及更高版本。
+**Reading first.** Posts sit in a comfortable column with a table of contents beside them, an estimated reading time,
+and a gentle notice when a post has not been updated for a while. Callouts, captions, and code blocks are styled to
+support the text rather than compete with it.
+
+**Quiet motion.** Pages and themes fade into each other, and menus open softly. Every animation has a purpose, and all
+of them step aside for readers who prefer reduced motion.
+
+**At home on every screen.** Each layout starts on the phone and grows from there. Whatever the desktop offers — the
+navigation, search, and table of contents — the phone has its own version too.
+
+**Easy for everyone.** Clear keyboard focus, comfortable tap targets, and readable contrast in both themes.
+
+## What's Inside
+
+- **Home** — a hero image, site stats, categories, popular tags, and the latest posts
+- **Posts, tags, and archive** — browse by date, by topic, or year by year
+- **Search** — find posts by title, tag, category, or description, right from the navigation bar
+- **About and friends** — a profile card with your contact links, and a page for the sites you love
+- **Light, dark, or system** — readers choose, and the site remembers
+- **Ready to share** — RSS, a sitemap, and optional share images for every post
+- **Comments** — optional, powered by [Artalk](https://artalk.js.org)
+- **Two languages** — the interface is available in Simplified Chinese and English
+
+## Getting Started
+
+You need [Node.js](https://nodejs.org) `^22.23.4`, `^24.22.1`, or `>=26.12.1`.
 
 ```bash
 git clone https://github.com/CnBarrier404/astro-theme-misthaven.git
@@ -28,43 +52,30 @@ npm install
 npm run dev
 ```
 
-开发服务器启动后，访问 `http://localhost:4321`。
+Then open `http://localhost:4321`. Changes you make appear in the browser as you save.
 
-## 定制站点
+## Make It Yours
 
-大多数设置都集中在 `src/config/` 中：
+All the settings live in `src/config/`. Start with `siteConfig.ts`: give the site your name and description, and set
+`siteUrl` to the address you will publish at.
 
-- `siteConfig.ts`：站点名称、描述、域名、作者与分享设置
-- `aboutConfig.ts`：关于页面的简介与联系方式（正文位于 `src/content/pages/about.md`）
-- `friendsConfig.ts`：友链列表与页面介绍（交换友链说明位于 `src/content/pages/friends.md`）
-- `navigationConfig.ts`：顶部导航
-- `footerConfig.ts`：页脚链接
-- `commentConfig.ts`：评论功能
-- `fontConfig.ts`：字体
+## Writing
 
-站点地址应设置为最终使用的域名，例如：
+Posts live in `src/content/posts/`. Copy `_template.md`, fill in the title and date at the top, and write the rest in
+Markdown. Set `draft: true` to keep a post to yourself — you can still preview it locally, but it will not be
+published.
 
-```ts
-siteUrl: "https://your-domain.com",
-```
-
-## 写作
-
-文章位于 `src/content/posts/`。可以复制 `_template.md` 开始写作；文件名会成为文章地址的一部分。
-
-将文章的 `draft` 设置为 `true`，它就不会出现在生产构建中。
-
-## 发布
-
-Misthaven 使用静态输出，适合部署到 GitHub Pages 等静态托管服务。
+## Publishing
 
 ```bash
 npm run build
 ```
 
-构建结果位于 `dist/`。部署前，请确认站点地址、社交链接、文章内容和自定义域名均已完成配置。
+Upload the `dist/` folder to any static host, or push to GitHub and let the included workflow publish the site to
+GitHub Pages.
 
-仓库中的文章和隐私政策是用于展示主题效果的示例内容。开始使用前，请替换文章，并根据实际站点的服务与数据处理情况完善隐私政策。
+Before you go live, replace the sample posts with your own, and rewrite the privacy policy in
+`src/content/pages/privacy.md` to describe your site.
 
 ## License
 

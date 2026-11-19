@@ -1,15 +1,12 @@
 import type { APIRoute } from "astro";
 
-import { siteConfig } from "@/config/siteConfig";
 import { getPostHref } from "@/utils/paths";
 import { getPostModifiedAt } from "@/utils/postDates";
 import { getVisiblePosts } from "@/utils/posts";
 import { getStandalonePage, standalonePageIds } from "@/utils/standalonePages";
-import { collectMarkdownDocuments, type MarkdownDocument } from "../markdownForAgents/documents";
 
 export interface ContentPublication {
   lastmodByPath: Record<string, string>;
-  markdown?: MarkdownDocument[];
 }
 
 export const prerender = true;
@@ -27,9 +24,5 @@ export const GET: APIRoute = async () => {
   }
 
   const publication: ContentPublication = { lastmodByPath };
-  if (siteConfig.enableMarkdownNegotiation) {
-    publication.markdown = collectMarkdownDocuments(posts, pages);
-  }
-
   return Response.json(publication);
 };

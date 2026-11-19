@@ -55,12 +55,4 @@ export const siteConfig = {
   // 图片位置处于 ./src/assets/ 中
   heroImageLight: "images/hero_light.png",
   heroImageDark: "images/hero_dark.png",
-
-  // Markdown Negotiation（Accept: text/markdown）
-  // 开启后，构建会自动生成每页的 Markdown 版本，
-  // 以及 nginx/Caddy 内容协商所需的 markdown-paths.map / markdown-tokens.map。
-  // 注意：启用前请先在服务器上配置对应的 nginx/Caddy 规则（把 text/markdown
-  // 请求改写/转发到生成的 .md 文件），否则 markdown 请求会 404；
-  // 部署后还需要 reload 一次代理配置才能加载新的 map 文件。
-  enableMarkdownNegotiation: false,
 } as const satisfies SiteConfig;

@@ -15,7 +15,7 @@ Misthaven 是一个简洁、安静的 Astro 博客主题。
 - Markdown 写作与文章搜索
 - RSS、Sitemap 和友好的 SEO 基础
 - 文章目录、预计阅读时长与过时提示
-- 可选的 Open Graph 图片、Artalk 评论和 Markdown Negotiation
+- 可选的 Open Graph 图片和 Artalk 评论
 
 ## 开始使用
 

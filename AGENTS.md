@@ -34,19 +34,19 @@ After completing work, run `npm run format` and `npm run check`.
 
 `src/` contains the main source code, content, styles, and configuration for the Astro site.
 
-| Path            | Purpose                                                                     |
-| :-------------- | :-------------------------------------------------------------------------- |
-| `assets/`       | Images, fonts, and other assets processed and optimized by Astro            |
-| `components/`   | Reusable UI components grouped by responsibility                            |
-| `config/`       | Site metadata, navigation, home page, footer, and integration settings      |
-| `content/`      | Markdown content collections for posts and standalone pages                 |
-| `i18n/`         | Translation keys, locale strings, language settings, and helpers            |
-| `integrations/` | Theme-level Astro integrations, such as the Markdown Negotiation build hook |
-| `layouts/`      | Shared document shells and article layout                                   |
-| `pages/`        | File-based routes, dynamic routes, and server endpoints                     |
-| `styles/`       | Global styles, design tokens, typography, and prose rules                   |
-| `types/`        | Shared TypeScript types and interfaces                                      |
-| `utils/`        | General-purpose helpers, including post querying and sorting                |
+| Path            | Purpose                                                                |
+| :-------------- | :--------------------------------------------------------------------- |
+| `assets/`       | Images, fonts, and other assets processed and optimized by Astro       |
+| `components/`   | Reusable UI components grouped by responsibility                       |
+| `config/`       | Site metadata, navigation, home page, footer, and integration settings |
+| `content/`      | Markdown content collections for posts and standalone pages            |
+| `i18n/`         | Translation keys, locale strings, language settings, and helpers       |
+| `integrations/` | Theme-level Astro integrations and Markdown rendering plugins          |
+| `layouts/`      | Shared document shells and article layout                              |
+| `pages/`        | File-based routes, dynamic routes, and server endpoints                |
+| `styles/`       | Global styles, design tokens, typography, and prose rules              |
+| `types/`        | Shared TypeScript types and interfaces                                 |
+| `utils/`        | General-purpose helpers, including post querying and sorting           |
 
 ### Component Source Layout
 

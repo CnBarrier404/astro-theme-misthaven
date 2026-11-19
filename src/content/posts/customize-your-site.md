@@ -34,7 +34,6 @@ export const siteConfig = {
   siteUrl: "https://example.com",
   owner: "Your Name",
   generateOpenGraph: true,
-  enableMarkdownNegotiation: false,
 } as const;
 ```
 
@@ -70,7 +69,7 @@ updatedAt: 2026-08-13
 
 1. 先修改站点信息和基础 URL。
 2. 再调整导航和页脚。
-3. 确认评论、搜索和 Markdown Negotiation 等可选功能是否需要启用。
+3. 确认是否需要启用评论功能。
 4. 最后根据自己的内容风格调整字体、代码块和主题颜色。
 
 > [!CAUTION]
